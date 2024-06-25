@@ -61,20 +61,20 @@ public class NeuralNetwork implements Serializable {
         return finalOutputs;
     }
 
-    public static void saveModel(NeuralNetwork network, String filePath) {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filePath))) {
+    public static void saveModel(NeuralNetwork network, File file) {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
             out.writeObject(network);
-            System.out.println("Network saved to " + filePath);
+            System.out.println("Network saved to " + file.getPath());
         } catch (IOException e) {
             System.out.println("Error saving network: " + e.getMessage());
         }
     }
 
-    public static NeuralNetwork loadModel(String filePath) {
+    public static NeuralNetwork loadModel(File file) {
         NeuralNetwork network = null;
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(filePath))) {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             network = (NeuralNetwork) in.readObject();
-            System.out.println("Network loaded from " + filePath);
+            System.out.println("Network loaded from " + file.getPath());
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Error loading network: " + e.getMessage());
         }
