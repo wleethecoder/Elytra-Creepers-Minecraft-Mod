@@ -3,6 +3,8 @@ package com.leecrafts.bowmaster.util;
 import com.leecrafts.bowmaster.neuralnetwork.NeuralNetwork;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,6 +76,53 @@ public class NeuralNetworkUtil {
 //            }
 //        }
 //    }
+
+    public static void updateNetwork(NeuralNetwork network,
+                                     ArrayList<double[]> states,
+                                     ArrayList<List<double[]>> actionProbs,
+                                     ArrayList<Double> rewards) {
+        ArrayList<Double> returns = new ArrayList<>();
+        double cumulativeReturn = 0.0;
+        for (int i = rewards.size() - 1; i >= 0; i--) {
+            cumulativeReturn = rewards.get(i) + GAMMA * cumulativeReturn;
+            returns.add(0, cumulativeReturn);
+        }
+
+        for (int t = 0; t < states.size(); t++) {
+            List<double[]> probsList = actionProbs.get(t);
+            double Gt = returns.get(t);
+
+            for (int layer = 0; layer < network.getOutputLayers().size(); layer++) {
+                double[] probs = probsList.get(layer);
+                double[] gradients = new double[probs.length];
+
+                for (int a = 0; a < probs.length; a++) {
+                    if (network.getOutputActivations()[layer].equals("softmax")) {
+                        // Multiply gradient by Gt here
+                        gradients[a] = ((a == argmax(probs) ? 1 : 0) - probs[a]) * Gt;
+//                        gradients[a] = ((actionWasTaken(a, chosenAction) ? 1 : 0) - probs[a]) * Gt;
+                    }
+                    else {
+                        gradients[a] = probs[a] * Gt; // Direct use of action value as part of the gradient calculation
+                    }
+                }
+
+                network.getOutputLayers().get(layer).updateLayerWeights(new double[][]{gradients}, LEARNING_RATE);
+            }
+        }
+    }
+
+    public static int argmax(double[] array) {
+        int maxIndex = 0;
+        double maxValue = Double.MIN_VALUE;
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] > maxValue) {
+                maxValue = array[i];
+                maxIndex = i;
+            }
+        }
+        return maxIndex;
+    }
 
     public static void saveModel(NeuralNetwork network) {
         NeuralNetwork.saveModel(network, file(getNewestModelNumber() + 1));

@@ -46,4 +46,12 @@ public class Neuron implements Serializable {
     public double getOutput() {
         return output;
     }
+
+    // Method to update weights
+    public void updateWeights(double[] gradient, double learningRate) {
+        for (int i = 0; i < this.weights.length; i++) {
+            this.weights[i] += learningRate * gradient[i];
+        }
+    }
+
 }

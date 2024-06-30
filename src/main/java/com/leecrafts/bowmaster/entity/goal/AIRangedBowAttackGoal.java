@@ -3,10 +3,8 @@ package com.leecrafts.bowmaster.entity.goal;
 import com.leecrafts.bowmaster.capability.ModCapabilities;
 import com.leecrafts.bowmaster.capability.livingentity.LivingEntityCap;
 import com.leecrafts.bowmaster.entity.custom.SkeletonBowMasterEntity;
-import com.leecrafts.bowmaster.util.MultiOutputFreeformNetwork;
-import com.leecrafts.bowmaster.util.NeuralNetworkUtil;
+import com.leecrafts.bowmaster.neuralnetwork.NeuralNetwork;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -15,6 +13,7 @@ import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.minecraft.SharedConstants.TICKS_PER_SECOND;
@@ -70,36 +69,40 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
             double yawFacingTarget = Math.atan2(-distanceNormalized.x, distanceNormalized.z); // in radians
 
             // observations
-            MultiOutputFreeformNetwork network = this.mob.getNetwork();
-            NeuralNetworkUtil.printWeights(network);
+            NeuralNetwork network = this.mob.getNetwork();
             double[] observations = getObservations(livingEntity, distance, pitchFacingTarget, yawFacingTarget);
 
             // actions
-            double[] actionOutputs = NeuralNetworkUtil.computeOutput(network, observations);
+            List<double[]> actionOutputs = network.feedForward(observations);
+            double[] lookActions = actionOutputs.get(0);
+            double[] rightClickActions = actionOutputs.get(1);
+            double[] movementActions = actionOutputs.get(2);
+            double[] strafeActions = actionOutputs.get(3);
+            double[] jumpActions = actionOutputs.get(4);
 
-            // random actions using epsilon
-            RandomSource random = this.mob.getRandom();
-            if (SkeletonBowMasterEntity.TRAINING) {
-                for (int i = 0; i < actionOutputs.length; i++) {
-                    if (random.nextDouble() < NeuralNetworkUtil.EPSILON) {
-                        actionOutputs[i] = random.nextDouble();
-                    }
-                }
-            }
+            // hold off on using epsilon for now
+//            RandomSource random = this.mob.getRandom();
+//            if (SkeletonBowMasterEntity.TRAINING) {
+//                for (int i = 0; i < actionOutputs.length; i++) {
+//                    if (random.nextDouble() < NeuralNetworkUtil.EPSILON) {
+//                        actionOutputs[i] = random.nextDouble();
+//                    }
+//                }
+//            }
 
             boolean killerModeEnabled = false; // sounds cool, but it's only for testing
             if (!killerModeEnabled) {
-                handleLookDirection(actionOutputs[0], actionOutputs[1], pitchFacingTarget, yawFacingTarget);
-                handleRightClick(livingEntity, actionOutputs[2], actionOutputs[3]);
-                handleMovement(actionOutputs[4], actionOutputs[5], actionOutputs[6]);
+                handleLookDirection(lookActions[0], lookActions[1], pitchFacingTarget, yawFacingTarget);
+                handleRightClick(livingEntity, rightClickActions[0], rightClickActions[1]);
+                handleMovement(movementActions[0], movementActions[1], movementActions[2]);
             }
             else {
                 handleLookDirection(0.5, 0.5, pitchFacingTarget, yawFacingTarget);
                 spamArrows(livingEntity);
                 handleMovement(1, 0, 0);
             }
-            handleStrafing(actionOutputs[7], actionOutputs[8], actionOutputs[9]);
-            handleJump(actionOutputs[10], actionOutputs[11]);
+            handleStrafing(strafeActions[0], strafeActions[1], strafeActions[2]);
+            handleJump(jumpActions[0], jumpActions[1]);
 
             if (SkeletonBowMasterEntity.TRAINING) {
 //                double[] logProbabilities = new double[actionOutputs.length];

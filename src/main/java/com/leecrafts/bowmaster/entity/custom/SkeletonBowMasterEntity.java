@@ -1,7 +1,7 @@
 package com.leecrafts.bowmaster.entity.custom;
 
 import com.leecrafts.bowmaster.entity.goal.AIRangedBowAttackGoal;
-import com.leecrafts.bowmaster.util.MultiOutputFreeformNetwork;
+import com.leecrafts.bowmaster.neuralnetwork.NeuralNetwork;
 import com.leecrafts.bowmaster.util.NeuralNetworkUtil;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -21,14 +21,15 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SkeletonBowMasterEntity extends AbstractSkeleton {
 
     public static final boolean TRAINING = true;
     protected boolean shouldForwardImpulse = false;
-    private MultiOutputFreeformNetwork network;
+    private NeuralNetwork network;
     private final ArrayList<double[]> states = new ArrayList<>();
-    private final ArrayList<double[]> actions = new ArrayList<>();
+    private final ArrayList<List<double[]>> actions = new ArrayList<>();
     private final ArrayList<Double> rewards = new ArrayList<>();
 
     public SkeletonBowMasterEntity(EntityType<? extends AbstractSkeleton> pEntityType, Level pLevel) {
@@ -66,7 +67,7 @@ public class SkeletonBowMasterEntity extends AbstractSkeleton {
         this.shouldForwardImpulse = amount != 0;
     }
 
-    public MultiOutputFreeformNetwork getNetwork() {
+    public NeuralNetwork getNetwork() {
         return this.network;
     }
 
@@ -99,7 +100,7 @@ public class SkeletonBowMasterEntity extends AbstractSkeleton {
         this.states.add(observations);
     }
 
-    public void storeActions(double[] actionOutputs) {
+    public void storeActions(List<double[]> actionOutputs) {
         this.actions.add(actionOutputs);
     }
 
@@ -116,7 +117,7 @@ public class SkeletonBowMasterEntity extends AbstractSkeleton {
         return this.states;
     }
 
-    public ArrayList<double[]> getActions() {
+    public ArrayList<List<double[]>> getActions() {
         return this.actions;
     }
 

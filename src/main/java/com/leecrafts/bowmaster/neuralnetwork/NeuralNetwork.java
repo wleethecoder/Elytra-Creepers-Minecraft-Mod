@@ -18,6 +18,7 @@ public class NeuralNetwork implements Serializable {
     private final NetworkLayer inputLayer;
     private final List<NetworkLayer> hiddenLayers;
     private final List<NetworkLayer> outputLayers;
+    private final String[] outputActivations;
 
     // A simple factory for creating activation functions from strings
     private static final Map<String, ActivationFunction> activationFunctionMap = new HashMap<>();
@@ -43,10 +44,12 @@ public class NeuralNetwork implements Serializable {
 
         // Initialize output layers with specified activation functions
         this.outputLayers = new ArrayList<>();
+        this.outputActivations = outputActivations;
         for (int i = 0; i < outputSizes.length; i++) {
-            ActivationFunction af = activationFunctionMap.get(outputActivations[i]);
+            ActivationFunction af = activationFunctionMap.get(this.outputActivations[i]);
             outputLayers.add(new NetworkLayer(outputSizes[i], previousSize, af));
         }
+
     }
 
     public List<double[]> feedForward(double[] inputs) {
@@ -59,6 +62,14 @@ public class NeuralNetwork implements Serializable {
             finalOutputs.add(layer.feedForward(currentOutput));
         }
         return finalOutputs;
+    }
+
+    public List<NetworkLayer> getOutputLayers() {
+        return this.outputLayers;
+    }
+
+    public String[] getOutputActivations() {
+        return this.outputActivations;
     }
 
     public static void saveModel(NeuralNetwork network, File file) {
