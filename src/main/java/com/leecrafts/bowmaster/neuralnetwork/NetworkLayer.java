@@ -3,15 +3,11 @@ package com.leecrafts.bowmaster.neuralnetwork;
 import com.leecrafts.bowmaster.neuralnetwork.activationfunction.ActivationFunction;
 import com.leecrafts.bowmaster.neuralnetwork.activationfunction.Softmax;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NetworkLayer implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     private final List<Neuron> neurons;
     private final ActivationFunction activationFunction;

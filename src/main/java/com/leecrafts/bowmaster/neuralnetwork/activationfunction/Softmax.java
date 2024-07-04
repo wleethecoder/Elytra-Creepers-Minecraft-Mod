@@ -1,6 +1,9 @@
 package com.leecrafts.bowmaster.neuralnetwork.activationfunction;
 
-public class Softmax implements ActivationFunction {
+import java.io.Serializable;
+
+public class Softmax implements ActivationFunction, Serializable {
+
     public double activate(double input) {
         return input; // Softmax on single value doesn't make sense, use activate(double[] inputs)
     }

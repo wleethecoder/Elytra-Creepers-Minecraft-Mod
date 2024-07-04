@@ -1,6 +1,8 @@
 package com.leecrafts.bowmaster.neuralnetwork.activationfunction;
 
-public interface ActivationFunction {
+import java.io.Serializable;
+
+public interface ActivationFunction extends Serializable {
     double activate(double input);
     double[] activate(double[] inputs);
 }

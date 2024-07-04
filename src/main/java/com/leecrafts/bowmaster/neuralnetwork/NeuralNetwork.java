@@ -5,15 +5,9 @@ import com.leecrafts.bowmaster.neuralnetwork.activationfunction.Softmax;
 import com.leecrafts.bowmaster.neuralnetwork.activationfunction.Tanh;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class NeuralNetwork implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     private final NetworkLayer inputLayer;
     private final List<NetworkLayer> hiddenLayers;
@@ -72,12 +66,47 @@ public class NeuralNetwork implements Serializable {
         return this.outputActivations;
     }
 
+    public void printWeights() {
+        System.out.println("Neural Network Weights:");
+
+        // Print weights for the input layer
+        System.out.println("\nInput Layer:");
+        printLayerWeights(this.inputLayer);
+
+        // Print weights for each hidden layer
+        int hiddenLayerIndex = 1;
+        for (NetworkLayer layer : this.hiddenLayers) {
+            System.out.println("\nHidden Layer " + hiddenLayerIndex + ":");
+            printLayerWeights(layer);
+            hiddenLayerIndex++;
+        }
+
+        // Print weights for each output layer
+        int outputLayerIndex = 1;
+        for (NetworkLayer layer : this.outputLayers) {
+            System.out.println("\nOutput Layer " + outputLayerIndex + ":");
+            printLayerWeights(layer);
+            outputLayerIndex++;
+        }
+    }
+
+    private void printLayerWeights(NetworkLayer layer) {
+        int neuronIndex = 1;
+        for (Neuron neuron : layer.getNeurons()) {
+            System.out.print("Neuron " + neuronIndex + ": ");
+            double[] weights = neuron.getWeights();
+            System.out.println(Arrays.toString(weights));
+            neuronIndex++;
+        }
+    }
+
     public static void saveModel(NeuralNetwork network, File file) {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
             out.writeObject(network);
             System.out.println("Network saved to " + file.getPath());
         } catch (IOException e) {
             System.out.println("Error saving network: " + e.getMessage());
+            System.out.println(e.toString());
         }
     }
 

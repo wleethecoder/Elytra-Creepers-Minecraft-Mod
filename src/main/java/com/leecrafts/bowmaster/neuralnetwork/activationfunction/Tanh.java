@@ -1,6 +1,9 @@
 package com.leecrafts.bowmaster.neuralnetwork.activationfunction;
 
-public class Tanh implements ActivationFunction {
+import java.io.Serializable;
+
+public class Tanh implements ActivationFunction, Serializable {
+
     public double activate(double input) {
         return Math.tanh(input);
     }

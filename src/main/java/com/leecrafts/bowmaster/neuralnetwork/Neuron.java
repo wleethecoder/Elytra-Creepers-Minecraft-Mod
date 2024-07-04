@@ -2,13 +2,9 @@ package com.leecrafts.bowmaster.neuralnetwork;
 
 import com.leecrafts.bowmaster.neuralnetwork.activationfunction.ActivationFunction;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 public class Neuron implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     private final double[] weights;
     private double output;

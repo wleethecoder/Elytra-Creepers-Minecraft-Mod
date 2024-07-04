@@ -154,7 +154,7 @@ public class NeuralNetworkUtil {
             return maxNum;
         }
 
-        Pattern pattern = Pattern.compile(String.format("^%s-(\\d+)\\.eg$", MODEL_BASE_NAME));  // Regex to find files
+        Pattern pattern = Pattern.compile(String.format("^%s-(\\d+)\\.dat$", MODEL_BASE_NAME));  // Regex to find files
         for (File file : files) {
             if (file.isFile()) {
                 Matcher matcher = pattern.matcher(file.getName());
@@ -168,7 +168,7 @@ public class NeuralNetworkUtil {
     }
 
     private static File file(int modelNumber) {
-        return new File(String.format("%s/%s-%d.eg", MODEL_DIRECTORY_PATH, MODEL_BASE_NAME, modelNumber));
+        return new File(String.format("%s/%s-%d.dat", MODEL_DIRECTORY_PATH, MODEL_BASE_NAME, modelNumber));
     }
 
 }
