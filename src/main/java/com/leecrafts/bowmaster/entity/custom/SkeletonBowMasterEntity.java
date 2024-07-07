@@ -29,7 +29,8 @@ public class SkeletonBowMasterEntity extends AbstractSkeleton {
     protected boolean shouldForwardImpulse = false;
     private NeuralNetwork network;
     private final ArrayList<double[]> states = new ArrayList<>();
-    private final ArrayList<List<double[]>> actions = new ArrayList<>();
+    private final ArrayList<List<double[]>> actionProbs = new ArrayList<>();
+    private final ArrayList<int[]> actions = new ArrayList<>();
     private final ArrayList<Double> rewards = new ArrayList<>();
 
     public SkeletonBowMasterEntity(EntityType<? extends AbstractSkeleton> pEntityType, Level pLevel) {
@@ -100,8 +101,12 @@ public class SkeletonBowMasterEntity extends AbstractSkeleton {
         this.states.add(observations);
     }
 
-    public void storeActions(List<double[]> actionOutputs) {
-        this.actions.add(actionOutputs);
+    public void storeActionProbs(List<double[]> actionProbs) {
+        this.actionProbs.add(actionProbs);
+    }
+
+    public void storeActions(int[] actions) {
+        this.actions.add(actions);
     }
 
     public void storeRewards(double reward) {
@@ -117,7 +122,11 @@ public class SkeletonBowMasterEntity extends AbstractSkeleton {
         return this.states;
     }
 
-    public ArrayList<List<double[]>> getActions() {
+    public ArrayList<List<double[]>> getActionProbs() {
+        return this.actionProbs;
+    }
+
+    public ArrayList<int[]> getActions() {
         return this.actions;
     }
 

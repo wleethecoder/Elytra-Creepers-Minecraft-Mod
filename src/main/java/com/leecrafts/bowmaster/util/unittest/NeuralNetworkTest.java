@@ -6,6 +6,9 @@ import org.encog.engine.network.activation.ActivationSoftMax;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.pattern.FeedForwardPattern;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class NeuralNetworkTest {
 
     private static BasicNetwork createToyBasicNetwork() {
@@ -25,11 +28,42 @@ public class NeuralNetworkTest {
 
     public static NeuralNetwork createToyNetwork() {
         int[] hiddenLayerSizes = {2};
-        String[] hiddenActivations = {"tanh"};
-        int[] outputSizes = {1};
-        String[] outputActivations = {"softmax"};
+        String[] hiddenActivations = {NeuralNetwork.TANH};
+        int[] outputSizes = {3, 2};
+        String[] outputActivations = {NeuralNetwork.TANH, NeuralNetwork.SOFTMAX};
 
         return new NeuralNetwork(2, hiddenLayerSizes, hiddenActivations, outputSizes, outputActivations);
+    }
+
+    private static void test1() {
+        NeuralNetwork network = createToyNetwork();
+        network.printWeights();
+        NeuralNetworkUtil.saveModel(network);
+        NeuralNetwork network1 = NeuralNetworkUtil.loadOrCreateModel();
+        network1.printWeights();
+    }
+
+    private static void test2() {
+        NeuralNetwork network = createToyNetwork();
+        network.printWeights();
+
+        ArrayList<double[]> states = new ArrayList<>();
+        states.add(new double[] {5, 4});
+
+        ArrayList<List<double[]>> actionProbs = new ArrayList<>();
+        ArrayList<double[]> list = new ArrayList<>();
+        list.add(new double[] {-0.2, 0.9, -0.3});
+        list.add(new double[] {0.4, 0.6});
+        actionProbs.add(list);
+
+        ArrayList<int[]> actions = new ArrayList<>();
+        actions.add(new int[] {Integer.MAX_VALUE, 1}); // first array entry should be ignored
+
+        ArrayList<Double> rewards = new ArrayList<>();
+        rewards.add(4.5);
+
+        NeuralNetworkUtil.updateNetwork(network, states, actionProbs, actions, rewards);
+        network.printWeights();
     }
 
 //    private static void test1() {
@@ -49,14 +83,6 @@ public class NeuralNetworkTest {
 //        System.out.println(network.dumpWeights());
 //    }
 
-    private static void test1() {
-        NeuralNetwork network = createToyNetwork();
-        network.printWeights();
-        NeuralNetworkUtil.saveModel(network);
-        NeuralNetwork network1 = NeuralNetworkUtil.loadOrCreateModel();
-        network1.printWeights();
-    }
-
 //    private static void test2() {
 //        MultiOutputFreeformNetwork network = createToyMultiOutputFreeformNetwork();
 //        double[] observations = new double[] {-.5, 0.7, 1};
@@ -71,8 +97,7 @@ public class NeuralNetworkTest {
     public static void main(String[] args) {
         System.out.println("Running unit tests to verify correctness of REINFORCE algorithm");
 //        test1();
-//        test2();
-        test1();
+        test2();
     }
 
 }

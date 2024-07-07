@@ -96,9 +96,9 @@ public class ModEvents {
                 // update network from both the winner's and loser's data
                 NeuralNetwork network = winner.getNetwork(); // winner and loser have the same network
                 NeuralNetworkUtil.updateNetwork(
-                        network, winner.getStates(), winner.getActions(), winner.getRewards());
+                        network, winner.getStates(), winner.getActionProbs(), winner.getActions(), winner.getRewards());
                 NeuralNetworkUtil.updateNetwork(
-                        network, loser.getStates(), loser.getActions(), loser.getRewards());
+                        network, loser.getStates(), loser.getActionProbs(), loser.getActions(), loser.getRewards());
 
                 // save network
                 NeuralNetworkUtil.saveModel(network);

@@ -14,6 +14,7 @@ import net.minecraft.world.item.BowItem;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static net.minecraft.SharedConstants.TICKS_PER_SECOND;
@@ -73,46 +74,49 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
             double[] observations = getObservations(livingEntity, distance, pitchFacingTarget, yawFacingTarget);
 
             // actions
-            List<double[]> actionOutputs = network.feedForward(observations);
-            double[] lookActions = actionOutputs.get(0);
-            double[] rightClickActions = actionOutputs.get(1);
-            double[] movementActions = actionOutputs.get(2);
-            double[] strafeActions = actionOutputs.get(3);
-            double[] jumpActions = actionOutputs.get(4);
+            List<double[]> actionProbs = network.feedForward(observations);
+            double[] lookActions = actionProbs.get(0);
+            double[] rightClickActions = actionProbs.get(1);
+            double[] movementActions = actionProbs.get(2);
+            double[] strafeActions = actionProbs.get(3);
+            double[] jumpActions = actionProbs.get(4);
 
             // hold off on using epsilon for now
 //            RandomSource random = this.mob.getRandom();
 //            if (SkeletonBowMasterEntity.TRAINING) {
-//                for (int i = 0; i < actionOutputs.length; i++) {
+//                for (int i = 0; i < actionProbs.length; i++) {
 //                    if (random.nextDouble() < NeuralNetworkUtil.EPSILON) {
-//                        actionOutputs[i] = random.nextDouble();
+//                        actionProbs[i] = random.nextDouble();
 //                    }
 //                }
 //            }
 
+            int[] actions = new int[actionProbs.size()];
             boolean killerModeEnabled = false; // sounds cool, but it's only for testing
             if (!killerModeEnabled) {
+                // handleLookDirection is a continuous action, so it isn't stored in the actions variable
                 handleLookDirection(lookActions[0], lookActions[1], pitchFacingTarget, yawFacingTarget);
-                handleRightClick(livingEntity, rightClickActions[0], rightClickActions[1]);
-                handleMovement(movementActions[0], movementActions[1], movementActions[2]);
+                actions[1] = handleRightClick(livingEntity, rightClickActions[0], rightClickActions[1]);
+                actions[2] = handleMovement(movementActions[0], movementActions[1], movementActions[2]);
             }
             else {
                 handleLookDirection(0.5, 0.5, pitchFacingTarget, yawFacingTarget);
                 spamArrows(livingEntity);
                 handleMovement(1, 0, 0);
             }
-            handleStrafing(strafeActions[0], strafeActions[1], strafeActions[2]);
-            handleJump(jumpActions[0], jumpActions[1]);
+            actions[3] = handleStrafing(strafeActions[0], strafeActions[1], strafeActions[2]);
+            actions[4] = handleJump(jumpActions[0], jumpActions[1]);
 
             if (SkeletonBowMasterEntity.TRAINING) {
-//                double[] logProbabilities = new double[actionOutputs.length];
-//                for (int i = 0; i < actionOutputs.length; i++) {
-//                    logProbabilities[i] = Math.log(actionOutputs[i]);
+//                double[] logProbabilities = new double[actionProbs.length];
+//                for (int i = 0; i < actionProbs.length; i++) {
+//                    logProbabilities[i] = Math.log(actionProbs[i]);
 //                }
 
                 // update state, action, and reward storage
                 this.mob.storeStates(observations);
-                this.mob.storeActions(actionOutputs);
+                this.mob.storeActionProbs(actionProbs);
+                this.mob.storeActions(actions);
                 this.mob.storeRewards(-0.005);
             }
 
@@ -189,9 +193,11 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
         this.mob.setYRot((float) Math.toDegrees(normalizeAngle(yawFacingTarget + Math.PI * yRotOffset)));
     }
 
-    private void handleRightClick(LivingEntity target, double rightClickProb, double noRightClickProb) {
+    private int handleRightClick(LivingEntity target, double rightClickProb, double noRightClickProb) {
         System.out.println("rightClickProb: " + rightClickProb + ", noRightClickProb: " + noRightClickProb);
-        boolean press = rightClickProb > noRightClickProb;
+//        boolean press = rightClickProb > noRightClickProb;
+        int action = sampleAction(rightClickProb, noRightClickProb);
+        boolean press = action == 0;
         if (press) {
             this.mob.startUsingItem(ProjectileUtil.getWeaponHoldingHand(this.mob, item -> item instanceof BowItem));
         }
@@ -204,32 +210,51 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
                 this.mob.stopUsingItem();
             }
         }
+        return action;
     }
 
-    private void handleMovement(double forwardProb, double backwardProb, double neitherProb) {
+    private int handleMovement(double forwardProb, double backwardProb, double neitherProb) {
         System.out.println("forwardProb: " + forwardProb + ", backwardProb: " + backwardProb + ", neitherProb: " + neitherProb);
-        if (forwardProb > backwardProb && forwardProb > neitherProb) {
+        int action = sampleAction(forwardProb, backwardProb, neitherProb);
+//        if (forwardProb > backwardProb && forwardProb > neitherProb) {
+//            this.mob.forwardImpulse(1.0f);
+//        } else if (backwardProb > neitherProb) {
+//            this.mob.forwardImpulse(-1.0f);
+//        }
+        if (action == 0) {
             this.mob.forwardImpulse(1.0f);
-        } else if (backwardProb > neitherProb) {
+        }
+        else if (action == 1) {
             this.mob.forwardImpulse(-1.0f);
         }
+        return action;
     }
 
-    private void handleStrafing(double leftProb, double rightProb, double neitherProb) {
+    private int handleStrafing(double leftProb, double rightProb, double neitherProb) {
         System.out.println("leftProb: " + leftProb + ", rightProb: " + rightProb + ", neitherProb: " + neitherProb);
+        int action = sampleAction(leftProb, rightProb, neitherProb);
         // I could use MoveControl#strafe, but there are some unwanted hardcoded behaviors
-        if (leftProb > rightProb && leftProb > neitherProb) {
+//        if (leftProb > rightProb && leftProb > neitherProb) {
+//            this.mob.setXxa(1.0f);
+//        } else if (rightProb > neitherProb) {
+//            this.mob.setXxa(-1.0f);
+//        }
+        if (action == 0) {
             this.mob.setXxa(1.0f);
-        } else if (rightProb > neitherProb) {
+        }
+        else if (action == 1) {
             this.mob.setXxa(-1.0f);
         }
+        return action;
     }
 
-    private void handleJump(double jumpProb, double noJumpProb) {
+    private int handleJump(double jumpProb, double noJumpProb) {
         System.out.println("jumpProb: " + jumpProb + ", noJumpProb: " + noJumpProb);
-        if (jumpProb > noJumpProb) {
+        int action = sampleAction(jumpProb, noJumpProb);
+        if (action == 0) {
             this.mob.getJumpControl().jump();
         }
+        return action;
     }
 
     private void spamArrows(LivingEntity target) { // for testing
@@ -244,6 +269,23 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
         else {
             this.mob.startUsingItem(ProjectileUtil.getWeaponHoldingHand(this.mob, item -> item instanceof BowItem));
         }
+    }
+
+    // draw random sample from distribution
+    // e.g. p1 = 0.4, p2 = 0.6, sample = 0.6 -> i = 1
+    private static int sampleAction(double... probs) {
+        Random random = new Random();
+        double sample = random.nextDouble(); // random number from range (0, 1)
+        double currentThreshold = 0;
+        for (int i = 0; i < probs.length; i++) {
+            currentThreshold += probs[i];
+            if (sample < currentThreshold) {
+                return i;
+            }
+        }
+
+        // This line shouldn't execute
+        return probs.length - 1;
     }
 
 }

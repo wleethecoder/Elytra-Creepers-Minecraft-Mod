@@ -13,12 +13,14 @@ public class NeuralNetwork implements Serializable {
     private final List<NetworkLayer> hiddenLayers;
     private final List<NetworkLayer> outputLayers;
     private final String[] outputActivations;
+    public static final String TANH = "tanh";
+    public static final String SOFTMAX = "softmax";
 
     // A simple factory for creating activation functions from strings
     private static final Map<String, ActivationFunction> activationFunctionMap = new HashMap<>();
     static {
-        activationFunctionMap.put("tanh", new Tanh());
-        activationFunctionMap.put("softmax", new Softmax());
+        activationFunctionMap.put(TANH, new Tanh());
+        activationFunctionMap.put(SOFTMAX, new Softmax());
     }
 
     public NeuralNetwork(int inputSize, int[] hiddenLayerSizes, String[] hiddenActivations, int[] outputSizes, String[] outputActivations) {
@@ -41,7 +43,7 @@ public class NeuralNetwork implements Serializable {
         this.outputActivations = outputActivations;
         for (int i = 0; i < outputSizes.length; i++) {
             ActivationFunction af = activationFunctionMap.get(this.outputActivations[i]);
-            outputLayers.add(new NetworkLayer(outputSizes[i], previousSize, af));
+            this.outputLayers.add(new NetworkLayer(outputSizes[i], previousSize, af));
         }
 
     }

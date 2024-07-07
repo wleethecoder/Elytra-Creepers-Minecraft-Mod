@@ -4,6 +4,7 @@ import com.leecrafts.bowmaster.neuralnetwork.NeuralNetwork;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,9 +34,14 @@ public class NeuralNetworkUtil {
      */
     public static NeuralNetwork createNetwork() {
         int[] hiddenLayerSizes = {32};
-        String[] hiddenActivations = {"tanh"};
+        String[] hiddenActivations = {NeuralNetwork.TANH};
         int[] outputSizes = {2, 2, 3, 3, 2};
-        String[] outputActivations = {"tanh", "softmax", "softmax", "softmax", "softmax"};
+        String[] outputActivations = {
+                NeuralNetwork.TANH,
+                NeuralNetwork.SOFTMAX,
+                NeuralNetwork.SOFTMAX,
+                NeuralNetwork.SOFTMAX,
+                NeuralNetwork.SOFTMAX};
 
         return new NeuralNetwork(INPUT_SIZE, hiddenLayerSizes, hiddenActivations, outputSizes, outputActivations);
     }
@@ -80,6 +86,7 @@ public class NeuralNetworkUtil {
     public static void updateNetwork(NeuralNetwork network,
                                      ArrayList<double[]> states,
                                      ArrayList<List<double[]>> actionProbs,
+                                     ArrayList<int[]> actions,
                                      ArrayList<Double> rewards) {
         ArrayList<Double> returns = new ArrayList<>();
         double cumulativeReturn = 0.0;
@@ -97,32 +104,36 @@ public class NeuralNetworkUtil {
                 double[] gradients = new double[probs.length];
 
                 for (int a = 0; a < probs.length; a++) {
-                    if (network.getOutputActivations()[layer].equals("softmax")) {
+                    String af = network.getOutputActivations()[layer];
+                    if (af.equals(NeuralNetwork.SOFTMAX)) {
+                        int chosenAction = actions.get(t)[layer];
                         // Multiply gradient by Gt here
-                        gradients[a] = ((a == argmax(probs) ? 1 : 0) - probs[a]) * Gt;
+                        gradients[a] = ((a == chosenAction ? 1 : 0) - probs[a]) * Gt;
 //                        gradients[a] = ((actionWasTaken(a, chosenAction) ? 1 : 0) - probs[a]) * Gt;
                     }
-                    else {
+                    else if (af.equals(NeuralNetwork.TANH)) {
                         gradients[a] = probs[a] * Gt; // Direct use of action value as part of the gradient calculation
                     }
                 }
+
+                System.out.println(Arrays.toString(Arrays.stream(gradients).toArray()));
 
                 network.getOutputLayers().get(layer).updateLayerWeights(new double[][]{gradients}, LEARNING_RATE);
             }
         }
     }
 
-    public static int argmax(double[] array) {
-        int maxIndex = 0;
-        double maxValue = Double.MIN_VALUE;
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] > maxValue) {
-                maxValue = array[i];
-                maxIndex = i;
-            }
-        }
-        return maxIndex;
-    }
+//    public static int argmax(double[] array) {
+//        int maxIndex = 0;
+//        double maxValue = Double.MIN_VALUE;
+//        for (int i = 0; i < array.length; i++) {
+//            if (array[i] > maxValue) {
+//                maxValue = array[i];
+//                maxIndex = i;
+//            }
+//        }
+//        return maxIndex;
+//    }
 
     public static void saveModel(NeuralNetwork network) {
         NeuralNetwork.saveModel(network, file(getNewestModelNumber() + 1));
