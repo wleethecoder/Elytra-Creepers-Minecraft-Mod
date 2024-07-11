@@ -39,7 +39,7 @@ public class NetworkLayer implements Serializable {
     }
 
     // Method to update weights in each neuron
-    public void updateLayerWeights(double[][] gradients, double learningRate) {
+    public void updateLayerWeights(double[] gradients, double learningRate) {
         for (int i = 0; i < this.neurons.size(); i++) {
             this.neurons.get(i).updateWeights(gradients[i], learningRate);
         }

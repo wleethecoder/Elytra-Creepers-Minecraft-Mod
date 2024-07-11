@@ -98,6 +98,8 @@ public class NeuralNetworkUtil {
         for (int t = 0; t < states.size(); t++) {
             List<double[]> probsList = actionProbs.get(t);
             double Gt = returns.get(t);
+            System.out.println("t = " + t);
+            System.out.println("Gt = " + Gt);
 
             for (int layer = 0; layer < network.getOutputLayers().size(); layer++) {
                 double[] probs = probsList.get(layer);
@@ -109,18 +111,36 @@ public class NeuralNetworkUtil {
                         int chosenAction = actions.get(t)[layer];
                         // Multiply gradient by Gt here
                         gradients[a] = ((a == chosenAction ? 1 : 0) - probs[a]) * Gt;
-//                        gradients[a] = ((actionWasTaken(a, chosenAction) ? 1 : 0) - probs[a]) * Gt;
                     }
                     else if (af.equals(NeuralNetwork.TANH)) {
                         gradients[a] = probs[a] * Gt; // Direct use of action value as part of the gradient calculation
                     }
                 }
 
-                System.out.println(Arrays.toString(Arrays.stream(gradients).toArray()));
+                System.out.println("resulting gradients:");
+                System.out.println(Arrays.toString(gradients));
 
-                network.getOutputLayers().get(layer).updateLayerWeights(new double[][]{gradients}, LEARNING_RATE);
+                network.getOutputLayers().get(layer).updateLayerWeights(gradients, LEARNING_RATE);
             }
         }
+    }
+
+    public static void print2DArray(double[][] array) {
+        System.out.print("[");
+        for (int i = 0; i < array.length; i++) {
+            System.out.print("[");
+            for (int j = 0; j < array[i].length; j++) {
+                System.out.print(array[i][j]);
+                if (j < array[i].length - 1) {
+                    System.out.print(", ");
+                }
+            }
+            System.out.print("]");
+            if (i < array.length - 1) {
+                System.out.print(", ");
+            }
+        }
+        System.out.println("]");
     }
 
 //    public static int argmax(double[] array) {
