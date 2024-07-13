@@ -4,7 +4,6 @@ import com.leecrafts.bowmaster.neuralnetwork.NeuralNetwork;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -95,12 +94,12 @@ public class NeuralNetworkUtil {
             returns.add(0, cumulativeReturn);
         }
 
+        // Assume each layer might have different gradient needs based on activation functions
+        List<double[]> lastGradientsForBackprop = new ArrayList<>(network.getOutputLayers().size());
+
         for (int t = 0; t < states.size(); t++) {
             List<double[]> probsList = actionProbs.get(t);
             double Gt = returns.get(t);
-            System.out.println("t = " + t);
-            System.out.println("Gt = " + Gt);
-
             for (int layer = 0; layer < network.getOutputLayers().size(); layer++) {
                 double[] probs = probsList.get(layer);
                 double[] gradients = new double[probs.length];
@@ -117,11 +116,19 @@ public class NeuralNetworkUtil {
                     }
                 }
 
-                System.out.println("resulting gradients:");
-                System.out.println(Arrays.toString(gradients));
-
                 network.getOutputLayers().get(layer).updateLayerWeights(gradients, LEARNING_RATE);
+
+                // Accumulate gradients for backpropagation (simple average or sum)
+                if (t == states.size() - 1) { // Last timestep, prepare for backprop
+                    lastGradientsForBackprop.add(gradients);
+                }
             }
+        }
+
+        // Backpropagation step: starting with the last set of gradients calculated
+        if (!lastGradientsForBackprop.isEmpty()) {
+            double[] initialErrors = lastGradientsForBackprop.get(lastGradientsForBackprop.size() - 1); // Taking the last layer's gradients as initial error
+            network.backpropagate(initialErrors, LEARNING_RATE);
         }
     }
 

@@ -4,6 +4,10 @@ import java.io.Serializable;
 
 public class Softmax implements ActivationFunction, Serializable {
 
+    public String getString() {
+        return "softmax";
+    }
+
     public double activate(double input) {
         return input; // Softmax on single value doesn't make sense, use activate(double[] inputs)
     }

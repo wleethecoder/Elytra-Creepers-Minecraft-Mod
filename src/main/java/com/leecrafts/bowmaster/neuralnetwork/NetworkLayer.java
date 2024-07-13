@@ -34,6 +34,9 @@ public class NetworkLayer implements Serializable {
         // Apply softmax at the layer level if necessary
         if (this.activationFunction instanceof Softmax softmax) {
             outputs = softmax.activate(outputs);
+            for (Neuron neuron : neurons) {
+                neuron.setSoftmaxOutputs(outputs);
+            }
         }
         return outputs;
     }

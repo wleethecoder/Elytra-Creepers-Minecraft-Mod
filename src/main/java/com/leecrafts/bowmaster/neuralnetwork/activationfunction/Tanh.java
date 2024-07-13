@@ -4,6 +4,10 @@ import java.io.Serializable;
 
 public class Tanh implements ActivationFunction, Serializable {
 
+    public String getString() {
+        return "tanh";
+    }
+
     public double activate(double input) {
         return Math.tanh(input);
     }
