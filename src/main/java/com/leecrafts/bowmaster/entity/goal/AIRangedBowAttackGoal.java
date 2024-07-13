@@ -92,7 +92,7 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
 //            }
 
             int[] actions = new int[actionProbs.size()];
-            boolean killerModeEnabled = false; // sounds cool, but it's only for testing
+            boolean killerModeEnabled = true; // sounds cool, but it's only for testing
             if (!killerModeEnabled) {
                 // handleLookDirection is a continuous action, so it isn't stored in the actions variable
                 handleLookDirection(lookActions[0], lookActions[1], pitchFacingTarget, yawFacingTarget);
@@ -100,7 +100,7 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
                 actions[2] = handleMovement(movementActions[0], movementActions[1], movementActions[2]);
             }
             else {
-                handleLookDirection(0.5, 0.5, pitchFacingTarget, yawFacingTarget);
+                handleLookDirection(0, 0, pitchFacingTarget, yawFacingTarget);
                 spamArrows(livingEntity);
                 handleMovement(1, 0, 0);
             }

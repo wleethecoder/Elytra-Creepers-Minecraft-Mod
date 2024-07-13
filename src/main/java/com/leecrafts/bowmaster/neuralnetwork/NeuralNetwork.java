@@ -9,7 +9,7 @@ import java.util.*;
 
 public class NeuralNetwork implements Serializable {
 
-    private final NetworkLayer inputLayer;
+//    private final NetworkLayer inputLayer;
     private final List<NetworkLayer> hiddenLayers;
     private final List<NetworkLayer> outputLayers;
     private final String[] outputActivations;
@@ -24,11 +24,11 @@ public class NeuralNetwork implements Serializable {
     }
 
     public NeuralNetwork(int inputSize, int[] hiddenLayerSizes, String[] hiddenActivations, int[] outputSizes, String[] outputActivations) {
-        this.inputLayer = new NetworkLayer(1, inputSize, new ActivationFunction() { // Placeholder function
-            public String getString() { return ""; }
-            public double activate(double input) { return input; }
-            public double[] activate(double[] inputs) { return inputs; }
-        }); // Only one neuron in the input layer acting as a placeholder
+//        this.inputLayer = new NetworkLayer(1, inputSize, new ActivationFunction() { // Placeholder function
+//            public String getString() { return ""; }
+//            public double activate(double input) { return input; }
+//            public double[] activate(double[] inputs) { return inputs; }
+//        }); // Only one neuron in the input layer acting as a placeholder
 
         // Initialize hidden layers with specified activation functions
         this.hiddenLayers = new ArrayList<>();
@@ -50,7 +50,8 @@ public class NeuralNetwork implements Serializable {
     }
 
     public List<double[]> feedForward(double[] inputs) {
-        double[] currentOutput = this.inputLayer.feedForward(inputs);
+//        double[] currentOutput = this.inputLayer.feedForward(inputs);
+        double[] currentOutput = inputs;
         for (NetworkLayer layer : this.hiddenLayers) {
             currentOutput = layer.feedForward(currentOutput);
         }
@@ -99,14 +100,21 @@ public class NeuralNetwork implements Serializable {
                 double[] gradients = new double[neuron.getWeights().length];
                 for (int weightIndex = 0; weightIndex < gradients.length; weightIndex++) {
                     double input = (weightIndex == neuron.getWeights().length - 1) ? 1 : neuron.getInputs()[weightIndex];
-                    gradients[weightIndex] = activationDerivative * nextLayerGradients[neuronIndex] * input;
-                    neuron.updateWeight(weightIndex, gradients[weightIndex], learningRate);
+                    double gradient = 0;
+                    for (int j = 0; j < nextLayerGradients.length; j++) {  // Sum over all gradients from the next layer
+                        gradient += nextLayerGradients[j] * input;
+                    }
+                    gradient *= activationDerivative;
+                    neuron.updateWeight(weightIndex, gradient, learningRate);
+                    gradients[weightIndex] = gradient;  // Store for summing later
+//                    gradients[weightIndex] = activationDerivative * nextLayerGradients[neuronIndex] * input;
+//                    neuron.updateWeight(weightIndex, gradients[weightIndex], learningRate);
                 }
 
                 // Sum the product of all outgoing weights and the gradients of neurons in the next layer
                 double sumGradient = 0;
                 for (int weightIndex = 0; weightIndex < neuron.getWeights().length; weightIndex++) {
-                    sumGradient += neuron.getWeights()[weightIndex] * nextLayerGradients[neuronIndex];
+                    sumGradient += neuron.getWeights()[weightIndex] * gradients[weightIndex];
                 }
                 currentLayerGradients[neuronIndex] = sumGradient * activationDerivative;
             }
@@ -125,9 +133,9 @@ public class NeuralNetwork implements Serializable {
     public void printWeights() {
         System.out.println("Neural Network Weights:");
 
-        // Print weights for the input layer
-        System.out.println("\nInput Layer:");
-        printLayerWeights(this.inputLayer);
+//        // Print weights for the input layer
+//        System.out.println("\nInput Layer:");
+//        printLayerWeights(this.inputLayer);
 
         // Print weights for each hidden layer
         int hiddenLayerIndex = 1;
