@@ -92,7 +92,7 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
 //            }
 
             int[] actions = new int[actionProbs.size()];
-            boolean killerModeEnabled = true; // sounds cool, but it's only for testing
+            boolean killerModeEnabled = false; // sounds cool, but it's only for testing
             if (!killerModeEnabled) {
                 // handleLookDirection is a continuous action, so it isn't stored in the actions variable
                 handleLookDirection(lookActions[0], lookActions[1], pitchFacingTarget, yawFacingTarget);
@@ -188,13 +188,13 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
     }
 
     private void handleLookDirection(double xRotOffset, double yRotOffset, double pitchFacingTarget, double yawFacingTarget) {
-        System.out.println("xRotOffset: " + xRotOffset + ", yRotOffset: " + yRotOffset);
+//        System.out.println("xRotOffset: " + xRotOffset + ", yRotOffset: " + yRotOffset);
         this.mob.setXRot((float) Mth.clamp(Math.toDegrees(pitchFacingTarget) + 90 * xRotOffset, -90, 90));
         this.mob.setYRot((float) Math.toDegrees(normalizeAngle(yawFacingTarget + Math.PI * yRotOffset)));
     }
 
     private int handleRightClick(LivingEntity target, double rightClickProb, double noRightClickProb) {
-        System.out.println("rightClickProb: " + rightClickProb + ", noRightClickProb: " + noRightClickProb);
+//        System.out.println("rightClickProb: " + rightClickProb + ", noRightClickProb: " + noRightClickProb);
 //        boolean press = rightClickProb > noRightClickProb;
         int action = sampleAction(rightClickProb, noRightClickProb);
         boolean press = action == 0;
@@ -214,7 +214,7 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
     }
 
     private int handleMovement(double forwardProb, double backwardProb, double neitherProb) {
-        System.out.println("forwardProb: " + forwardProb + ", backwardProb: " + backwardProb + ", neitherProb: " + neitherProb);
+//        System.out.println("forwardProb: " + forwardProb + ", backwardProb: " + backwardProb + ", neitherProb: " + neitherProb);
         int action = sampleAction(forwardProb, backwardProb, neitherProb);
 //        if (forwardProb > backwardProb && forwardProb > neitherProb) {
 //            this.mob.forwardImpulse(1.0f);
@@ -231,7 +231,7 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
     }
 
     private int handleStrafing(double leftProb, double rightProb, double neitherProb) {
-        System.out.println("leftProb: " + leftProb + ", rightProb: " + rightProb + ", neitherProb: " + neitherProb);
+//        System.out.println("leftProb: " + leftProb + ", rightProb: " + rightProb + ", neitherProb: " + neitherProb);
         int action = sampleAction(leftProb, rightProb, neitherProb);
         // I could use MoveControl#strafe, but there are some unwanted hardcoded behaviors
 //        if (leftProb > rightProb && leftProb > neitherProb) {
@@ -249,7 +249,7 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
     }
 
     private int handleJump(double jumpProb, double noJumpProb) {
-        System.out.println("jumpProb: " + jumpProb + ", noJumpProb: " + noJumpProb);
+//        System.out.println("jumpProb: " + jumpProb + ", noJumpProb: " + noJumpProb);
         int action = sampleAction(jumpProb, noJumpProb);
         if (action == 0) {
             this.mob.getJumpControl().jump();

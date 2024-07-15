@@ -126,10 +126,11 @@ public class NeuralNetworkUtil {
         }
 
         // Backpropagation step: starting with the last set of gradients calculated
-        if (!lastGradientsForBackprop.isEmpty()) {
-            double[] initialErrors = lastGradientsForBackprop.get(lastGradientsForBackprop.size() - 1); // Taking the last layer's gradients as initial error
-            network.backpropagate(initialErrors, LEARNING_RATE);
-        }
+//        if (!lastGradientsForBackprop.isEmpty()) {
+//            double[] initialErrors = lastGradientsForBackprop.get(lastGradientsForBackprop.size() - 1); // Taking the last layer's gradients as initial error
+//            network.backpropagate(initialErrors, LEARNING_RATE);
+//        }
+        network.backpropagate(lastGradientsForBackprop, LEARNING_RATE);
     }
 
     public static void print2DArray(double[][] array) {

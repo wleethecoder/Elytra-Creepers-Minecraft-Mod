@@ -33,7 +33,6 @@ public class Neuron implements Serializable {
     }
 
     public void calculateOutput(double[] inputs) {
-        System.out.println(inputs.length);
         this.setInputs(inputs);
         double sum = 0;
         for (int i = 0; i < inputs.length; i++) {
