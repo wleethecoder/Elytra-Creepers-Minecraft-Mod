@@ -3,6 +3,7 @@ package com.leecrafts.bowmaster.neuralnetwork;
 import com.leecrafts.bowmaster.neuralnetwork.activationfunction.ActivationFunction;
 
 import java.io.Serializable;
+import java.util.Random;
 
 public class Neuron implements Serializable {
 
@@ -11,6 +12,7 @@ public class Neuron implements Serializable {
     private double[] inputs;
     private double[] softmaxOutputs;
     private final ActivationFunction activationFunction;
+    private final Random random = new Random();
 
     public Neuron(int inputSize, ActivationFunction activationFunction) {
         this.weights = new double[inputSize + 1]; // +1 for bias
@@ -20,7 +22,7 @@ public class Neuron implements Serializable {
 
     private void initializeWeights() {
         for (int i = 0; i < this.weights.length; i++) {
-            this.weights[i] = Math.random(); // Simple random initialization
+            this.weights[i] = this.random.nextGaussian(); // Gaussian random initialization
         }
     }
 
