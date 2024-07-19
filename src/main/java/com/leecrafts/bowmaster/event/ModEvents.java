@@ -82,7 +82,9 @@ public class ModEvents {
         @SubscribeEvent
         public static void hurtEntity(LivingHurtEvent event) {
             LivingEntity livingEntity = event.getEntity();
-            if (!livingEntity.level().isClientSide && event.getSource().getEntity() instanceof SkeletonBowMasterEntity skeletonBowMasterEntity) {
+            if (!livingEntity.level().isClientSide &&
+                    event.getSource().getEntity() instanceof SkeletonBowMasterEntity skeletonBowMasterEntity &&
+                    !livingEntity.is(skeletonBowMasterEntity)) {
                 skeletonBowMasterEntity.storeRewards(event.getAmount());
             }
         }
