@@ -4,7 +4,9 @@ import com.leecrafts.bowmaster.capability.ModCapabilities;
 import com.leecrafts.bowmaster.capability.livingentity.LivingEntityCap;
 import com.leecrafts.bowmaster.entity.custom.SkeletonBowMasterEntity;
 import com.leecrafts.bowmaster.neuralnetwork.NeuralNetwork;
+import com.leecrafts.bowmaster.util.NeuralNetworkUtil;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -81,21 +83,17 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
             double[] strafeActions = actionProbs.get(3);
             double[] jumpActions = actionProbs.get(4);
 
-            // hold off on using epsilon for now
-//            RandomSource random = this.mob.getRandom();
-//            if (SkeletonBowMasterEntity.TRAINING) {
-//                for (int i = 0; i < actionProbs.length; i++) {
-//                    if (random.nextDouble() < NeuralNetworkUtil.EPSILON) {
-//                        actionProbs[i] = random.nextDouble();
-//                    }
-//                }
-//            }
-
             int[] actions = new int[actionProbs.size()];
             boolean killerModeEnabled = false; // sounds cool, but it's only for testing
+            double reward = 0;
             if (!killerModeEnabled) {
+                if (SkeletonBowMasterEntity.TRAINING) {
+                    RandomSource randomSource = this.mob.getRandom();
+                    lookActions[0] = handleOverflow(lookActions[0] + randomSource.nextGaussian() * NeuralNetworkUtil.GAUSSIAN_NOISE);
+                    lookActions[1] = handleOverflow(lookActions[1] + randomSource.nextGaussian() * NeuralNetworkUtil.GAUSSIAN_NOISE);
+                }
                 // handleLookDirection is a continuous action, so it isn't stored in the actions variable
-                handleLookDirection(lookActions[0], lookActions[1], pitchFacingTarget, yawFacingTarget);
+                reward += handleLookDirection(lookActions[0], lookActions[1], pitchFacingTarget, yawFacingTarget);
                 actions[1] = handleRightClick(livingEntity, rightClickActions[0], rightClickActions[1]);
                 actions[2] = handleMovement(movementActions[0], movementActions[1], movementActions[2]);
             }
@@ -108,16 +106,11 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
             actions[4] = handleJump(jumpActions[0], jumpActions[1]);
 
             if (SkeletonBowMasterEntity.TRAINING) {
-//                double[] logProbabilities = new double[actionProbs.length];
-//                for (int i = 0; i < actionProbs.length; i++) {
-//                    logProbabilities[i] = Math.log(actionProbs[i]);
-//                }
-
                 // update state, action, and reward storage
                 this.mob.storeStates(observations);
                 this.mob.storeActionProbs(actionProbs);
                 this.mob.storeActions(actions);
-                this.mob.storeRewards(-0.005);
+                this.mob.storeRewards(-0.005 + reward);
             }
 
         }
@@ -187,10 +180,11 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
         return Math.min(this.mob.getTicksUsingItem(), TICKS_PER_SECOND);
     }
 
-    private void handleLookDirection(double xRotOffset, double yRotOffset, double pitchFacingTarget, double yawFacingTarget) {
+    private double handleLookDirection(double xRotOffset, double yRotOffset, double pitchFacingTarget, double yawFacingTarget) {
 //        System.out.println("xRotOffset: " + xRotOffset + ", yRotOffset: " + yRotOffset);
         this.mob.setXRot((float) Mth.clamp(Math.toDegrees(pitchFacingTarget) + 90 * xRotOffset, -90, 90));
         this.mob.setYRot((float) Math.toDegrees(normalizeAngle(yawFacingTarget + Math.PI * yRotOffset)));
+        return 0.00125 * (1 - Math.abs(xRotOffset)) + 0.00125 * (1 - Math.abs(yRotOffset));
     }
 
     private int handleRightClick(LivingEntity target, double rightClickProb, double noRightClickProb) {
@@ -275,17 +269,36 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
     // e.g. p1 = 0.4, p2 = 0.6, sample = 0.6 -> i = 1
     private static int sampleAction(double... probs) {
         Random random = new Random();
-        double sample = random.nextDouble(); // random number from range (0, 1)
-        double currentThreshold = 0;
-        for (int i = 0; i < probs.length; i++) {
-            currentThreshold += probs[i];
-            if (sample < currentThreshold) {
-                return i;
+
+        if (SkeletonBowMasterEntity.TRAINING && random.nextDouble() < NeuralNetworkUtil.EPSILON) {
+            // epsilon-greedy strategy
+            return random.nextInt(probs.length);
+        }
+        else {
+            double sample = random.nextDouble(); // random number from range (0, 1)
+            double currentThreshold = 0;
+            for (int i = 0; i < probs.length; i++) {
+                currentThreshold += probs[i];
+                if (sample < currentThreshold) {
+                    return i;
+                }
             }
+
+            // This line shouldn't execute
+            return probs.length - 1;
         }
 
-        // This line shouldn't execute
-        return probs.length - 1;
+    }
+
+    private static double handleOverflow(double num) {
+        if (num < -1) {
+            // 1 - (-1 - gauss) = 1 + 1 + gauss = gauss + 2
+            num += 2;
+        } else if (num > 1) {
+            // -1 + (gauss - 1) = gauss - 2
+            num -= 2;
+        }
+        return num;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.leecrafts.bowmaster.util;
 
+import com.leecrafts.bowmaster.neuralnetwork.NetworkLayer;
 import com.leecrafts.bowmaster.neuralnetwork.NeuralNetwork;
 
 import java.io.File;
@@ -18,10 +19,14 @@ public class NeuralNetworkUtil {
     private static final int OUTPUT_SIZE = 12;
     private static double LEARNING_RATE = 0.1;
     private static final double GAMMA = 0.99;
-    public static double EPSILON = 0.9;
     public static final double EPSILON_MAX = 0.9;
     public static final double EPSILON_MIN = 0.1;
-    public static final double EPSILON_DECAY = 0.008; // linear epsilon decay
+    public static final double EPSILON_DECAY = (EPSILON_MAX - EPSILON_MIN) / 100; // linear epsilon decay
+    public static double EPSILON = EPSILON_MAX;
+    public static final double GAUSSIAN_NOISE_MAX = 1.0;
+    public static final double GAUSSIAN_NOISE_MIN = 0.1;
+    public static final double GAUSSIAN_NOISE_DECAY = (GAUSSIAN_NOISE_MAX - GAUSSIAN_NOISE_MIN) / 100; // linear gaussian noise decay
+    public static double GAUSSIAN_NOISE = GAUSSIAN_NOISE_MAX;
 
     /*
     Actions:
@@ -95,7 +100,10 @@ public class NeuralNetworkUtil {
         }
 
         // Assume each layer might have different gradient needs based on activation functions
-        List<double[]> lastGradientsForBackprop = new ArrayList<>(network.getOutputLayers().size());
+        List<double[]> averageGradients = new ArrayList<>(network.getOutputLayers().size());
+        for (NetworkLayer layer : network.getOutputLayers()) {
+            averageGradients.add(new double[layer.getNeurons().size()]);
+        }
 
         for (int t = 0; t < states.size(); t++) {
             List<double[]> probsList = actionProbs.get(t);
@@ -119,18 +127,14 @@ public class NeuralNetworkUtil {
                 network.getOutputLayers().get(layer).updateLayerWeights(gradients, LEARNING_RATE);
 
                 // Accumulate gradients for backpropagation (simple average or sum)
-                if (t == states.size() - 1) { // Last timestep, prepare for backprop
-                    lastGradientsForBackprop.add(gradients);
+                for (int i = 0; i < gradients.length; i++) {
+                    averageGradients.get(layer)[i] += (gradients[i] / states.size());
                 }
             }
         }
 
-        // Backpropagation step: starting with the last set of gradients calculated
-//        if (!lastGradientsForBackprop.isEmpty()) {
-//            double[] initialErrors = lastGradientsForBackprop.get(lastGradientsForBackprop.size() - 1); // Taking the last layer's gradients as initial error
-//            network.backpropagate(initialErrors, LEARNING_RATE);
-//        }
-        network.backpropagate(lastGradientsForBackprop, LEARNING_RATE);
+        // Backpropagation
+        network.backpropagate(averageGradients, LEARNING_RATE);
     }
 
     public static void print2DArray(double[][] array) {
@@ -175,6 +179,7 @@ public class NeuralNetworkUtil {
         // TODO consider learning rate decay
         // TODO consider epsilon decay
         EPSILON = Math.max(EPSILON_MAX - EPSILON_DECAY * (modelNumber + 1), EPSILON_MIN);
+        GAUSSIAN_NOISE = Math.max(GAUSSIAN_NOISE_MAX - GAUSSIAN_NOISE_DECAY * (modelNumber + 1), GAUSSIAN_NOISE_MIN);
         File file = file(modelNumber);
         if (file.exists()) {
             System.out.println("existing model found (" + modelNumber + ")");
