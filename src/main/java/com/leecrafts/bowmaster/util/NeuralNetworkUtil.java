@@ -1,11 +1,10 @@
 package com.leecrafts.bowmaster.util;
 
+import com.leecrafts.bowmaster.entity.custom.SkeletonBowMasterEntity;
 import com.leecrafts.bowmaster.neuralnetwork.NetworkLayer;
 import com.leecrafts.bowmaster.neuralnetwork.NeuralNetwork;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -13,10 +12,9 @@ import java.util.regex.Pattern;
 
 public class NeuralNetworkUtil {
 
-    private static final String UTIL_BASE_DIRECTORY_PATH = "src/main/java/com/leecrafts/bowmaster/util";
-    private static final String MODEL_DIRECTORY_PATH = UTIL_BASE_DIRECTORY_PATH + "/models";
+    private static final File MODEL_DIRECTORY_PATH = new File(System.getProperty("user.dir"), "networks");
     private static final String MODEL_BASE_NAME = "model";
-    public static final String REWARDS_LOG_FILE_PATH = UTIL_BASE_DIRECTORY_PATH + "/log/rewards.csv";
+    public static final File REWARDS_LOG_FILE_PATH = new File(System.getProperty("user.dir"), "rewardlog/rewards.csv");
     private static final int INPUT_SIZE = 9;
     private static final int OUTPUT_SIZE = 12;
     private static double LEARNING_RATE = 0.1;
@@ -170,10 +168,20 @@ public class NeuralNetworkUtil {
 //    }
 
     public static void saveModel(NeuralNetwork network) {
-        NeuralNetwork.saveModel(network, file(getNewestModelNumber() + 1));
+        NeuralNetwork.saveModel(network, modelFile(getNewestModelNumber() + 1));
     }
 
     public static NeuralNetwork loadOrCreateModel() {
+        if (SkeletonBowMasterEntity.PRODUCTION) {
+            // Access a file within the JAR through the class loader
+            try (InputStream inputStream = NeuralNetworkUtil.class.getResourceAsStream("/assets/bowmaster/network/model.dat");
+                 ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
+                System.out.println("existing model in resources folder found");
+                return (NeuralNetwork) objectInputStream.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                System.out.println("Error loading network: " + e.getMessage());
+            }
+        }
         return loadOrCreateModel(getNewestModelNumber());
     }
 
@@ -182,7 +190,7 @@ public class NeuralNetworkUtil {
         // TODO consider epsilon decay
         EPSILON = Math.max(EPSILON_MAX - EPSILON_DECAY * modelNumber, EPSILON_MIN);
         GAUSSIAN_NOISE = Math.max(GAUSSIAN_NOISE_MAX - GAUSSIAN_NOISE_DECAY * modelNumber, GAUSSIAN_NOISE_MIN);
-        File file = file(modelNumber);
+        File file = modelFile(modelNumber);
         if (file.exists()) {
             System.out.println("existing model found (" + modelNumber + ")");
             return NeuralNetwork.loadModel(file);
@@ -194,7 +202,7 @@ public class NeuralNetworkUtil {
     }
 
     private static int getNewestModelNumber() {
-        File[] files = new File(MODEL_DIRECTORY_PATH).listFiles();  // Get all files in the directory
+        File[] files = MODEL_DIRECTORY_PATH.listFiles();  // Get all files in the directory
         int maxNum = 0;
         if (files == null) {
             return maxNum;
@@ -213,21 +221,27 @@ public class NeuralNetworkUtil {
         return maxNum;
     }
 
-    private static File file(int modelNumber) {
-        return new File(String.format("%s/%s-%d.dat", MODEL_DIRECTORY_PATH, MODEL_BASE_NAME, modelNumber));
+    private static File modelFile(int modelNumber) {
+//        return new File(String.format("%s/%s-%d.dat", MODEL_DIRECTORY_PATH, MODEL_BASE_NAME, modelNumber));
+        return new File(MODEL_DIRECTORY_PATH, String.format("%s-%d.dat", MODEL_BASE_NAME, modelNumber));
     }
 
     public static void logRewards(ArrayList<Double> winnerRewards, ArrayList<Double> loserRewards) {
         try {
             FileWriter writer = new FileWriter(REWARDS_LOG_FILE_PATH, true);
-            writer.write(
-                    getNewestModelNumber() + "," +
-                            winnerRewards.stream().mapToDouble(Double::doubleValue).sum() + "," +
-                            loserRewards.stream().mapToDouble(Double::doubleValue).sum() + "\n");
+            if (REWARDS_LOG_FILE_PATH.length() == 0) {
+                writer.append("Episode,Winner Total Reward,Loser Total Reward\n");
+            }
+            writer.append(String.valueOf(getNewestModelNumber() + 1))
+                    .append(",")
+                    .append(String.valueOf(winnerRewards.stream().mapToDouble(Double::doubleValue).sum()))
+                    .append(",")
+                    .append(String.valueOf(loserRewards.stream().mapToDouble(Double::doubleValue).sum()))
+                    .append("\n");
             writer.close();
             System.out.println("Rewards have been logged.");
         } catch (IOException e) {
-            System.out.println("An error occurred." + e.getMessage());
+            System.out.println("Error logging rewards: " + e.getMessage());
         }
     }
 

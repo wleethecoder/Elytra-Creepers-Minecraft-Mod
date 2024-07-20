@@ -25,7 +25,10 @@ import java.util.List;
 
 public class SkeletonBowMasterEntity extends AbstractSkeleton {
 
+    // TRAINING and PRODUCTION should not both be true
     public static final boolean TRAINING = true;
+    public static final boolean PRODUCTION = false;
+
     protected boolean shouldForwardImpulse = false;
     private NeuralNetwork network;
     private final ArrayList<double[]> states = new ArrayList<>();

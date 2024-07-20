@@ -84,7 +84,7 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
             double[] jumpActions = actionProbs.get(4);
 
             int[] actions = new int[actionProbs.size()];
-            boolean killerModeEnabled = false; // sounds cool, but it's only for testing
+            boolean killerModeEnabled = true; // sounds cool, but it's only for testing
             double reward = 0;
             if (!killerModeEnabled) {
                 if (SkeletonBowMasterEntity.TRAINING) {
@@ -257,7 +257,7 @@ public class AIRangedBowAttackGoal<T extends SkeletonBowMasterEntity & RangedAtt
             if (i >= 3) {
                 this.mob.stopUsingItem();
 //                this.mob.performRangedAttack(target, BowItem.getPowerForTime(i));
-                this.mob.performRangedAttack(target, 3);
+                this.mob.performRangedAttack(target, 5);
             }
         }
         else {

@@ -23,7 +23,3 @@ run
 
 # Files from Forge MDK
 forge*changelog.txt
-
-# models
-src/main/java/com/leecrafts/bowmaster/util/models
-src/main/java/com/leecrafts/bowmaster/util/log
