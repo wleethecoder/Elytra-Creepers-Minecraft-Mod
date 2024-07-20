@@ -15,7 +15,10 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +43,7 @@ public class SkeletonBowMasterEntity extends AbstractSkeleton {
         super(pEntityType, pLevel);
         if (!pLevel.isClientSide) {
             this.network = NeuralNetworkUtil.loadOrCreateModel();
-            this.network.printWeights();
+//            this.network.printWeights();
         }
         this.setPersistenceRequired();
     }
@@ -87,17 +90,33 @@ public class SkeletonBowMasterEntity extends AbstractSkeleton {
 
     @Override
     public void performRangedAttack(@NotNull LivingEntity pTarget, float pDistanceFactor) {
+        ItemStack mainHandItem = this.getMainHandItem();
         ItemStack itemstack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, item -> item instanceof net.minecraft.world.item.BowItem)));
-        AbstractArrow abstractarrow = this.getArrow(itemstack, pDistanceFactor);
-        if (this.getMainHandItem().getItem() instanceof net.minecraft.world.item.BowItem)
-            abstractarrow = ((net.minecraft.world.item.BowItem)this.getMainHandItem().getItem()).customArrow(abstractarrow);
-//        double d0 = pTarget.getX() - this.getX();
-//        double d1 = pTarget.getY(0.3333333333333333D) - abstractarrow.getY();
-//        double d2 = pTarget.getZ() - this.getZ();
-//        double d3 = Math.sqrt(d0 * d0 + d2 * d2);
+        ArrowItem arrowItem = (ArrowItem)(itemstack.getItem() instanceof ArrowItem ? itemstack.getItem() : Items.ARROW);
+        AbstractArrow abstractarrow = arrowItem.createArrow(this.level(), itemstack, this);
+        if (mainHandItem.getItem() instanceof BowItem bowItem) {
+            abstractarrow = bowItem.customArrow(abstractarrow);
+        }
         Vec3 vec3 = this.getLookAngle();
-        abstractarrow.shoot(vec3.x, vec3.y, vec3.z, 1.6F, (float)(14 - this.level().getDifficulty().getId() * 4));
+        abstractarrow.shoot(vec3.x, vec3.y, vec3.z, pDistanceFactor * 3.0f, 1.0f);
         this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+        if (pDistanceFactor == 1.0F) {
+            abstractarrow.setCritArrow(true);
+        }
+
+//        int j = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.POWER_ARROWS, mainHandItem);
+//        if (j > 0) {
+//            abstractarrow.setBaseDamage(abstractarrow.getBaseDamage() + (double)j * 0.5D + 0.5D);
+//        }
+//
+//        int k = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PUNCH_ARROWS, mainHandItem);
+//        if (k > 0) {
+//            abstractarrow.setKnockback(k);
+//        }
+//
+//        if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FLAMING_ARROWS, mainHandItem) > 0) {
+//            abstractarrow.setSecondsOnFire(100);
+//        }
         this.level().addFreshEntity(abstractarrow);
     }
 
