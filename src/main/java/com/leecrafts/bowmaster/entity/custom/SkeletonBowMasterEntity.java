@@ -40,6 +40,7 @@ public class SkeletonBowMasterEntity extends AbstractSkeleton {
         super(pEntityType, pLevel);
         if (!pLevel.isClientSide) {
             this.network = NeuralNetworkUtil.loadOrCreateModel();
+            this.network.printWeights();
         }
         this.setPersistenceRequired();
     }

@@ -62,65 +62,124 @@ public class NeuralNetwork implements Serializable {
         return finalOutputs;
     }
 
+//    public void backpropagate(List<double[]> initialErrors, double learningRate) {
+//        // Reverse the layers for backpropagation, starting from output to input
+//        for (int i = 0; i < this.outputLayers.size(); i++) {
+//            List<NetworkLayer> allLayers = new ArrayList<>(this.hiddenLayers);
+//            allLayers.add(this.outputLayers.get(i));
+//            Collections.reverse(allLayers);
+//
+//            double[] nextLayerGradients = initialErrors.get(i); // Start with the gradient resulting from the output
+//
+//            // Iterate over all layers, starting from the last going back to the first
+//            for (NetworkLayer currentLayer : allLayers) {
+//                double[] currentLayerGradients = new double[currentLayer.getNeurons().size()];
+//
+//                for (int neuronIndex = 0; neuronIndex < currentLayer.getNeurons().size(); neuronIndex++) {
+//                    Neuron neuron = currentLayer.getNeurons().get(neuronIndex);
+//                    double activationDerivative = 1;
+//
+//                    if (neuron.getActivationFunction().getString().equals(NeuralNetwork.TANH)) {
+//                        activationDerivative = 1 - Math.pow(neuron.getOutput(), 2);
+//                    } else if (neuron.getActivationFunction().getString().equals(NeuralNetwork.SOFTMAX)) {
+//                        double[] softmaxOutputs = neuron.getSoftmaxOutputs();  // Assuming you have a method to get softmax outputs stored after the forward pass
+//                        double[] softmaxDerivatives = new double[softmaxOutputs.length];
+//
+//                        assert softmaxOutputs.length == nextLayerGradients.length;
+//                        for (int j = 0; j < softmaxOutputs.length; j++) {
+//                            for (int k = 0; k < softmaxOutputs.length; k++) {
+//                                if (j == k) {
+//                                    softmaxDerivatives[j] += softmaxOutputs[j] * (1 - softmaxOutputs[k]) * nextLayerGradients[k];  // Diagonal term
+//                                } else {
+//                                    softmaxDerivatives[j] -= softmaxOutputs[j] * softmaxOutputs[k] * nextLayerGradients[k];  // Off-diagonal term
+//                                }
+//                            }
+//                        }
+//                        activationDerivative = softmaxDerivatives[neuronIndex]; // Use the computed derivatives as part of the gradient calculation
+//                    }
+//
+//                    double[] gradients = new double[neuron.getWeights().length];
+//                    for (int weightIndex = 0; weightIndex < gradients.length; weightIndex++) {
+//                        double input = (weightIndex == neuron.getWeights().length - 1) ? 1 : neuron.getInputs()[weightIndex];
+//                        double gradient = 0;
+//                        for (double nextLayerGradient : nextLayerGradients) {  // Sum over all gradients from the next layer
+//                            gradient += nextLayerGradient * input;
+//                        }
+//                        gradient *= activationDerivative;
+//                        neuron.updateWeight(weightIndex, gradient, learningRate);
+//                        gradients[weightIndex] = gradient;  // Store for summing later
+////                    gradients[weightIndex] = activationDerivative * nextLayerGradients[neuronIndex] * input;
+////                    neuron.updateWeight(weightIndex, gradients[weightIndex], learningRate);
+//                    }
+//
+//                    // Sum the product of all outgoing weights and the gradients of neurons in the next layer
+//                    double sumGradient = 0;
+//                    for (int weightIndex = 0; weightIndex < neuron.getWeights().length; weightIndex++) {
+//                        sumGradient += neuron.getWeights()[weightIndex] * gradients[weightIndex];
+//                    }
+//                    currentLayerGradients[neuronIndex] = sumGradient * activationDerivative;
+//                }
+//                nextLayerGradients = currentLayerGradients; // Update gradients for the next layer iteration
+//            }
+//        }
+//    }
+
     public void backpropagate(List<double[]> initialErrors, double learningRate) {
-        // Reverse the layers for backpropagation, starting from output to input
-        for (int i = 0; i < this.outputLayers.size(); i++) {
+        // Iterate over each output layer
+        for (int outputIndex = 0; outputIndex < this.outputLayers.size(); outputIndex++) {
             List<NetworkLayer> allLayers = new ArrayList<>(this.hiddenLayers);
-            allLayers.add(this.outputLayers.get(i));
+            allLayers.add(this.outputLayers.get(outputIndex));
             Collections.reverse(allLayers);
 
-            double[] nextLayerGradients = initialErrors.get(i); // Start with the gradient resulting from the output
+            double[] nextLayerGradients = initialErrors.get(outputIndex);
 
-            // Iterate over all layers, starting from the last going back to the first
             for (int layerIndex = 0; layerIndex < allLayers.size(); layerIndex++) {
                 NetworkLayer currentLayer = allLayers.get(layerIndex);
                 double[] currentLayerGradients = new double[currentLayer.getNeurons().size()];
 
                 for (int neuronIndex = 0; neuronIndex < currentLayer.getNeurons().size(); neuronIndex++) {
                     Neuron neuron = currentLayer.getNeurons().get(neuronIndex);
-                    double activationDerivative = 1;
+                    double activationDerivative = 1; // Default for linear activation
 
                     if (neuron.getActivationFunction().getString().equals(NeuralNetwork.TANH)) {
                         activationDerivative = 1 - Math.pow(neuron.getOutput(), 2);
                     } else if (neuron.getActivationFunction().getString().equals(NeuralNetwork.SOFTMAX)) {
-                        double[] softmaxOutputs = neuron.getSoftmaxOutputs();  // Assuming you have a method to get softmax outputs stored after the forward pass
+                        // Handle softmax separately
+                        double[] softmaxOutputs = neuron.getSoftmaxOutputs();
                         double[] softmaxDerivatives = new double[softmaxOutputs.length];
-
-                        assert softmaxOutputs.length == nextLayerGradients.length;
                         for (int j = 0; j < softmaxOutputs.length; j++) {
                             for (int k = 0; k < softmaxOutputs.length; k++) {
                                 if (j == k) {
-                                    softmaxDerivatives[j] += softmaxOutputs[j] * (1 - softmaxOutputs[k]) * nextLayerGradients[k];  // Diagonal term
+                                    softmaxDerivatives[j] += softmaxOutputs[j] * (1 - softmaxOutputs[k]) * nextLayerGradients[k];
                                 } else {
-                                    softmaxDerivatives[j] -= softmaxOutputs[j] * softmaxOutputs[k] * nextLayerGradients[k];  // Off-diagonal term
+                                    softmaxDerivatives[j] -= softmaxOutputs[j] * softmaxOutputs[k] * nextLayerGradients[k];
                                 }
                             }
                         }
-                        activationDerivative = softmaxDerivatives[neuronIndex]; // Use the computed derivatives as part of the gradient calculation
+                        activationDerivative = softmaxDerivatives[neuronIndex];
                     }
 
-                    double[] gradients = new double[neuron.getWeights().length];
-                    for (int weightIndex = 0; weightIndex < gradients.length; weightIndex++) {
-                        double input = (weightIndex == neuron.getWeights().length - 1) ? 1 : neuron.getInputs()[weightIndex];
-                        double gradient = 0;
-                        for (int j = 0; j < nextLayerGradients.length; j++) {  // Sum over all gradients from the next layer
-                            gradient += nextLayerGradients[j] * input;
-                        }
-                        gradient *= activationDerivative;
-                        neuron.updateWeight(weightIndex, gradient, learningRate);
-                        gradients[weightIndex] = gradient;  // Store for summing later
-//                    gradients[weightIndex] = activationDerivative * nextLayerGradients[neuronIndex] * input;
-//                    neuron.updateWeight(weightIndex, gradients[weightIndex], learningRate);
-                    }
-
-                    // Sum the product of all outgoing weights and the gradients of neurons in the next layer
                     double sumGradient = 0;
-                    for (int weightIndex = 0; weightIndex < neuron.getWeights().length; weightIndex++) {
-                        sumGradient += neuron.getWeights()[weightIndex] * gradients[weightIndex];
+                    if (layerIndex == 0) { // Output layer
+                        sumGradient = nextLayerGradients[neuronIndex];
+                    } else { // Hidden layers
+                        for (int i = 0; i < nextLayerGradients.length; i++) {
+                            sumGradient += nextLayerGradients[i] * neuron.getWeights()[i];
+                        }
                     }
-                    currentLayerGradients[neuronIndex] = sumGradient * activationDerivative;
+
+                    double gradient = sumGradient * activationDerivative;
+                    currentLayerGradients[neuronIndex] = gradient;
+
+                    // Update weights
+                    for (int weightIndex = 0; weightIndex < neuron.getWeights().length; weightIndex++) {
+                        double input = (weightIndex == neuron.getWeights().length - 1) ? 1 : neuron.getInputs()[weightIndex];
+                        double weightGradient = gradient * input;
+                        neuron.updateWeight(weightIndex, weightGradient, learningRate);
+                    }
                 }
-                nextLayerGradients = currentLayerGradients; // Update gradients for the next layer iteration
+
+                nextLayerGradients = currentLayerGradients;
             }
         }
     }

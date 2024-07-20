@@ -6,6 +6,7 @@ import org.encog.engine.network.activation.ActivationSoftMax;
 import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.pattern.FeedForwardPattern;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -101,11 +102,20 @@ public class NeuralNetworkTest {
         NeuralNetworkUtil.logRewards(winnerRewards, loserRewards);
     }
 
+    private static void test4() {
+        String basePath = "/Users/wlee2019/Downloads/mod repos/skeleton bow master/run/networks";
+        NeuralNetwork network = NeuralNetwork.loadModel(new File(basePath + "/model-2.dat"));
+        network.printWeights();
+        NeuralNetwork network1 = NeuralNetwork.loadModel(new File(basePath + "/model-1.dat"));
+        network1.printWeights();
+    }
+
     public static void main(String[] args) {
         System.out.println("Running unit tests");
 //        test1();
 //        test2();
 //        test3();
+        test4();
     }
 
 }

@@ -50,41 +50,54 @@ public class NeuralNetworkUtil {
         return new NeuralNetwork(INPUT_SIZE, hiddenLayerSizes, hiddenActivations, outputSizes, outputActivations);
     }
 
-//    public static void updateNetwork(MultiOutputFreeformNetwork network,
+//    public static void updateNetwork(NeuralNetwork network,
 //                                     ArrayList<double[]> states,
-//                                     ArrayList<double[]> actionProbs,
+//                                     ArrayList<List<double[]>> actionProbs,
+//                                     ArrayList<int[]> actions,
 //                                     ArrayList<Double> rewards) {
-//        // cumulative rewards if not already provided
-//        double[] cumulativeRewards = new double[rewards.size()];
-//        double cumulative = 0;
+//        ArrayList<Double> returns = new ArrayList<>();
+//        double cumulativeReturn = 0.0;
 //        for (int i = rewards.size() - 1; i >= 0; i--) {
-//            cumulative = rewards.get(i) + cumulative * GAMMA;
-//            cumulativeRewards[i] = cumulative;
+//            cumulativeReturn = rewards.get(i) + GAMMA * cumulativeReturn;
+//            returns.add(0, cumulativeReturn);
 //        }
 //
-//        // Traverse each time step
+//        // Assume each layer might have different gradient needs based on activation functions
+//        List<double[]> averageGradients = new ArrayList<>(network.getOutputLayers().size());
+//        for (NetworkLayer layer : network.getOutputLayers()) {
+//            averageGradients.add(new double[layer.getNeurons().size()]);
+//        }
+//
 //        for (int t = 0; t < states.size(); t++) {
-//            double[] probs = actionProbs.get(t);
-//            double Gt = cumulativeRewards[t];
+//            List<double[]> probsList = actionProbs.get(t);
+//            double Gt = returns.get(t);
+//            for (int layer = 0; layer < network.getOutputLayers().size(); layer++) {
+//                double[] probs = probsList.get(layer);
+//                double[] gradients = new double[probs.length];
 //
-//            // Assuming a method to get all neurons, including hidden and output layers
-//            List<FreeformLayer> allLayers = network.getAllLayers();
-//            for (FreeformLayer layer : allLayers) {
-//                for (FreeformNeuron neuron : layer.getNeurons()) {
-//                    List<FreeformConnection> connections = neuron.getOutputs();
-//                    for (FreeformConnection connection : connections) {
-//                        double inputActivation = neuron.getActivation();
-//
-//                        // Calculate the gradient
-//                        double grad = - (Gt * (1 - probs[t]) * inputActivation); // Simplified gradient calculation
-//                        // Update weights
-//                        double oldWeight = connection.getWeight();
-//                        double newWeight = oldWeight - LEARNING_RATE * grad;
-//                        connection.setWeight(newWeight);
+//                for (int a = 0; a < probs.length; a++) {
+//                    String af = network.getOutputActivations()[layer];
+//                    if (af.equals(NeuralNetwork.SOFTMAX)) {
+//                        int chosenAction = actions.get(t)[layer];
+//                        // Multiply gradient by Gt here
+//                        gradients[a] = ((a == chosenAction ? 1 : 0) - probs[a]) * Gt;
 //                    }
+//                    else if (af.equals(NeuralNetwork.TANH)) {
+//                        gradients[a] = probs[a] * Gt; // Direct use of action value as part of the gradient calculation
+//                    }
+//                }
+//
+//                network.getOutputLayers().get(layer).updateLayerWeights(gradients, LEARNING_RATE);
+//
+//                // Accumulate gradients for backpropagation (simple average or sum)
+//                for (int i = 0; i < gradients.length; i++) {
+//                    averageGradients.get(layer)[i] += (gradients[i] / states.size());
 //                }
 //            }
 //        }
+//
+//        // Backpropagation
+//        network.backpropagate(averageGradients, LEARNING_RATE);
 //    }
 
     public static void updateNetwork(NeuralNetwork network,
@@ -92,6 +105,7 @@ public class NeuralNetworkUtil {
                                      ArrayList<List<double[]>> actionProbs,
                                      ArrayList<int[]> actions,
                                      ArrayList<Double> rewards) {
+        // Calculate returns (discounted cumulative rewards)
         ArrayList<Double> returns = new ArrayList<>();
         double cumulativeReturn = 0.0;
         for (int i = rewards.size() - 1; i >= 0; i--) {
@@ -99,42 +113,43 @@ public class NeuralNetworkUtil {
             returns.add(0, cumulativeReturn);
         }
 
-        // Assume each layer might have different gradient needs based on activation functions
-        List<double[]> averageGradients = new ArrayList<>(network.getOutputLayers().size());
+        // Initialize gradients for each output layer
+        List<double[]> gradients = new ArrayList<>();
         for (NetworkLayer layer : network.getOutputLayers()) {
-            averageGradients.add(new double[layer.getNeurons().size()]);
+            gradients.add(new double[layer.getNeurons().size()]);
         }
 
+        // Calculate gradients for each time step
         for (int t = 0; t < states.size(); t++) {
             List<double[]> probsList = actionProbs.get(t);
             double Gt = returns.get(t);
-            for (int layer = 0; layer < network.getOutputLayers().size(); layer++) {
-                double[] probs = probsList.get(layer);
-                double[] gradients = new double[probs.length];
+
+            for (int layerIndex = 0; layerIndex < network.getOutputLayers().size(); layerIndex++) {
+                double[] probs = probsList.get(layerIndex);
+                int chosenAction = actions.get(t)[layerIndex];
+                String activationFunction = network.getOutputActivations()[layerIndex];
 
                 for (int a = 0; a < probs.length; a++) {
-                    String af = network.getOutputActivations()[layer];
-                    if (af.equals(NeuralNetwork.SOFTMAX)) {
-                        int chosenAction = actions.get(t)[layer];
-                        // Multiply gradient by Gt here
-                        gradients[a] = ((a == chosenAction ? 1 : 0) - probs[a]) * Gt;
+                    if (activationFunction.equals(NeuralNetwork.SOFTMAX)) {
+                        // For softmax, we use the policy gradient theorem
+                        gradients.get(layerIndex)[a] += ((a == chosenAction ? 1 : 0) - probs[a]) * Gt;
+                    } else if (activationFunction.equals(NeuralNetwork.TANH)) {
+                        // For tanh, we use the actual output as the gradient
+                        gradients.get(layerIndex)[a] += probs[a] * Gt;
                     }
-                    else if (af.equals(NeuralNetwork.TANH)) {
-                        gradients[a] = probs[a] * Gt; // Direct use of action value as part of the gradient calculation
-                    }
-                }
-
-                network.getOutputLayers().get(layer).updateLayerWeights(gradients, LEARNING_RATE);
-
-                // Accumulate gradients for backpropagation (simple average or sum)
-                for (int i = 0; i < gradients.length; i++) {
-                    averageGradients.get(layer)[i] += (gradients[i] / states.size());
                 }
             }
         }
 
-        // Backpropagation
-        network.backpropagate(averageGradients, LEARNING_RATE);
+        // Normalize gradients by the number of samples
+        for (double[] layerGradients : gradients) {
+            for (int i = 0; i < layerGradients.length; i++) {
+                layerGradients[i] /= states.size();
+            }
+        }
+
+        // Apply gradients using backpropagation
+        network.backpropagate(gradients, LEARNING_RATE);
     }
 
     public static void print2DArray(double[][] array) {
@@ -154,18 +169,6 @@ public class NeuralNetworkUtil {
         }
         System.out.println("]");
     }
-
-//    public static int argmax(double[] array) {
-//        int maxIndex = 0;
-//        double maxValue = Double.MIN_VALUE;
-//        for (int i = 0; i < array.length; i++) {
-//            if (array[i] > maxValue) {
-//                maxValue = array[i];
-//                maxIndex = i;
-//            }
-//        }
-//        return maxIndex;
-//    }
 
     public static void saveModel(NeuralNetwork network) {
         NeuralNetwork.saveModel(network, modelFile(getNewestModelNumber() + 1));
