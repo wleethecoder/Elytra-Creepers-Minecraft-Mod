@@ -4,6 +4,8 @@ import com.leecrafts.bowmaster.neuralnetwork.NetworkLayer;
 import com.leecrafts.bowmaster.neuralnetwork.NeuralNetwork;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -11,10 +13,10 @@ import java.util.regex.Pattern;
 
 public class NeuralNetworkUtil {
 
-    // TODO do not use absolute path
-    private static final String MODEL_DIRECTORY_PATH = "/Users/wlee2019/Downloads/mod repos/skeleton bow master/src/main/java/com/leecrafts/bowmaster/util/models";
-//    private static final String MODEL_DIRECTORY_PATH = "src/main/java/com/leecrafts/bowmaster/util/models";
+    private static final String UTIL_BASE_DIRECTORY_PATH = "src/main/java/com/leecrafts/bowmaster/util";
+    private static final String MODEL_DIRECTORY_PATH = UTIL_BASE_DIRECTORY_PATH + "/models";
     private static final String MODEL_BASE_NAME = "model";
+    public static final String REWARDS_LOG_FILE_PATH = UTIL_BASE_DIRECTORY_PATH + "/log/rewards.csv";
     private static final int INPUT_SIZE = 9;
     private static final int OUTPUT_SIZE = 12;
     private static double LEARNING_RATE = 0.1;
@@ -178,8 +180,8 @@ public class NeuralNetworkUtil {
     public static NeuralNetwork loadOrCreateModel(int modelNumber) {
         // TODO consider learning rate decay
         // TODO consider epsilon decay
-        EPSILON = Math.max(EPSILON_MAX - EPSILON_DECAY * (modelNumber + 1), EPSILON_MIN);
-        GAUSSIAN_NOISE = Math.max(GAUSSIAN_NOISE_MAX - GAUSSIAN_NOISE_DECAY * (modelNumber + 1), GAUSSIAN_NOISE_MIN);
+        EPSILON = Math.max(EPSILON_MAX - EPSILON_DECAY * modelNumber, EPSILON_MIN);
+        GAUSSIAN_NOISE = Math.max(GAUSSIAN_NOISE_MAX - GAUSSIAN_NOISE_DECAY * modelNumber, GAUSSIAN_NOISE_MIN);
         File file = file(modelNumber);
         if (file.exists()) {
             System.out.println("existing model found (" + modelNumber + ")");
@@ -193,7 +195,7 @@ public class NeuralNetworkUtil {
 
     private static int getNewestModelNumber() {
         File[] files = new File(MODEL_DIRECTORY_PATH).listFiles();  // Get all files in the directory
-        int maxNum = -1;
+        int maxNum = 0;
         if (files == null) {
             return maxNum;
         }
@@ -213,6 +215,20 @@ public class NeuralNetworkUtil {
 
     private static File file(int modelNumber) {
         return new File(String.format("%s/%s-%d.dat", MODEL_DIRECTORY_PATH, MODEL_BASE_NAME, modelNumber));
+    }
+
+    public static void logRewards(ArrayList<Double> winnerRewards, ArrayList<Double> loserRewards) {
+        try {
+            FileWriter writer = new FileWriter(REWARDS_LOG_FILE_PATH, true);
+            writer.write(
+                    getNewestModelNumber() + "," +
+                            winnerRewards.stream().mapToDouble(Double::doubleValue).sum() + "," +
+                            loserRewards.stream().mapToDouble(Double::doubleValue).sum() + "\n");
+            writer.close();
+            System.out.println("Rewards have been logged.");
+        } catch (IOException e) {
+            System.out.println("An error occurred." + e.getMessage());
+        }
     }
 
 }

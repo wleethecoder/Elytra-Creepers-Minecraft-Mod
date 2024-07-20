@@ -7,6 +7,7 @@ import org.encog.neural.networks.BasicNetwork;
 import org.encog.neural.pattern.FeedForwardPattern;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class NeuralNetworkTest {
@@ -94,10 +95,17 @@ public class NeuralNetworkTest {
 //        }
 //    }
 
+    private static void test3() {
+        ArrayList<Double> winnerRewards = new ArrayList<>(Arrays.asList(5.6, 19.2, -0.5));
+        ArrayList<Double> loserRewards = new ArrayList<>(Arrays.asList(1.4, 6.0, -9.5));
+        NeuralNetworkUtil.logRewards(winnerRewards, loserRewards);
+    }
+
     public static void main(String[] args) {
-        System.out.println("Running unit tests to verify correctness of REINFORCE algorithm");
+        System.out.println("Running unit tests");
 //        test1();
-        test2();
+//        test2();
+//        test3();
     }
 
 }

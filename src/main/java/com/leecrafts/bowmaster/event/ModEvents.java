@@ -95,6 +95,9 @@ public class ModEvents {
                     event.getEntity() instanceof SkeletonBowMasterEntity loser &&
                     !loser.level().isClientSide &&
                     event.getSource().getEntity() instanceof SkeletonBowMasterEntity winner) {
+                // log rewards
+                NeuralNetworkUtil.logRewards(winner.getRewards(), loser.getRewards());
+
                 // update network from both the winner's and loser's data
                 NeuralNetwork network = winner.getNetwork(); // winner and loser have the same network
                 NeuralNetworkUtil.updateNetwork(
