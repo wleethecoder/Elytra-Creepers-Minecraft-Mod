@@ -68,34 +68,6 @@ public class NeuralNetworkTest {
         network.printWeights();
     }
 
-//    private static void test1() {
-//        BasicNetwork network = createToyBasicNetwork();
-//        ArrayList<double[]> states = new ArrayList<>();
-//        states.add(new double[] {-2, 1});
-//        states.add(new double[] {3, 5});
-//        ArrayList<double[]> actions = new ArrayList<>(); // log probabilities
-//        actions.add(new double[] {-0.2, -1.6});
-//        actions.add(new double[] {-0.1, -0.7});
-//        ArrayList<Double> rewards = new ArrayList<>();
-//        rewards.add(2.0);
-//        rewards.add(-1.0);
-//        double learningRate = 0.1;
-//        double gamma = 0.75;
-//        System.out.println(network.dumpWeightsVerbose());
-//        System.out.println(network.dumpWeights());
-//    }
-
-//    private static void test2() {
-//        MultiOutputFreeformNetwork network = createToyMultiOutputFreeformNetwork();
-//        double[] observations = new double[] {-.5, 0.7, 1};
-//        double[] outputs = NeuralNetworkUtil.computeOutput(network, observations);
-//
-//        NeuralNetworkUtil.printWeights(network);
-//        for (int i = 0; i < outputs.length; i++) {
-//            System.out.println(outputs[i]);
-//        }
-//    }
-
     private static void test3() {
         ArrayList<Double> winnerRewards = new ArrayList<>(Arrays.asList(5.6, 19.2, -0.5));
         ArrayList<Double> loserRewards = new ArrayList<>(Arrays.asList(1.4, 6.0, -9.5));
@@ -110,12 +82,25 @@ public class NeuralNetworkTest {
         network1.printWeights();
     }
 
+    private static void test5() {
+        NeuralNetwork network = NeuralNetworkUtil.createNetwork();
+        network.printWeights();
+        List<double[]> outputs = network.feedForward(new double[] {5,5,5,5,5,5,5,5,5});
+        for (double[] output : outputs) {
+            for (double o : output) {
+                System.out.print(o + " ");
+            }
+            System.out.println();
+        }
+    }
+
     public static void main(String[] args) {
         System.out.println("Running unit tests");
 //        test1();
 //        test2();
 //        test3();
         test4();
+//        test5();
     }
 
 }
