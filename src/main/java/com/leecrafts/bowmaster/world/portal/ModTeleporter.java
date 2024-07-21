@@ -35,7 +35,7 @@ public class ModTeleporter implements ITeleporter {
 
     // width of arena, including outside walls.
     // because the width is 50, the enclosed area is 48x48
-    public static final int ARENA_WIDTH = 25;
+    public static final int ARENA_WIDTH = 15;
     public static final int ARENA_HEIGHT = 100;
     public static final int ARENA_Y = -61;
 
