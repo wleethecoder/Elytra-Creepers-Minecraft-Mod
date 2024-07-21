@@ -19,6 +19,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
@@ -82,10 +83,14 @@ public class ModEvents {
         @SubscribeEvent
         public static void hurtEntity(LivingHurtEvent event) {
             LivingEntity livingEntity = event.getEntity();
-            if (!livingEntity.level().isClientSide &&
+            if (SkeletonBowMasterEntity.TRAINING &&
+                    !livingEntity.level().isClientSide &&
                     event.getSource().getEntity() instanceof SkeletonBowMasterEntity skeletonBowMasterEntity) {
                 if (!livingEntity.is(skeletonBowMasterEntity)) {
+                    System.out.println(String.format("sbm %d hit sbm %d for %f damage",
+                            skeletonBowMasterEntity.getId(), livingEntity.getId(), event.getAmount()));
                     skeletonBowMasterEntity.storeRewards(event.getAmount());
+                    event.setAmount(Float.MAX_VALUE);
                 }
                 else {
                     event.setCanceled(true);
@@ -99,6 +104,9 @@ public class ModEvents {
                     event.getEntity() instanceof SkeletonBowMasterEntity loser &&
                     !loser.level().isClientSide &&
                     event.getSource().getEntity() instanceof SkeletonBowMasterEntity winner) {
+                System.out.println("Winner: sbm " + winner.getId());
+                System.out.println("Loser: sbm " + loser.getId());
+
                 // log rewards
                 NeuralNetworkUtil.logRewards(winner.getRewards(), loser.getRewards());
 
@@ -111,7 +119,8 @@ public class ModEvents {
 
                 // save network
                 NeuralNetworkUtil.saveModel(network);
-                Player spectator = winner.level().getNearestPlayer(winner, 200);
+                Player spectator = winner.level().getNearestPlayer(
+                        winner.getX(), winner.getY(), winner.getZ(), 200, EntitySelector.LIVING_ENTITY_STILL_ALIVE);
                 if (spectator != null) {
                     spectator.getCapability(ModCapabilities.PLAYER_CAPABILITY).ifPresent(iPlayerCap -> {
                         PlayerCap playerCap = (PlayerCap) iPlayerCap;
