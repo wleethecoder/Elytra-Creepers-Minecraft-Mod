@@ -4,16 +4,19 @@ import com.leecrafts.bowmaster.neuralnetwork.NeuralNetwork;
 
 import java.io.Serializable;
 
-public class Tanh implements ActivationFunction, Serializable {
+public class Relu implements ActivationFunction, Serializable {
 
+    @Override
     public String getString() {
-        return NeuralNetwork.TANH;
+        return NeuralNetwork.RELU;
     }
 
+    @Override
     public double activate(double input) {
-        return Math.tanh(input);
+        return Math.max(input, 0);
     }
 
+    @Override
     public double[] activate(double[] inputs) {
         double[] outputs = new double[inputs.length];
         for (int i = 0; i < inputs.length; i++) {
@@ -21,4 +24,5 @@ public class Tanh implements ActivationFunction, Serializable {
         }
         return outputs;
     }
+
 }
