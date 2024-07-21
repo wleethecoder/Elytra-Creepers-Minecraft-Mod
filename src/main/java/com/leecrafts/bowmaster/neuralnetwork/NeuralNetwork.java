@@ -1,6 +1,7 @@
 package com.leecrafts.bowmaster.neuralnetwork;
 
 import com.leecrafts.bowmaster.neuralnetwork.activationfunction.ActivationFunction;
+import com.leecrafts.bowmaster.neuralnetwork.activationfunction.Relu;
 import com.leecrafts.bowmaster.neuralnetwork.activationfunction.Softmax;
 import com.leecrafts.bowmaster.neuralnetwork.activationfunction.Tanh;
 
@@ -22,6 +23,7 @@ public class NeuralNetwork implements Serializable {
     static {
         activationFunctionMap.put(TANH, new Tanh());
         activationFunctionMap.put(SOFTMAX, new Softmax());
+        activationFunctionMap.put(RELU, new Relu());
     }
 
     public NeuralNetwork(int inputSize, int[] hiddenLayerSizes, String[] hiddenActivations, int[] outputSizes, String[] outputActivations) {
