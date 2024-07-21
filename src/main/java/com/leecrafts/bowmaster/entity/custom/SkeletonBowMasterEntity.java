@@ -3,10 +3,12 @@ package com.leecrafts.bowmaster.entity.custom;
 import com.leecrafts.bowmaster.entity.goal.AIRangedBowAttackGoal;
 import com.leecrafts.bowmaster.neuralnetwork.NeuralNetwork;
 import com.leecrafts.bowmaster.util.NeuralNetworkUtil;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -19,9 +21,12 @@ import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +90,19 @@ public class SkeletonBowMasterEntity extends AbstractSkeleton {
     }
 
     @Override
+    protected void populateDefaultEquipmentSlots(@NotNull RandomSource pRandom, @NotNull DifficultyInstance pDifficulty) {
+        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+    }
+
+    @Nullable
+    @Override
+    public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor pLevel, @NotNull DifficultyInstance pDifficulty, @NotNull MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+//        pSpawnData = super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
+        this.populateDefaultEquipmentSlots(pLevel.getRandom(), pDifficulty);
+        return pSpawnData;
+    }
+
+    @Override
     public void reassessWeaponGoal() {
     }
 
@@ -104,19 +122,18 @@ public class SkeletonBowMasterEntity extends AbstractSkeleton {
             abstractarrow.setCritArrow(true);
         }
 
-//        int j = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.POWER_ARROWS, mainHandItem);
-//        if (j > 0) {
-//            abstractarrow.setBaseDamage(abstractarrow.getBaseDamage() + (double)j * 0.5D + 0.5D);
-//        }
-//
-//        int k = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PUNCH_ARROWS, mainHandItem);
-//        if (k > 0) {
-//            abstractarrow.setKnockback(k);
-//        }
-//
-//        if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FLAMING_ARROWS, mainHandItem) > 0) {
-//            abstractarrow.setSecondsOnFire(100);
-//        }
+        int j = mainHandItem.getEnchantmentLevel(Enchantments.POWER_ARROWS);
+        if (j > 0) {
+            abstractarrow.setBaseDamage(abstractarrow.getBaseDamage() + (double)j * 0.5D + 0.5D);
+        }
+        int k = mainHandItem.getEnchantmentLevel(Enchantments.PUNCH_ARROWS);
+        if (k > 0) {
+            abstractarrow.setKnockback(k);
+        }
+        if (mainHandItem.getEnchantmentLevel(Enchantments.FLAMING_ARROWS) > 0) {
+            abstractarrow.setSecondsOnFire(100);
+        }
+
         this.level().addFreshEntity(abstractarrow);
     }
 
