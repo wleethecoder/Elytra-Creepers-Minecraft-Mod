@@ -17,16 +17,14 @@ public class NeuralNetworkUtil {
     public static final File REWARDS_LOG_FILE_PATH = new File(System.getProperty("user.dir"), "rewardlog/rewards.csv");
     private static final int INPUT_SIZE = 9;
     private static final int OUTPUT_SIZE = 12;
-    private static double LEARNING_RATE = 0.1;
+    private static double LEARNING_RATE = 0.01;
     private static final double GAMMA = 0.99;
-    public static final double EPSILON_MAX = 0.9;
-    public static final double EPSILON_MIN = 0.1;
-    public static final double EPSILON_DECAY = (EPSILON_MAX - EPSILON_MIN) / 100; // linear epsilon decay
-    public static double EPSILON = EPSILON_MAX;
-    public static final double GAUSSIAN_NOISE_MAX = 1.0;
-    public static final double GAUSSIAN_NOISE_MIN = 0.1;
-    public static final double GAUSSIAN_NOISE_DECAY = (GAUSSIAN_NOISE_MAX - GAUSSIAN_NOISE_MIN) / 100; // linear gaussian noise decay
-    public static double GAUSSIAN_NOISE = GAUSSIAN_NOISE_MAX;
+    public static final double EPSILON_START = 0.5;
+    public static final double EPSILON_DECAY = 0.99;
+    public static double EPSILON = EPSILON_START;
+    public static final double GAUSSIAN_NOISE_START = 0.85;
+    public static final double GAUSSIAN_NOISE_DECAY = 0.99;
+    public static double GAUSSIAN_NOISE = GAUSSIAN_NOISE_START;
 
     /*
     Actions:
@@ -37,8 +35,8 @@ public class NeuralNetworkUtil {
     - Jump / no jump
      */
     public static NeuralNetwork createNetwork() {
-        int[] hiddenLayerSizes = {32};
-        String[] hiddenActivations = {NeuralNetwork.TANH};
+        int[] hiddenLayerSizes = {10, 10};
+        String[] hiddenActivations = {NeuralNetwork.RELU, NeuralNetwork.RELU};
         int[] outputSizes = {2, 2, 3, 3, 2};
         String[] outputActivations = {
                 NeuralNetwork.TANH,
@@ -49,56 +47,6 @@ public class NeuralNetworkUtil {
 
         return new NeuralNetwork(INPUT_SIZE, hiddenLayerSizes, hiddenActivations, outputSizes, outputActivations);
     }
-
-//    public static void updateNetwork(NeuralNetwork network,
-//                                     ArrayList<double[]> states,
-//                                     ArrayList<List<double[]>> actionProbs,
-//                                     ArrayList<int[]> actions,
-//                                     ArrayList<Double> rewards) {
-//        ArrayList<Double> returns = new ArrayList<>();
-//        double cumulativeReturn = 0.0;
-//        for (int i = rewards.size() - 1; i >= 0; i--) {
-//            cumulativeReturn = rewards.get(i) + GAMMA * cumulativeReturn;
-//            returns.add(0, cumulativeReturn);
-//        }
-//
-//        // Assume each layer might have different gradient needs based on activation functions
-//        List<double[]> averageGradients = new ArrayList<>(network.getOutputLayers().size());
-//        for (NetworkLayer layer : network.getOutputLayers()) {
-//            averageGradients.add(new double[layer.getNeurons().size()]);
-//        }
-//
-//        for (int t = 0; t < states.size(); t++) {
-//            List<double[]> probsList = actionProbs.get(t);
-//            double Gt = returns.get(t);
-//            for (int layer = 0; layer < network.getOutputLayers().size(); layer++) {
-//                double[] probs = probsList.get(layer);
-//                double[] gradients = new double[probs.length];
-//
-//                for (int a = 0; a < probs.length; a++) {
-//                    String af = network.getOutputActivations()[layer];
-//                    if (af.equals(NeuralNetwork.SOFTMAX)) {
-//                        int chosenAction = actions.get(t)[layer];
-//                        // Multiply gradient by Gt here
-//                        gradients[a] = ((a == chosenAction ? 1 : 0) - probs[a]) * Gt;
-//                    }
-//                    else if (af.equals(NeuralNetwork.TANH)) {
-//                        gradients[a] = probs[a] * Gt; // Direct use of action value as part of the gradient calculation
-//                    }
-//                }
-//
-//                network.getOutputLayers().get(layer).updateLayerWeights(gradients, LEARNING_RATE);
-//
-//                // Accumulate gradients for backpropagation (simple average or sum)
-//                for (int i = 0; i < gradients.length; i++) {
-//                    averageGradients.get(layer)[i] += (gradients[i] / states.size());
-//                }
-//            }
-//        }
-//
-//        // Backpropagation
-//        network.backpropagate(averageGradients, LEARNING_RATE);
-//    }
 
     public static void updateNetwork(NeuralNetwork network,
                                      ArrayList<double[]> states,
@@ -191,8 +139,10 @@ public class NeuralNetworkUtil {
     public static NeuralNetwork loadOrCreateModel(int modelNumber) {
         // TODO consider learning rate decay
         // TODO consider epsilon decay
-        EPSILON = Math.max(EPSILON_MAX - EPSILON_DECAY * modelNumber, EPSILON_MIN);
-        GAUSSIAN_NOISE = Math.max(GAUSSIAN_NOISE_MAX - GAUSSIAN_NOISE_DECAY * modelNumber, GAUSSIAN_NOISE_MIN);
+//        EPSILON = Math.max(EPSILON_MAX - EPSILON_DECAY * modelNumber, EPSILON_MIN);
+        EPSILON = EPSILON_START * Math.pow(EPSILON_DECAY, modelNumber);
+//        GAUSSIAN_NOISE = Math.max(GAUSSIAN_NOISE_MAX - GAUSSIAN_NOISE_DECAY * modelNumber, GAUSSIAN_NOISE_MIN);
+        GAUSSIAN_NOISE = GAUSSIAN_NOISE_START * Math.pow(GAUSSIAN_NOISE_DECAY, modelNumber);
         File file = modelFile(modelNumber);
         if (file.exists()) {
             System.out.println("existing model found (" + modelNumber + ")");
