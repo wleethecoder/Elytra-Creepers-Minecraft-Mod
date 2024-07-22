@@ -2,9 +2,6 @@ package com.leecrafts.bowmaster.util.unittest;
 
 import com.leecrafts.bowmaster.neuralnetwork.NeuralNetwork;
 import com.leecrafts.bowmaster.util.NeuralNetworkUtil;
-import org.encog.engine.network.activation.ActivationSoftMax;
-import org.encog.neural.networks.BasicNetwork;
-import org.encog.neural.pattern.FeedForwardPattern;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,24 +10,11 @@ import java.util.List;
 
 public class NeuralNetworkTest {
 
-    private static BasicNetwork createToyBasicNetwork() {
-        FeedForwardPattern pattern = new FeedForwardPattern();
-        pattern.setInputNeurons(2);
-        pattern.addHiddenLayer(3);
-        pattern.setOutputNeurons(2);
-        pattern.setActivationFunction(new ActivationSoftMax()); // output of softmax is (0, 1)
-
-        BasicNetwork network = (BasicNetwork) pattern.generate();
-//        network.reset();
-        double[] weights = network.getFlat().getWeights();
-        double[] weightsToAssign = {0.4,1.8,3.2,0.8,0.8,2.6,2.8,1.6,1.5,2.5,1.3,1.1,0.6,0.6,2.0,0.5,0.5};
-        System.arraycopy(weightsToAssign, 0, weights, 0, weights.length);
-        return network;
-    }
+    public static final String BASE_PATH = "/Users/wlee2019/Downloads/mod repos/skeleton bow master/run/networks";
 
     public static NeuralNetwork createToyNetwork() {
         int[] hiddenLayerSizes = {2};
-        String[] hiddenActivations = {NeuralNetwork.TANH};
+        String[] hiddenActivations = {NeuralNetwork.RELU};
         int[] outputSizes = {3, 2};
         String[] outputActivations = {NeuralNetwork.TANH, NeuralNetwork.SOFTMAX};
 
@@ -40,8 +24,10 @@ public class NeuralNetworkTest {
     private static void test1() {
         NeuralNetwork network = createToyNetwork();
         network.printWeights();
-        NeuralNetworkUtil.saveModel(network);
-        NeuralNetwork network1 = NeuralNetworkUtil.loadOrCreateModel();
+//        NeuralNetworkUtil.saveModel(network);
+        NeuralNetwork.saveModel(network, new File(BASE_PATH + "/model-1.dat"));
+//        NeuralNetwork network1 = NeuralNetworkUtil.loadOrCreateModel();
+        NeuralNetwork network1 = NeuralNetwork.loadModel(new File(BASE_PATH + "/model-1.dat"));
         network1.printWeights();
     }
 
@@ -75,10 +61,9 @@ public class NeuralNetworkTest {
     }
 
     private static void test4() {
-        String basePath = "/Users/wlee2019/Downloads/mod repos/skeleton bow master/run/networks";
-        NeuralNetwork network = NeuralNetwork.loadModel(new File(basePath + "/model-2.dat"));
+        NeuralNetwork network = NeuralNetwork.loadModel(new File(BASE_PATH + "/model-2.dat"));
         network.printWeights();
-        NeuralNetwork network1 = NeuralNetwork.loadModel(new File(basePath + "/model-1.dat"));
+        NeuralNetwork network1 = NeuralNetwork.loadModel(new File(BASE_PATH + "/model-1.dat"));
         network1.printWeights();
     }
 
@@ -96,10 +81,10 @@ public class NeuralNetworkTest {
 
     public static void main(String[] args) {
         System.out.println("Running unit tests");
-//        test1();
+        test1();
 //        test2();
 //        test3();
-        test4();
+//        test4();
 //        test5();
     }
 

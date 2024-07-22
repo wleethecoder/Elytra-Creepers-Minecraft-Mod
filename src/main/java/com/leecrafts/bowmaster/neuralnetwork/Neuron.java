@@ -1,6 +1,7 @@
 package com.leecrafts.bowmaster.neuralnetwork;
 
 import com.leecrafts.bowmaster.neuralnetwork.activationfunction.ActivationFunction;
+import com.leecrafts.bowmaster.neuralnetwork.activationfunction.Relu;
 
 import java.io.Serializable;
 import java.util.Random;
@@ -8,22 +9,36 @@ import java.util.Random;
 public class Neuron implements Serializable {
 
     private final double[] weights;
+    private double numberOfNodesFromThisLayer;
     private double output;
     private double[] inputs;
     private double[] softmaxOutputs;
     private final ActivationFunction activationFunction;
     private final Random random = new Random();
 
-    public Neuron(int inputSize, ActivationFunction activationFunction) {
+    public Neuron(int inputSize, ActivationFunction activationFunction, int numberOfNodesFromThisLayer) {
         this.weights = new double[inputSize + 1]; // +1 for bias
         this.activationFunction = activationFunction;
+        this.numberOfNodesFromThisLayer = numberOfNodesFromThisLayer;
         initializeWeights();
     }
 
     private void initializeWeights() {
-        for (int i = 0; i < this.weights.length; i++) {
-            this.weights[i] = this.random.nextGaussian(); // Gaussian random initialization
+        int inputSize = this.weights.length - 1;
+        for (int i = 0; i < inputSize; i++) {
+            if (this.activationFunction instanceof Relu) {
+                // He weight initialization
+                this.weights[i] = this.random.nextGaussian() * Math.sqrt(2.0 / inputSize);
+            }
+            else {
+                // Xavier weight initialization (for softmax and tanh)
+                double limit = Math.sqrt(6 / (inputSize + this.numberOfNodesFromThisLayer));
+                this.weights[i] = this.random.nextDouble(-limit, limit);
+            }
         }
+
+        // initialize bias
+        this.weights[inputSize] = 0.01;
     }
 
     public double[] getWeights() {

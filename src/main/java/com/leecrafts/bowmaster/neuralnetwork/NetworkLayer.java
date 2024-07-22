@@ -16,7 +16,7 @@ public class NetworkLayer implements Serializable {
         this.activationFunction = activationFunction;
         this.neurons = new ArrayList<>();
         for (int i = 0; i < numberOfNeurons; i++) {
-            this.neurons.add(new Neuron(inputSize, this.activationFunction));
+            this.neurons.add(new Neuron(inputSize, this.activationFunction, numberOfNeurons));
         }
     }
 
