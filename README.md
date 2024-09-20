@@ -2,9 +2,10 @@
 
 The purpose of this project is to train and optimize a neural network that controls a skeleton (an enemy creature that shoots with a bow and arrow) in Minecraft. The neural network is trained using a policy-based reinforcement learning algorithm, REINFORCE. During this process, two copies of the agent fight each other, hence a 2-player RL task. After the training, the skeleton will be able to aim and fire arrows towards the target with a similar competence as a human.
 
-This is currently a work in progress. I have yet to achieve convergence via adjusting network architecture, reward mechanics, hyperparameters, etc.
-
 Believe it or not, I had to write a neural network and the training process from scratch. Without a deep learning library. I could not get the more powerful ones (e.g. Deeplearning4j) to work due to stubborn dependency issues, and the libraries that worked did not suffice for the requirements for my project, such as needing a network with multiple output layers.
+
+![](https://github.com/wleethecoder/Skeleton-Bow-Master-Minecraft-Mod/blob/main/trimmed.gif)  
+This is currently a work in progress. As you can see, the skeletons are moving around in a circle as though they're performing a blood ritual of some sort. I have yet to achieve convergence via adjusting network architecture, reward mechanics, hyperparameters, etc. Also, I had calculated everything manually, so I would have to watch out for errors.
 
 ## General info  
 
