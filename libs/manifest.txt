@@ -1,1 +1,0 @@
-Automatic-Module-Name: ai.djl.pytorch_native_cpu_osx_aarch64
