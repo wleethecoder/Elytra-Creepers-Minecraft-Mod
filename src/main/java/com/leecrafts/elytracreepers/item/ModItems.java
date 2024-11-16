@@ -15,7 +15,7 @@ public class ModItems {
     public static final DeferredItem<Item> NEURAL_ELYTRA = ITEMS.register(
             "neural_elytra", () -> new NeuralElytra(new Item.Properties().durability(432).rarity(Rarity.UNCOMMON)));
 
-    public static void regsiter(IEventBus eventBus) {
+    public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }
 
