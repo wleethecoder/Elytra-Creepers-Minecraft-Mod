@@ -1,13 +1,10 @@
 package com.leecrafts.elytracreepers.event;
 
 import com.leecrafts.elytracreepers.ElytraCreepers;
-import com.leecrafts.elytracreepers.capability.ModCapabilities;
-import com.leecrafts.elytracreepers.capability.custom.INeuralHandler;
-import com.leecrafts.elytracreepers.capability.custom.NeuralHandler;
+import com.leecrafts.elytracreepers.attachment.ModAttachments;
 import com.leecrafts.elytracreepers.item.ModItems;
+import com.leecrafts.elytracreepers.util.NeuralNetwork;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -16,27 +13,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
 public class ModEvents {
 
-    @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.MOD)
-    public static class ModBusEvents {
-
-        @SubscribeEvent
-        public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-            if (!event.isEntityRegistered(ModCapabilities.NEURAL_HANDLER_ENTITY, EntityType.CREEPER)) {
-                event.registerEntity(ModCapabilities.NEURAL_HANDLER_ENTITY,
-                        EntityType.CREEPER,
-                        (entity, ctx) -> new NeuralHandler());
-            }
-        }
-
-    }
+//    @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.MOD)
+//    public static class ModBusEvents {
+//
+//    }
 
     @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.GAME)
     public static class GameBusEvents {
@@ -75,9 +61,15 @@ public class ModEvents {
         @SubscribeEvent
         public static void creeperTickTest(EntityTickEvent.Pre event) {
             if (event.getEntity() instanceof Creeper creeper && !creeper.level().isClientSide) {
-                INeuralHandler handler = creeper.getCapability(ModCapabilities.NEURAL_HANDLER_ENTITY);
-                if (handler != null && creeper.tickCount % 40 == 0) {
-                    System.out.println("chat is this real " + handler.getNum() + "; " + handler.getNetwork().getWeights());
+//                INeuralHandler handler = creeper.getCapability(ModCapabilities.NEURAL_HANDLER_ENTITY);
+//                if (handler != null && creeper.tickCount % 40 == 0) {
+//                    System.out.println("chat is this real " + handler.getNum() + "; " + handler.getNetwork().getWeights());
+//                }
+                NeuralNetwork neuralNetwork = creeper.getData(ModAttachments.NEURAL_NETWORK);
+                if (creeper.tickCount % 40 == 0) {
+                    System.out.println("chat is this real " + neuralNetwork.getWeights());
+                    neuralNetwork.setWeights(4321);
+                    System.out.println(neuralNetwork.getWeights());
                 }
             }
         }
