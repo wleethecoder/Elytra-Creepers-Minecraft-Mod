@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class NeuralNetwork {
 
-    private final int weights;
+    private int weights;
 
     public NeuralNetwork() {
         this.weights = (new Random()).nextInt(100);
@@ -12,6 +12,10 @@ public class NeuralNetwork {
 
     public int getWeights() {
         return this.weights;
+    }
+
+    public void setWeights(int weights) {
+        this.weights = weights;
     }
 
 }
