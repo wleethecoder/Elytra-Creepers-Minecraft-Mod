@@ -11,11 +11,16 @@ import java.util.function.Supplier;
 
 public class ModAttachments {
 
+    private static final int INPUT_SIZE = 7; // TODO change if needed
+    private static final int OUTPUT_SIZE = 2;
+    private static final NeuralNetwork NETWORK =
+            new NeuralNetwork(new int[] {INPUT_SIZE, 16, 32, OUTPUT_SIZE}, "linear", "relu");
+
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES =
             DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, ElytraCreepers.MODID);
 
     public static final Supplier<AttachmentType<NeuralNetwork>> NEURAL_NETWORK = ATTACHMENT_TYPES.register(
-            "neural_network", () -> AttachmentType.builder(NeuralNetwork::new).build()
+            "neural_network", () -> AttachmentType.builder(() -> NETWORK).build()
     );
 
     public static void register(IEventBus eventBus) {
