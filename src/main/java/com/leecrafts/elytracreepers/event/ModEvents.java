@@ -61,15 +61,9 @@ public class ModEvents {
         @SubscribeEvent
         public static void creeperTickTest(EntityTickEvent.Pre event) {
             if (event.getEntity() instanceof Creeper creeper && !creeper.level().isClientSide) {
-//                INeuralHandler handler = creeper.getCapability(ModCapabilities.NEURAL_HANDLER_ENTITY);
-//                if (handler != null && creeper.tickCount % 40 == 0) {
-//                    System.out.println("chat is this real " + handler.getNum() + "; " + handler.getNetwork().getWeights());
-//                }
-                NeuralNetwork neuralNetwork = creeper.getData(ModAttachments.NEURAL_NETWORK);
+                NeuralNetwork network = creeper.getData(ModAttachments.NEURAL_NETWORK);
                 if (creeper.tickCount % 40 == 0) {
-                    System.out.println("chat is this real " + neuralNetwork.getWeights());
-                    neuralNetwork.setWeights(4321);
-                    System.out.println(neuralNetwork.getWeights());
+//                    System.out.println("chat is this real " + network.testInt + " id " + creeper.getId());
                 }
             }
         }

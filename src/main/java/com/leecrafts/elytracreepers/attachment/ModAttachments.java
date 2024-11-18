@@ -14,8 +14,9 @@ public class ModAttachments {
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES =
             DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, ElytraCreepers.MODID);
 
+    // TODO change
     public static final Supplier<AttachmentType<NeuralNetwork>> NEURAL_NETWORK = ATTACHMENT_TYPES.register(
-            "neural_network", () -> AttachmentType.builder(NeuralNetwork::new).build()
+            "neural_network", () -> AttachmentType.builder(() -> new NeuralNetwork(new int[]{0,0,0}, "linear", "linear")).build()
     );
 
     public static void register(IEventBus eventBus) {
