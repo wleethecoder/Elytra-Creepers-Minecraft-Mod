@@ -4,7 +4,9 @@ import com.leecrafts.elytracreepers.Config;
 import com.leecrafts.elytracreepers.ElytraCreepers;
 import com.leecrafts.elytracreepers.attachment.ModAttachments;
 import com.leecrafts.elytracreepers.item.ModItems;
+import com.leecrafts.elytracreepers.item.custom.NeuralElytra;
 import com.leecrafts.elytracreepers.util.NeuralNetwork;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -24,6 +26,9 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
 public class ModEvents {
 
+    private static final boolean TRAINING = true;
+    private static final BlockPos SPAWN_POS = new BlockPos(-24, -23, 3);
+
 //    @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.MOD)
 //    public static class ModBusEvents {
 //
@@ -33,17 +38,21 @@ public class ModEvents {
     public static class GameBusEvents {
 
         @SubscribeEvent
-        public static void onEntityJoin(PlayerInteractEvent.RightClickItem event) {
-            if (event.getEntity() instanceof Player player && player.level() instanceof ServerLevel serverLevel) {
-                if (event.getItemStack().getItem() == Items.FEATHER) {
-                    Config.spawnedElytraEntityType.spawn(serverLevel, player.blockPosition(), MobSpawnType.MOB_SUMMONED);
+        public static void spawnAgents(PlayerInteractEvent.RightClickItem event) {
+            if (TRAINING &&
+                    event.getEntity() instanceof Player player &&
+                    player.level() instanceof ServerLevel serverLevel) {
+                if (event.getItemStack().is(Items.FEATHER)) {
+                    Config.spawnedElytraEntityType.spawn(serverLevel, SPAWN_POS, MobSpawnType.MOB_SUMMONED);
                 }
             }
         }
 
         @SubscribeEvent
         public static void putElytraTest(PlayerInteractEvent.EntityInteract event) {
-            if (event.getTarget() instanceof LivingEntity livingEntity && !livingEntity.level().isClientSide) {
+            if (event.getTarget() instanceof LivingEntity livingEntity &&
+                    !livingEntity.level().isClientSide &&
+                    event.getItemStack().is(ModItems.NEURAL_ELYTRA)) {
                 livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
                 System.out.println(livingEntity.getItemBySlot(EquipmentSlot.CHEST).getItem());
             }
@@ -59,16 +68,20 @@ public class ModEvents {
             }
         }
 
+        // this cannot be implemented in the NeuralElytra class because Item#inventoryTick is only called when an item is in a
+        // player's inventory
         @SubscribeEvent
         public static void fallFlyingTest(EntityTickEvent.Pre event) {
-            if (event.getEntity() instanceof LivingEntity livingEntity &&
-                    !livingEntity.level().isClientSide &&
-                    livingEntity.getItemBySlot(EquipmentSlot.CHEST).getItem() == ModItems.NEURAL_ELYTRA.asItem() &&
-                    !livingEntity.onGround() &&
-                    !livingEntity.isFallFlying()) {
-                CompoundTag compoundTag = livingEntity.saveWithoutId(new CompoundTag());
-                compoundTag.putBoolean("FallFlying", true);
-                livingEntity.load(compoundTag);
+            if (NeuralElytra.isNonPlayerLivingEntity(event.getEntity())) {
+                LivingEntity livingEntity = (LivingEntity) event.getEntity();
+                if (!livingEntity.level().isClientSide &&
+                        livingEntity.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.NEURAL_ELYTRA.asItem())) {
+                    if (!livingEntity.onGround() && !livingEntity.isFallFlying()) {
+                        CompoundTag compoundTag = livingEntity.saveWithoutId(new CompoundTag());
+                        compoundTag.putBoolean("FallFlying", true);
+                        livingEntity.load(compoundTag);
+                    }
+                }
             }
         }
 
