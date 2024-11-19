@@ -78,10 +78,18 @@ public class ModEvents {
                 LivingEntity livingEntity = (LivingEntity) event.getEntity();
                 if (!livingEntity.level().isClientSide &&
                         livingEntity.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.NEURAL_ELYTRA.asItem())) {
+                    // I have to use NBTs because Entity#setSharedFlag is a protected method
+                    CompoundTag compoundTag = livingEntity.saveWithoutId(new CompoundTag());
                     if (!livingEntity.onGround() && !livingEntity.isFallFlying()) {
-                        CompoundTag compoundTag = livingEntity.saveWithoutId(new CompoundTag());
                         compoundTag.putBoolean("FallFlying", true);
                         livingEntity.load(compoundTag);
+                        livingEntity.setSharedFlag(7, true);
+                    }
+                    else if (livingEntity.onGround()) {
+                        // TODO change this part
+                        compoundTag.putBoolean("FallFlying", false);
+                        livingEntity.load(compoundTag);
+                        livingEntity.setSharedFlag(7, false);
                     }
                 }
             }
