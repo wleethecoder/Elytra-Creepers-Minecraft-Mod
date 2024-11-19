@@ -6,7 +6,7 @@ import com.leecrafts.elytracreepers.attachment.ModAttachments;
 import com.leecrafts.elytracreepers.item.ModItems;
 import com.leecrafts.elytracreepers.item.custom.NeuralElytra;
 import com.leecrafts.elytracreepers.util.NeuralNetwork;
-import net.minecraft.core.BlockPos;
+import com.leecrafts.elytracreepers.util.NeuralNetworkUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -26,9 +26,6 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
 public class ModEvents {
 
-    private static final boolean TRAINING = true;
-    private static final BlockPos SPAWN_POS = new BlockPos(-24, -23, 3);
-
 //    @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.MOD)
 //    public static class ModBusEvents {
 //
@@ -39,11 +36,16 @@ public class ModEvents {
 
         @SubscribeEvent
         public static void spawnAgents(PlayerInteractEvent.RightClickItem event) {
-            if (TRAINING &&
+            if (NeuralNetworkUtil.TRAINING &&
                     event.getEntity() instanceof Player player &&
                     player.level() instanceof ServerLevel serverLevel) {
                 if (event.getItemStack().is(Items.FEATHER)) {
-                    Config.spawnedElytraEntityType.spawn(serverLevel, SPAWN_POS, MobSpawnType.MOB_SUMMONED);
+                    for (int i = 0; i < NeuralNetworkUtil.POPULATION_SIZE; i++) {
+                        Entity entity = Config.spawnedElytraEntityType.spawn(serverLevel, NeuralNetworkUtil.SPAWN_POS, MobSpawnType.MOB_SUMMONED);
+                        if (entity instanceof LivingEntity livingEntity) {
+                            livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
+                        }
+                    }
                 }
             }
         }
