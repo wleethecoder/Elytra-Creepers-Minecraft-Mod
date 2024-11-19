@@ -1,16 +1,18 @@
 package com.leecrafts.elytracreepers;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Neo's config APIs
@@ -36,12 +38,18 @@ public class Config
             .comment("A list of items to log on common setup.")
             .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), Config::validateItemName);
 
+    private static final ModConfigSpec.ConfigValue<String> SPAWNED_ELYTRA_ENTITY_TYPE = BUILDER
+            .comment("The type of entities that will spawn with a neural elytra.")
+            .define("elytra_entity_type", "minecraft:creeper");
+
+
     static final ModConfigSpec SPEC = BUILDER.build();
 
     public static boolean logDirtBlock;
     public static int magicNumber;
     public static String magicNumberIntroduction;
     public static Set<Item> items;
+    public static EntityType<?> spawnedElytraEntityType;
 
     private static boolean validateItemName(final Object obj)
     {
@@ -59,5 +67,15 @@ public class Config
         items = ITEM_STRINGS.get().stream()
                 .map(itemName -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemName)))
                 .collect(Collectors.toSet());
+
+        Optional<EntityType<?>> entityTypeOptional = EntityType.byString(SPAWNED_ELYTRA_ENTITY_TYPE.get());
+        if (entityTypeOptional.isPresent()) {
+            spawnedElytraEntityType = entityTypeOptional.get();
+        }
+        else {
+            System.out.println("the value entered for 'elytra_entity_type' in elytracreepers-common.toml not recognized, " +
+                    "defaulting to minecraft:creeper");
+            spawnedElytraEntityType = EntityType.CREEPER;
+        }
     }
 }

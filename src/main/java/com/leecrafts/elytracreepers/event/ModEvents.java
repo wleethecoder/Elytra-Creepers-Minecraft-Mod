@@ -1,15 +1,20 @@
 package com.leecrafts.elytracreepers.event;
 
+import com.leecrafts.elytracreepers.Config;
 import com.leecrafts.elytracreepers.ElytraCreepers;
 import com.leecrafts.elytracreepers.attachment.ModAttachments;
 import com.leecrafts.elytracreepers.item.ModItems;
 import com.leecrafts.elytracreepers.util.NeuralNetwork;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -26,6 +31,15 @@ public class ModEvents {
 
     @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.GAME)
     public static class GameBusEvents {
+
+        @SubscribeEvent
+        public static void onEntityJoin(PlayerInteractEvent.RightClickItem event) {
+            if (event.getEntity() instanceof Player player && player.level() instanceof ServerLevel serverLevel) {
+                if (event.getItemStack().getItem() == Items.FEATHER) {
+                    Config.spawnedElytraEntityType.spawn(serverLevel, player.blockPosition(), MobSpawnType.MOB_SUMMONED);
+                }
+            }
+        }
 
         @SubscribeEvent
         public static void putElytraTest(PlayerInteractEvent.EntityInteract event) {
@@ -60,10 +74,11 @@ public class ModEvents {
 
         @SubscribeEvent
         public static void creeperTickTest(EntityTickEvent.Pre event) {
-            if (event.getEntity() instanceof Creeper creeper && !creeper.level().isClientSide) {
-                NeuralNetwork neuralNetwork = creeper.getData(ModAttachments.NEURAL_NETWORK);
-                if (creeper.tickCount % 40 == 0) {
-                    neuralNetwork.printWeights();
+            Entity entity = event.getEntity();
+            if (event.getEntity().getType() == Config.spawnedElytraEntityType && !entity.level().isClientSide) {
+                NeuralNetwork neuralNetwork = entity.getData(ModAttachments.NEURAL_NETWORK);
+                if (entity.tickCount % 40 == 0) {
+//                    neuralNetwork.printWeights();
                 }
             }
         }
