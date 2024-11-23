@@ -1,5 +1,6 @@
 package com.leecrafts.elytracreepers.util;
 
+import com.leecrafts.elytracreepers.neat.NeuralNetwork;
 import net.minecraft.core.BlockPos;
 
 public class NeuralNetworkUtil {

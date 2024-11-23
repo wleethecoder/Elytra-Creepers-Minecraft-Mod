@@ -1,7 +1,7 @@
 package com.leecrafts.elytracreepers.attachment;
 
 import com.leecrafts.elytracreepers.ElytraCreepers;
-import com.leecrafts.elytracreepers.util.NeuralNetwork;
+import com.leecrafts.elytracreepers.neat.NeuralNetwork;
 import com.leecrafts.elytracreepers.util.NeuralNetworkUtil;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.bus.api.IEventBus;

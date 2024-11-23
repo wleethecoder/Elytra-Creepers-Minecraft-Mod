@@ -1,9 +1,11 @@
 package com.leecrafts.elytracreepers.item.custom;
 
 import com.leecrafts.elytracreepers.attachment.ModAttachments;
-import com.leecrafts.elytracreepers.util.NeuralNetwork;
+import com.leecrafts.elytracreepers.item.ModItems;
+import com.leecrafts.elytracreepers.neat.NeuralNetwork;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ElytraItem;
@@ -18,6 +20,10 @@ public class NeuralElytra extends ElytraItem {
 
     public NeuralElytra(Properties properties) {
         super(properties);
+    }
+
+    public static boolean isWearing(LivingEntity livingEntity) {
+        return livingEntity.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.NEURAL_ELYTRA.asItem());
     }
 
     @Override

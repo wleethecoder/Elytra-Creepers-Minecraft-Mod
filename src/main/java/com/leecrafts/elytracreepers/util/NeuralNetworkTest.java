@@ -1,5 +1,7 @@
 package com.leecrafts.elytracreepers.util;
 
+import com.leecrafts.elytracreepers.neat.NeuralNetwork;
+
 import java.util.Arrays;
 
 public class NeuralNetworkTest {

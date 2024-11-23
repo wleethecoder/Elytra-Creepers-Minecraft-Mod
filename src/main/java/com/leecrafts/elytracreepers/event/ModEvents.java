@@ -2,24 +2,23 @@ package com.leecrafts.elytracreepers.event;
 
 import com.leecrafts.elytracreepers.Config;
 import com.leecrafts.elytracreepers.ElytraCreepers;
-import com.leecrafts.elytracreepers.attachment.ModAttachments;
 import com.leecrafts.elytracreepers.item.ModItems;
 import com.leecrafts.elytracreepers.item.custom.NeuralElytra;
+import com.leecrafts.elytracreepers.neat.NEATController;
 import com.leecrafts.elytracreepers.util.NeuralNetworkUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
-
-import java.util.List;
 
 public class ModEvents {
 
@@ -28,6 +27,8 @@ public class ModEvents {
 //
 //    }
 
+    private static NEATController neatController;
+    public static int REMAINING;
     private static final int SIGHT_DISTANCE = 200;
 
     @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.GAME)
@@ -39,6 +40,10 @@ public class ModEvents {
                     event.getEntity() instanceof Player player &&
                     player.level() instanceof ServerLevel serverLevel) {
                 if (event.getItemStack().is(Items.FEATHER)) {
+                    neatController = new NEATController();
+                    neatController.initializePopulation(NeuralNetworkUtil.POPULATION_SIZE);
+                    // spawn population of creepers, do data attachments
+                    /*
                     for (int i = 0; i < NeuralNetworkUtil.POPULATION_SIZE; i++) {
                         Entity entity = Config.spawnedElytraEntityType.spawn(serverLevel, NeuralNetworkUtil.SPAWN_POS, MobSpawnType.MOB_SUMMONED);
                         if (entity instanceof LivingEntity livingEntity) {
@@ -56,6 +61,7 @@ public class ModEvents {
                             }
                         }
                     }
+                     */
                 }
             }
         }
@@ -76,8 +82,7 @@ public class ModEvents {
         public static void fallFlying(EntityTickEvent.Pre event) {
             if (NeuralElytra.isNonPlayerLivingEntity(event.getEntity())) {
                 LivingEntity livingEntity = (LivingEntity) event.getEntity();
-                if (!livingEntity.level().isClientSide &&
-                        livingEntity.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.NEURAL_ELYTRA.asItem())) {
+                if (!livingEntity.level().isClientSide && NeuralElytra.isWearing(livingEntity)) {
                     // I have to use NBTs because Entity#setSharedFlag is a protected method
                     CompoundTag compoundTag = livingEntity.saveWithoutId(new CompoundTag());
                     if (!livingEntity.onGround() && !livingEntity.isFallFlying()) {
@@ -92,6 +97,19 @@ public class ModEvents {
                         livingEntity.setSharedFlag(7, false);
                     }
                 }
+            }
+        }
+
+        @SubscribeEvent
+        public static void agentRunEnd(LivingFallEvent event) {
+            LivingEntity livingEntity = event.getEntity();
+            if (!livingEntity.level().isClientSide &&
+                    livingEntity.getType() == Config.spawnedElytraEntityType &&
+                    NeuralElytra.isWearing(livingEntity)) {
+                double fitness = 0;
+//                neatController.recordFitness(livingEntity, fitness);
+//                ^ livingEntity.getData(GENOME).fitness = fitness;
+                livingEntity.discard();
             }
         }
 

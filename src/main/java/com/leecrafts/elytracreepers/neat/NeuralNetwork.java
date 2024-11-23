@@ -1,4 +1,4 @@
-package com.leecrafts.elytracreepers.util;
+package com.leecrafts.elytracreepers.neat;
 
 public class NeuralNetwork {
     private final int[] layerSizes;
