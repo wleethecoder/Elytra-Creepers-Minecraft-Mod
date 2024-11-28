@@ -83,6 +83,7 @@ public class NEATController {
     // returns copy of a ConnectionGene
     public static ConnectionGene getConnection(ConnectionGene connectionGene) {
         ConnectionGene connectionGene1 = new ConnectionGene(connectionGene.getFrom(), connectionGene.getTo());
+        connectionGene1.setInnovationNumber(connectionGene.getInnovationNumber());
         connectionGene1.setWeight(connectionGene.getWeight());
         connectionGene1.setEnabled(connectionGene.isEnabled());
         return connectionGene1;

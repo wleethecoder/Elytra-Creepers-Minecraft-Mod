@@ -17,8 +17,14 @@ public class Genome {
 
         Genome thisGenome = this;
 
-        int thisGeneHighestInnovationNumber = thisGenome.getConnections().get(thisGenome.getConnections().size() - 1).getInnovationNumber();
-        int otherGeneHighestInnovationNumber = otherGenome.getConnections().get(otherGenome.getConnections().size() - 1).getInnovationNumber();
+        int thisGeneHighestInnovationNumber = 0;
+        if (thisGenome.getConnections().size() != 0) {
+            thisGeneHighestInnovationNumber = thisGenome.getConnections().get(thisGenome.getConnections().size() - 1).getInnovationNumber();
+        }
+        int otherGeneHighestInnovationNumber = 0;
+        if (otherGenome.getConnections().size() != 0) {
+            otherGeneHighestInnovationNumber = otherGenome.getConnections().get(otherGenome.getConnections().size() - 1).getInnovationNumber();
+        }
 
         if (thisGeneHighestInnovationNumber > otherGeneHighestInnovationNumber) {
             Genome temp = thisGenome;
