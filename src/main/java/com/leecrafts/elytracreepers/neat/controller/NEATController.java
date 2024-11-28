@@ -1,7 +1,6 @@
 package com.leecrafts.elytracreepers.neat.controller;
 
 import com.leecrafts.elytracreepers.event.ModEvents;
-import com.leecrafts.elytracreepers.neat.*;
 import com.leecrafts.elytracreepers.neat.datastructures.RandomHashSet;
 import com.leecrafts.elytracreepers.neat.genome.ConnectionGene;
 import com.leecrafts.elytracreepers.neat.genome.Genome;
@@ -19,10 +18,6 @@ public class NEATController {
     public static final int POPULATION_SIZE = 1;
     public static final int INPUT_SIZE = 5; // TODO change if needed
     public static final int OUTPUT_SIZE = 4;
-    public static final NeuralNetwork NETWORK = new NeuralNetwork(
-            new int[] {INPUT_SIZE, 16, 32, OUTPUT_SIZE},
-            "linear",
-            "relu");
 
     private final double C1 = 1;
     private final double C2 = 1;
@@ -44,9 +39,6 @@ public class NEATController {
     private int inputSize;
     private int outputSize;
     private int maxClients;
-
-    private Population population;
-    private int generation = 0;
 
     public NEATController(int inputSize, int outputSize, int clients) {
         this.reset(inputSize, outputSize, clients);
