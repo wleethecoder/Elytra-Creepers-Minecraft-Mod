@@ -1,19 +1,61 @@
 package com.leecrafts.elytracreepers.neat;
 
-public class ConnectionGene {
-    private int fromNodeId;
-    private int toNodeId;
-    private int innovationNumber;
-    private double weight;
-    private boolean enabled;
+public class ConnectionGene extends Gene {
 
-    // Used as key in innovation history
+    private NodeGene from;
+    private NodeGene to;
+
+    private double weight;
+    private boolean enabled = true;
+
+    public ConnectionGene(NodeGene from, NodeGene to) {
+        this.from = from;
+        this.to = to;
+    }
+
+    public NodeGene getFrom() {
+        return this.from;
+    }
+
+    public void setFrom(NodeGene from) {
+        this.from = from;
+    }
+
+    public NodeGene getTo() {
+        return this.to;
+    }
+
+    public void setTo(NodeGene to) {
+        this.to = to;
+    }
+
+    public double getWeight() {
+        return this.weight;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
+    }
+
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     @Override
     public boolean equals(Object o) {
-        return false;
+        if (!(o instanceof ConnectionGene connectionGene)) {
+            return false;
+        }
+        return this.from.equals(connectionGene.from) && this.to.equals(connectionGene.to);
     }
+
     @Override
     public int hashCode() {
-        return 0;
+        // this value will always be unique for each connection gene
+        return this.from.getInnovationNumber() * NEATController.MAX_NODES + this.to.getInnovationNumber();
     }
 }

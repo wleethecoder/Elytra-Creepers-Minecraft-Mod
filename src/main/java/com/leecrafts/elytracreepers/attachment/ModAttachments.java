@@ -1,8 +1,6 @@
 package com.leecrafts.elytracreepers.attachment;
 
 import com.leecrafts.elytracreepers.ElytraCreepers;
-import com.leecrafts.elytracreepers.neat.NeuralNetwork;
-import com.leecrafts.elytracreepers.util.NeuralNetworkUtil;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -16,9 +14,9 @@ public class ModAttachments {
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES =
             DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, ElytraCreepers.MODID);
 
-    public static final Supplier<AttachmentType<NeuralNetwork>> NEURAL_NETWORK = ATTACHMENT_TYPES.register(
-            "neural_network", () -> AttachmentType.builder(() -> NeuralNetworkUtil.NETWORK).build()
-    );
+//    public static final Supplier<AttachmentType<NeuralNetwork>> NEURAL_NETWORK = ATTACHMENT_TYPES.register(
+//            "neural_network", () -> AttachmentType.builder(() -> NeuralNetworkUtil.NETWORK).build()
+//    );
 
     public static final Supplier<AttachmentType<Entity>> TARGET_ENTITY = ATTACHMENT_TYPES.register(
             "target_entity", () -> AttachmentType.builder(() -> (Entity) null).build()

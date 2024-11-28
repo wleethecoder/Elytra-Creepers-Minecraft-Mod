@@ -5,7 +5,6 @@ import com.leecrafts.elytracreepers.ElytraCreepers;
 import com.leecrafts.elytracreepers.item.ModItems;
 import com.leecrafts.elytracreepers.item.custom.NeuralElytra;
 import com.leecrafts.elytracreepers.neat.NEATController;
-import com.leecrafts.elytracreepers.util.NeuralNetworkUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -36,12 +35,12 @@ public class ModEvents {
 
         @SubscribeEvent
         public static void spawnAgents(PlayerInteractEvent.RightClickItem event) {
-            if (NeuralNetworkUtil.TRAINING &&
+            if (NEATController.TRAINING &&
                     event.getEntity() instanceof Player player &&
                     player.level() instanceof ServerLevel serverLevel) {
                 if (event.getItemStack().is(Items.FEATHER)) {
-                    neatController = new NEATController();
-                    neatController.initializePopulation(NeuralNetworkUtil.POPULATION_SIZE);
+                    neatController = new NEATController(NEATController.INPUT_SIZE, NEATController.OUTPUT_SIZE, NEATController.POPULATION_SIZE);
+                    neatController.initializePopulation(NEATController.POPULATION_SIZE);
                     // spawn population of creepers, do data attachments
                     /*
                     for (int i = 0; i < NeuralNetworkUtil.POPULATION_SIZE; i++) {

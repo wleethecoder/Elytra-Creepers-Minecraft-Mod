@@ -7,10 +7,10 @@ public class InnovationHistory {
     private int currentInnovation;
 
     // Methods for tracking innovations
-    public int getInnovationNumber(Node from, Node to) {
+    public int getInnovationNumber(NodeGene from, NodeGene to) {
         return 0;
     }
-    public boolean isExistingInnovation(Node from, Node to) {
+    public boolean isExistingInnovation(NodeGene from, NodeGene to) {
         return false;
     }
 }
