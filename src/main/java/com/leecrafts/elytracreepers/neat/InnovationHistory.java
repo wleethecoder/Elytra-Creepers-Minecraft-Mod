@@ -1,5 +1,8 @@
 package com.leecrafts.elytracreepers.neat;
 
+import com.leecrafts.elytracreepers.neat.genome.ConnectionGene;
+import com.leecrafts.elytracreepers.neat.genome.NodeGene;
+
 import java.util.Map;
 
 public class InnovationHistory {

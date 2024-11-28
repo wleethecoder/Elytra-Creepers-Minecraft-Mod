@@ -1,7 +1,11 @@
-package com.leecrafts.elytracreepers.neat;
+package com.leecrafts.elytracreepers.neat.controller;
 
 import com.leecrafts.elytracreepers.event.ModEvents;
+import com.leecrafts.elytracreepers.neat.*;
 import com.leecrafts.elytracreepers.neat.datastructures.RandomHashSet;
+import com.leecrafts.elytracreepers.neat.genome.ConnectionGene;
+import com.leecrafts.elytracreepers.neat.genome.Genome;
+import com.leecrafts.elytracreepers.neat.genome.NodeGene;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 

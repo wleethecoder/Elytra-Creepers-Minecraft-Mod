@@ -1,4 +1,4 @@
-package com.leecrafts.elytracreepers.neat;
+package com.leecrafts.elytracreepers.neat.genome;
 
 public class Gene {
 

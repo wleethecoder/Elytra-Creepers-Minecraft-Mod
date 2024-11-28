@@ -4,7 +4,7 @@ import com.leecrafts.elytracreepers.Config;
 import com.leecrafts.elytracreepers.ElytraCreepers;
 import com.leecrafts.elytracreepers.item.ModItems;
 import com.leecrafts.elytracreepers.item.custom.NeuralElytra;
-import com.leecrafts.elytracreepers.neat.NEATController;
+import com.leecrafts.elytracreepers.neat.controller.NEATController;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EquipmentSlot;

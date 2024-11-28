@@ -1,5 +1,6 @@
-package com.leecrafts.elytracreepers.neat;
+package com.leecrafts.elytracreepers.neat.controller;
 
+import com.leecrafts.elytracreepers.neat.genome.Genome;
 import com.leecrafts.elytracreepers.neat.visual.Frame;
 
 public class NEATTest {

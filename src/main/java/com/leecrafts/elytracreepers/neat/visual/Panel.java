@@ -1,8 +1,8 @@
 package com.leecrafts.elytracreepers.neat.visual;
 
-import com.leecrafts.elytracreepers.neat.ConnectionGene;
-import com.leecrafts.elytracreepers.neat.Genome;
-import com.leecrafts.elytracreepers.neat.NodeGene;
+import com.leecrafts.elytracreepers.neat.genome.ConnectionGene;
+import com.leecrafts.elytracreepers.neat.genome.Genome;
+import com.leecrafts.elytracreepers.neat.genome.NodeGene;
 
 import javax.swing.*;
 import java.awt.*;

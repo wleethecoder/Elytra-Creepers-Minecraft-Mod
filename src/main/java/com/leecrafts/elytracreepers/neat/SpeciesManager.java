@@ -1,5 +1,8 @@
 package com.leecrafts.elytracreepers.neat;
 
+import com.leecrafts.elytracreepers.neat.controller.Species;
+import com.leecrafts.elytracreepers.neat.genome.Genome;
+
 import java.util.List;
 
 public class SpeciesManager {

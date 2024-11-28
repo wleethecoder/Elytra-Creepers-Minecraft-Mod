@@ -1,6 +1,6 @@
 package com.leecrafts.elytracreepers.neat.datastructures;
 
-import com.leecrafts.elytracreepers.neat.Gene;
+import com.leecrafts.elytracreepers.neat.genome.Gene;
 
 import java.util.ArrayList;
 import java.util.HashSet;

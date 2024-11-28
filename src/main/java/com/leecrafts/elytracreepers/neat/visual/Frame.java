@@ -1,7 +1,7 @@
 package com.leecrafts.elytracreepers.neat.visual;
 
 import com.leecrafts.elytracreepers.neat.calculations.Calculator;
-import com.leecrafts.elytracreepers.neat.Genome;
+import com.leecrafts.elytracreepers.neat.genome.Genome;
 
 import javax.swing.*;
 import java.awt.*;

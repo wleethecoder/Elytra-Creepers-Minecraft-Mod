@@ -1,4 +1,6 @@
-package com.leecrafts.elytracreepers.neat;
+package com.leecrafts.elytracreepers.neat.genome;
+
+import com.leecrafts.elytracreepers.neat.controller.NEATController;
 
 public class ConnectionGene extends Gene {
 

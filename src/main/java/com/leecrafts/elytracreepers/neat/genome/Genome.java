@@ -1,5 +1,6 @@
-package com.leecrafts.elytracreepers.neat;
+package com.leecrafts.elytracreepers.neat.genome;
 
+import com.leecrafts.elytracreepers.neat.controller.NEATController;
 import com.leecrafts.elytracreepers.neat.datastructures.RandomHashSet;
 
 public class Genome {
