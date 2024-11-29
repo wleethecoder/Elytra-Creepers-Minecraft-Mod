@@ -18,9 +18,28 @@ public class NEATTest {
         new Frame(neatController.emptyGenome());
     }
 
+    private static void clients() {
+        NEATController neatController = new NEATController(10,1,1000);
+        double[] in = new double[10];
+        for (int i = 0; i < 10; i++) {
+            in[i] = Math.random();
+        }
+        for (int i = 0; i < 100; i++) {
+            for (Client client : neatController.getClients()) {
+                double score = client.calculate(in)[0];
+                client.setScore(score);
+            }
+            neatController.evolve();
+            neatController.printSpecies();
+        }
+
+        new Frame(neatController.getClient(0).getGenome());
+    }
+
     public static void main(String[] args) {
-        emptyGenomeSize();
-        displayFrame();
+//        emptyGenomeSize();
+//        displayFrame();
+        clients();
     }
 
 }

@@ -2,12 +2,14 @@ package com.leecrafts.elytracreepers.neat.controller;
 
 import com.leecrafts.elytracreepers.event.ModEvents;
 import com.leecrafts.elytracreepers.neat.datastructures.RandomHashSet;
+import com.leecrafts.elytracreepers.neat.datastructures.RandomSelector;
 import com.leecrafts.elytracreepers.neat.genome.ConnectionGene;
 import com.leecrafts.elytracreepers.neat.genome.Genome;
 import com.leecrafts.elytracreepers.neat.genome.NodeGene;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class NEATController {
@@ -22,20 +24,29 @@ public class NEATController {
     private final double C1 = 1;
     private final double C2 = 1;
     private final double C3 = 1;
+
+    private final double CP = 4;
+
     private final double WEIGHT_SHIFT_STRENGTH = 0.3;
     private final double WEIGHT_RANDOM_STRENGTH = 1;
 
+    private static final double SURVIVAL_RATE = 0.8;
+
     private final double PROBABILITY_MUTATE_LINK = 0.01;
-    private final double PROBABILITY_MUTATE_NODE = 0.1;
-    private final double PROBABILITY_MUTATE_WEIGHT_SHIFT = 0.02;
-    private final double PROBABILITY_MUTATE_WEIGHT_RANDOM = 0.02;
-    private final double PROBABILITY_MUTATE_TOGGLE_LINK = 0.02;
+    private final double PROBABILITY_MUTATE_NODE = 0.003;
+    private final double PROBABILITY_MUTATE_WEIGHT_SHIFT = 0.002;
+    private final double PROBABILITY_MUTATE_WEIGHT_RANDOM = 0.002;
+    private final double PROBABILITY_MUTATE_TOGGLE_LINK = 0;
 
     // We COULD use an ArrayList<ConnectionGene>, but we want O(1) access time
     // Using a HashMap works because we overrode hashCode for ConnectionGene so that hash codes are unique for all connection genes
     private final HashMap<ConnectionGene, ConnectionGene> allConnections = new HashMap<>();
 
     private final RandomHashSet<NodeGene> allNodes = new RandomHashSet<>();
+
+    private RandomHashSet<Client> clients = new RandomHashSet<>();
+    private RandomHashSet<Species> species = new RandomHashSet<>();
+
     private int inputSize;
     private int outputSize;
     private int maxClients;
@@ -60,6 +71,7 @@ public class NEATController {
 
         this.allConnections.clear();
         this.allNodes.clear();
+        this.clients.clear();
 
         for (int i = 0; i < this.inputSize; i++) {
             NodeGene nodeGene = this.getNode();
@@ -73,7 +85,22 @@ public class NEATController {
         }
 
         // TODO add agent population
-        this.initializePopulation(clients);
+        for (int i = 0; i < this.maxClients; i++) {
+            Client client = new Client();
+            client.setGenome(this.emptyGenome());
+            client.generateCalculator();
+            this.clients.add(client);
+        }
+//        this.initializePopulation(clients);
+    }
+
+    public Client getClient(int index) {
+        return this.clients.get(index);
+    }
+
+    // TODO this is for the unit test; remove it if you don't need it otherwise
+    public ArrayList<Client> getClients() {
+        return this.clients.getData();
     }
 
     // returns copy of a ConnectionGene
@@ -94,6 +121,7 @@ public class NEATController {
         }
         else {
             connectionGene.setInnovationNumber(this.allConnections.size() + 1);
+            this.allConnections.put(connectionGene, connectionGene);
         }
         return connectionGene;
     }
@@ -111,6 +139,85 @@ public class NEATController {
         return this.getNode();
     }
 
+    public void evolve() {
+        this.generateSpecies();
+        this.kill();
+        this.removeExtinctSpecies();
+        this.reproduce();
+        this.mutate();
+
+        for (Client client : this.clients.getData()) {
+            client.generateCalculator();
+        }
+    }
+
+    private void generateSpecies() {
+        for (Species s : this.species.getData()) {
+            s.reset();
+        }
+        for (Client client : this.clients.getData()) {
+            if (client.getSpecies() != null) {
+                continue;
+            }
+            boolean found = false;
+            for (Species s : this.species.getData()) {
+                if (s.put(client)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                this.species.add(new Species(client));
+            }
+        }
+
+        for (Species s : this.species.getData()) {
+            s.evaluateScore();
+        }
+    }
+
+    private void kill() {
+        for (Species s : this.species.getData()) {
+            s.kill(1 - SURVIVAL_RATE);
+        }
+    }
+
+    private void removeExtinctSpecies() {
+        for (int i = this.species.size() - 1; i >= 0; i--) {
+            if (this.species.get(i).size() <= 1) {
+                this.species.get(i).goExtinct();
+                this.species.remove(i);
+            }
+        }
+    }
+
+    private void reproduce() {
+        RandomSelector<Species> randomSelector = new RandomSelector<>();
+        for (Species s : this.species.getData()) {
+            randomSelector.add(s, s.getScore());
+        }
+        for (Client client : this.clients.getData()) {
+            if (client.getSpecies() == null) {
+                Species s = randomSelector.random();
+                client.setGenome(s.breed());
+                s.forcePut(client);
+            }
+        }
+    }
+
+    public void mutate() {
+        for (Client client : this.clients.getData()) {
+            client.mutate();
+        }
+    }
+
+    public void printSpecies() {
+        System.out.println("####################################");
+        for (Species s : this.species.getData()) {
+            System.out.println("Species " + s + "; average score: " + s.getScore() + "; size: " + s.size());
+        }
+    }
+
     public double getC1() {
         return this.C1;
     }
@@ -121,6 +228,10 @@ public class NEATController {
 
     public double getC3() {
         return this.C3;
+    }
+
+    public double getCP() {
+        return CP;
     }
 
     public double getWeightShiftStrength() {

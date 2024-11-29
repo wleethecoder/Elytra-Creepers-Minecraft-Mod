@@ -47,6 +47,7 @@ public class RandomHashSet<T> {
             if (gene.getInnovationNumber() < innovationNumber) {
                 this.set.add((T) gene);
                 this.data.add(i, (T) gene);
+                return;
             }
         }
         this.add((T) gene);

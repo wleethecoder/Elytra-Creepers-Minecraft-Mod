@@ -66,7 +66,7 @@ public class Genome {
             }
         }
 
-        weightDiff /= similar;
+        weightDiff /= Math.max(1, similar);
         excess = thisGenome.getConnections().size() - i;
 
         double N = Math.max(thisGenome.getConnections().size(), otherGenome.getConnections().size());
@@ -172,8 +172,10 @@ public class Genome {
     public void mutateNode() {
         ConnectionGene connectionGene = this.connections.randomElement();
         if (connectionGene == null) return;
+
         NodeGene from = connectionGene.getFrom();
         NodeGene to = connectionGene.getTo();
+
         NodeGene middle = this.neatController.getNode();
         middle.setX((from.getX() + to.getX()) / 2);
         middle.setY((from.getY() + to.getY()) / 2 + Math.random() * 0.1 - 0.05);
