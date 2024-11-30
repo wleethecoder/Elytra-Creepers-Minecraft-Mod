@@ -176,9 +176,18 @@ public class Genome {
         NodeGene from = connectionGene.getFrom();
         NodeGene to = connectionGene.getTo();
 
-        NodeGene middle = this.neatController.getNode();
-        middle.setX((from.getX() + to.getX()) / 2);
-        middle.setY((from.getY() + to.getY()) / 2 + Math.random() * 0.1 - 0.05);
+        int replaceIndex = this.neatController.getReplaceIndex(from, to);
+        NodeGene middle;
+        if (replaceIndex == 0) {
+            middle = this.neatController.getNode();
+            middle.setX((from.getX() + to.getX()) / 2);
+            middle.setY((from.getY() + to.getY()) / 2 + Math.random() * 0.1 - 0.05);
+            this.neatController.setReplaceIndex(from, to, middle.getInnovationNumber());
+        }
+        else {
+            middle = this.neatController.getNode(replaceIndex);
+        }
+
         ConnectionGene connectionGene1 = this.neatController.getConnection(from, middle);
         ConnectionGene connectionGene2 = this.neatController.getConnection(middle, to);
         connectionGene1.setWeight(1);

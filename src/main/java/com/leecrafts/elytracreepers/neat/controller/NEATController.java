@@ -126,6 +126,18 @@ public class NEATController {
         return connectionGene;
     }
 
+    public int getReplaceIndex(NodeGene from, NodeGene to) {
+        ConnectionGene connectionGene = this.allConnections.get(this.getConnection(from, to));
+        if (connectionGene == null) {
+            return 0;
+        }
+        return connectionGene.getReplaceIndex();
+    }
+
+    public void setReplaceIndex(NodeGene from, NodeGene to, int index) {
+        this.allConnections.get(new ConnectionGene(from, to)).setReplaceIndex(index);
+    }
+
     public NodeGene getNode() {
         NodeGene nodeGene = new NodeGene(this.allNodes.size() + 1);
         this.allNodes.add(nodeGene);

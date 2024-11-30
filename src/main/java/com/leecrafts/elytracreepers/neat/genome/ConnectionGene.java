@@ -10,6 +10,8 @@ public class ConnectionGene extends Gene {
     private double weight;
     private boolean enabled = true;
 
+    private int replaceIndex;
+
     public ConnectionGene(NodeGene from, NodeGene to) {
         this.from = from;
         this.to = to;
@@ -45,6 +47,14 @@ public class ConnectionGene extends Gene {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public int getReplaceIndex() {
+        return this.replaceIndex;
+    }
+
+    public void setReplaceIndex(int replaceIndex) {
+        this.replaceIndex = replaceIndex;
     }
 
     @Override
