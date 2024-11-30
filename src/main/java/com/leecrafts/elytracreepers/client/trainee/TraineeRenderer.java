@@ -3,6 +3,7 @@ package com.leecrafts.elytracreepers.client.trainee;
 import com.leecrafts.elytracreepers.entity.custom.TraineeEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -23,9 +24,12 @@ public class TraineeRenderer extends GeoEntityRenderer<TraineeEntity> {
         return TraineeModel.TRAINEE_TEXTURE;
     }
 
-    // TODO fall flying animation
     @Override
     public void actuallyRender(PoseStack poseStack, TraineeEntity animatable, BakedGeoModel model, @Nullable RenderType renderType, MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
+        if (animatable.isFallFlying()) {
+            poseStack.mulPose(Axis.YP.rotationDegrees(animatable.getYRot()));
+            poseStack.mulPose(Axis.XP.rotationDegrees(-animatable.getXRot() + 90));
+        }
         super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
     }
 }
