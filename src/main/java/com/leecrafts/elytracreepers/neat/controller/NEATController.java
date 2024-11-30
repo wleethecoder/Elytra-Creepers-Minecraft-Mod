@@ -1,13 +1,10 @@
 package com.leecrafts.elytracreepers.neat.controller;
 
-import com.leecrafts.elytracreepers.event.ModEvents;
 import com.leecrafts.elytracreepers.neat.datastructures.RandomHashSet;
 import com.leecrafts.elytracreepers.neat.datastructures.RandomSelector;
 import com.leecrafts.elytracreepers.neat.genome.ConnectionGene;
 import com.leecrafts.elytracreepers.neat.genome.Genome;
 import com.leecrafts.elytracreepers.neat.genome.NodeGene;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.LivingEntity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,11 +12,6 @@ import java.util.HashMap;
 public class NEATController {
 
     public static final int MAX_NODES = (int) Math.pow(2, 20);
-    public static final boolean TRAINING = true;
-    public static final BlockPos SPAWN_POS = new BlockPos(-24, -23, 3);
-    public static final int POPULATION_SIZE = 1;
-    public static final int INPUT_SIZE = 5; // TODO change if needed
-    public static final int OUTPUT_SIZE = 4;
 
     private final double C1 = 1;
     private final double C2 = 1;
@@ -84,14 +76,12 @@ public class NEATController {
             nodeGene.setY((i + 1) / (double) (this.outputSize + 1));
         }
 
-        // TODO add agent population
         for (int i = 0; i < this.maxClients; i++) {
             Client client = new Client();
             client.setGenome(this.emptyGenome());
             client.generateCalculator();
             this.clients.add(client);
         }
-//        this.initializePopulation(clients);
     }
 
     public Client getClient(int index) {
@@ -274,22 +264,8 @@ public class NEATController {
         return this.PROBABILITY_MUTATE_TOGGLE_LINK;
     }
 
-    public void initializePopulation(int size) {
-        // initialize population
-        ModEvents.REMAINING = size;
-        // for loop...entity.setData(new Genome)
-        // population.add(entity.getData())
-    }
-
-    public void recordFitness(LivingEntity livingEntity, double fitness) {
-        ModEvents.REMAINING--;
-
-        if (ModEvents.REMAINING == 0) {
-            evolveNewGeneration();
-        }
-    }
-
-    private void evolveNewGeneration() {
+    public int getMaxClients() {
+        return this.maxClients;
     }
 
 }
