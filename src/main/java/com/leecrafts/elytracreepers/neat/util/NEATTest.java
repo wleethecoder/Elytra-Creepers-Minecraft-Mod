@@ -1,5 +1,7 @@
-package com.leecrafts.elytracreepers.neat.controller;
+package com.leecrafts.elytracreepers.neat.util;
 
+import com.leecrafts.elytracreepers.neat.controller.Client;
+import com.leecrafts.elytracreepers.neat.controller.NEATController;
 import com.leecrafts.elytracreepers.neat.genome.Genome;
 import com.leecrafts.elytracreepers.neat.visual.Frame;
 
