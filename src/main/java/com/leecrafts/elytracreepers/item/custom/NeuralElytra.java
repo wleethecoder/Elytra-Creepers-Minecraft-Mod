@@ -29,14 +29,14 @@ public class NeuralElytra extends ElytraItem {
     @Override
     public boolean elytraFlightTick(@NotNull ItemStack stack, @NotNull LivingEntity entity, int flightTicks) {
         super.elytraFlightTick(stack, entity, flightTicks);
-        if (isNonPlayerLivingEntity(entity)) {
+        if (isNonPlayerLivingEntity(entity) && !entity.level().isClientSide) {
             Vec3 targetVec = getTargetVec(entity);
             Vec3 distance = targetVec.subtract(entity.position());
             Vec3 distanceNormalized = distance.normalize();
             double pitchFacingTarget = Math.asin(-distanceNormalized.y); // in radians
             double yawFacingTarget = Math.atan2(-distanceNormalized.x, distanceNormalized.z); // in radians
 
-            double[] observations = getObservations(entity, distance, pitchFacingTarget, yawFacingTarget);
+            double[] observations = getObservations(entity, distance, pitchFacingTarget, yawFacingTarget, false);
             Agent agent = entity.getData(ModAttachments.AGENT);
             if (agent != null) {
                 double[] outputs = agent.calculate(observations);
@@ -46,7 +46,7 @@ public class NeuralElytra extends ElytraItem {
         return true;
     }
 
-    private static double[] getObservations(LivingEntity entity, Vec3 distance, double pitchFacingTarget, double yawFacingTarget) {
+    private static double[] getObservations(LivingEntity entity, Vec3 distance, double pitchFacingTarget, double yawFacingTarget, boolean print) {
         double horizontalDistance = Math.sqrt(distance.x * distance.x + distance.z * distance.z);
         double verticalDistance = distance.y;
 
@@ -56,7 +56,7 @@ public class NeuralElytra extends ElytraItem {
         // TODO check if server handles movement speed
         double speed = entity.getDeltaMovement().length();
 
-        if (entity.tickCount % 40 == 0) {
+        if (print && entity.tickCount % 40 == 0) {
             System.out.println("OBSERVATIONS of entity " + entity.getId());
             System.out.println("horizontalDistance: " + horizontalDistance);
             System.out.println("verticalDistance: " + verticalDistance);
