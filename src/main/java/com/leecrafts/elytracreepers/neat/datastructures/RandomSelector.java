@@ -19,14 +19,25 @@ public class RandomSelector<T> {
 
     // higher scoring objects are assigned a higher weight for random selection
     public T random() {
-        double v = Math.random() * this.totalScore;
+        // scores are normalized so that the smallest score is 1 (if the smallest score is < 1)
+        // this is to deal with negative scores
+        double offset = Double.MAX_VALUE;
+        for (Double score : this.scores) {
+            offset = Math.min(offset, score);
+        }
+        offset += Math.max(1 - offset, 0);
+
+        double v = Math.random() * (this.totalScore + offset * this.scores.size());
         double c = 0;
         for (int i = 0; i < this.objects.size(); i++) {
-            c += this.scores.get(i);
+            c += this.scores.get(i) + offset;
             if (c >= v) {
                 return this.objects.get(i);
             }
         }
+
+        // this code should never run
+        assert false;
         return null;
     }
 
