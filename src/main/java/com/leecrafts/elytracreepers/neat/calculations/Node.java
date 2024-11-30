@@ -14,17 +14,22 @@ public class Node implements Comparable<Node> {
 
     public void calculate() {
         double s = 0;
-        for(Connection c:connections){
-            if(c.isEnabled()){
-                s += c.getWeight() * c.getFrom().getOutput();
+        for(Connection connection : this.connections){
+            if(connection.isEnabled()){
+                s += connection.getWeight() * connection.getFrom().getOutput();
             }
         }
-        output = activation_function(s);
+        this.output = this.activationFunction(s);
     }
 
-    // TODO change activation function
-    private double activation_function(double x){
-        return 1d / (1 + Math.exp(-x));
+    // TODO tweak activation function
+    private double activationFunction(double x) {
+        // if this is an output node (output activation is linear)
+        if (this.getX() >= 0.9) {
+            return x;
+        }
+        // for hidden nodes, use ReLU
+        return Math.max(0, x);
     }
 
     public void setX(double x) {
@@ -54,8 +59,8 @@ public class Node implements Comparable<Node> {
 
     @Override
     public int compareTo(Node o) {
-        if(this.x > o.x) return -1;
-        if(this.x < o.x) return 1;
+        if (this.x > o.x) return -1;
+        if (this.x < o.x) return 1;
         return 0;
     }
 }
