@@ -6,7 +6,6 @@ import com.leecrafts.elytracreepers.neat.genome.ConnectionGene;
 import com.leecrafts.elytracreepers.neat.genome.Genome;
 import com.leecrafts.elytracreepers.neat.genome.NodeGene;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class NEATController {
@@ -86,11 +85,6 @@ public class NEATController {
 
     public Agent getAgent(int index) {
         return this.agents.get(index);
-    }
-
-    // TODO this is for the unit test; remove it if you don't need it otherwise
-    public ArrayList<Agent> getAgents() {
-        return this.agents.getData();
     }
 
     // returns copy of a ConnectionGene

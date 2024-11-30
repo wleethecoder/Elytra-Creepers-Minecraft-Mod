@@ -27,7 +27,8 @@ public class NEATTest {
             in[i] = Math.random();
         }
         for (int i = 0; i < 100; i++) {
-            for (Agent agent : neatController.getAgents()) {
+            for (int j = 0; j < neatController.getPopulationSize(); j++) {
+                Agent agent = neatController.getAgent(j);
                 double score = agent.calculate(in)[0];
                 agent.setScore(score);
             }
