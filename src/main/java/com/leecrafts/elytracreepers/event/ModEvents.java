@@ -11,6 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -98,7 +99,7 @@ public class ModEvents {
         public static void createDefaultAttributes(EntityAttributeCreationEvent event) {
             event.put(
                     ModEntities.TRAINEE_ENTITY.get(),
-                    LivingEntity.createLivingAttributes()
+                    Mob.createMobAttributes()
                             .add(Attributes.MAX_HEALTH, 1)
                             .build()
             );

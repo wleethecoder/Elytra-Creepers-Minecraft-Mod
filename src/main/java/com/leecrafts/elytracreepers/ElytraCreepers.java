@@ -1,7 +1,10 @@
 package com.leecrafts.elytracreepers;
 
 import com.leecrafts.elytracreepers.attachment.ModAttachments;
+import com.leecrafts.elytracreepers.client.trainee.TraineeRenderer;
+import com.leecrafts.elytracreepers.entity.ModEntities;
 import com.leecrafts.elytracreepers.item.ModItems;
+import net.minecraft.client.renderer.entity.EntityRenderers;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -42,6 +45,7 @@ public class ElytraCreepers {
 
         ModItems.register(modEventBus);
         ModAttachments.register(modEventBus);
+        ModEntities.register(modEventBus);
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
@@ -70,6 +74,7 @@ public class ElytraCreepers {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
+            EntityRenderers.register(ModEntities.TRAINEE_ENTITY.get(), TraineeRenderer::new);
         }
     }
 }
