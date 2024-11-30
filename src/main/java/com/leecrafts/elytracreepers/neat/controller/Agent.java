@@ -3,7 +3,7 @@ package com.leecrafts.elytracreepers.neat.controller;
 import com.leecrafts.elytracreepers.neat.calculations.Calculator;
 import com.leecrafts.elytracreepers.neat.genome.Genome;
 
-public class Client {
+public class Agent {
 
     private Calculator calculator;
 
@@ -22,7 +22,7 @@ public class Client {
         return this.calculator.calculate(input);
     }
 
-    public double distance(Client other) {
+    public double distance(Agent other) {
         return this.genome.distance(other.getGenome());
     }
 

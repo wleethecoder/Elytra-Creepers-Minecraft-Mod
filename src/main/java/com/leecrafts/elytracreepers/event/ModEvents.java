@@ -41,7 +41,7 @@ public class ModEvents {
                     player.level() instanceof ServerLevel serverLevel) {
                 if (event.getItemStack().is(Items.FEATHER)) {
                     neatController = new NEATController(NEATUtil.INPUT_SIZE, NEATUtil.OUTPUT_SIZE, NEATUtil.POPULATION_SIZE);
-                    NEATUtil.initializeEntityPopulation(serverLevel, SIGHT_DISTANCE, neatController.getMaxClients());
+                    NEATUtil.initializeEntityPopulation(serverLevel, SIGHT_DISTANCE, neatController.getPopulationSize());
                     // spawn population of creepers, do data attachments
                     /*
                     for (int i = 0; i < NeuralNetworkUtil.POPULATION_SIZE; i++) {

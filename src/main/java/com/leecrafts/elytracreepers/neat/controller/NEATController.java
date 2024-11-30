@@ -36,15 +36,15 @@ public class NEATController {
 
     private final RandomHashSet<NodeGene> allNodes = new RandomHashSet<>();
 
-    private RandomHashSet<Client> clients = new RandomHashSet<>();
+    private RandomHashSet<Agent> agents = new RandomHashSet<>();
     private RandomHashSet<Species> species = new RandomHashSet<>();
 
     private int inputSize;
     private int outputSize;
-    private int maxClients;
+    private int populationSize;
 
-    public NEATController(int inputSize, int outputSize, int clients) {
-        this.reset(inputSize, outputSize, clients);
+    public NEATController(int inputSize, int outputSize, int populationSize) {
+        this.reset(inputSize, outputSize, populationSize);
     }
 
     // returns a new genome with the input and output nodes and no connections
@@ -56,14 +56,14 @@ public class NEATController {
         return genome;
     }
 
-    public void reset(int inputSize, int outputSize, int clients) {
+    public void reset(int inputSize, int outputSize, int populationSize) {
         this.inputSize = inputSize;
         this.outputSize = outputSize;
-        this.maxClients = clients;
+        this.populationSize = populationSize;
 
         this.allConnections.clear();
         this.allNodes.clear();
-        this.clients.clear();
+        this.agents.clear();
 
         for (int i = 0; i < this.inputSize; i++) {
             NodeGene nodeGene = this.getNode();
@@ -76,21 +76,21 @@ public class NEATController {
             nodeGene.setY((i + 1) / (double) (this.outputSize + 1));
         }
 
-        for (int i = 0; i < this.maxClients; i++) {
-            Client client = new Client();
-            client.setGenome(this.emptyGenome());
-            client.generateCalculator();
-            this.clients.add(client);
+        for (int i = 0; i < this.populationSize; i++) {
+            Agent agent = new Agent();
+            agent.setGenome(this.emptyGenome());
+            agent.generateCalculator();
+            this.agents.add(agent);
         }
     }
 
-    public Client getClient(int index) {
-        return this.clients.get(index);
+    public Agent getAgent(int index) {
+        return this.agents.get(index);
     }
 
     // TODO this is for the unit test; remove it if you don't need it otherwise
-    public ArrayList<Client> getClients() {
-        return this.clients.getData();
+    public ArrayList<Agent> getAgents() {
+        return this.agents.getData();
     }
 
     // returns copy of a ConnectionGene
@@ -148,8 +148,8 @@ public class NEATController {
         this.reproduce();
         this.mutate();
 
-        for (Client client : this.clients.getData()) {
-            client.generateCalculator();
+        for (Agent agent : this.agents.getData()) {
+            agent.generateCalculator();
         }
     }
 
@@ -157,19 +157,19 @@ public class NEATController {
         for (Species s : this.species.getData()) {
             s.reset();
         }
-        for (Client client : this.clients.getData()) {
-            if (client.getSpecies() != null) {
+        for (Agent agent : this.agents.getData()) {
+            if (agent.getSpecies() != null) {
                 continue;
             }
             boolean found = false;
             for (Species s : this.species.getData()) {
-                if (s.put(client)) {
+                if (s.put(agent)) {
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                this.species.add(new Species(client));
+                this.species.add(new Species(agent));
             }
         }
 
@@ -198,18 +198,18 @@ public class NEATController {
         for (Species s : this.species.getData()) {
             randomSelector.add(s, s.getScore());
         }
-        for (Client client : this.clients.getData()) {
-            if (client.getSpecies() == null) {
+        for (Agent agent : this.agents.getData()) {
+            if (agent.getSpecies() == null) {
                 Species s = randomSelector.random();
-                client.setGenome(s.breed());
-                s.forcePut(client);
+                agent.setGenome(s.breed());
+                s.forcePut(agent);
             }
         }
     }
 
     public void mutate() {
-        for (Client client : this.clients.getData()) {
-            client.mutate();
+        for (Agent agent : this.agents.getData()) {
+            agent.mutate();
         }
     }
 
@@ -264,8 +264,8 @@ public class NEATController {
         return this.PROBABILITY_MUTATE_TOGGLE_LINK;
     }
 
-    public int getMaxClients() {
-        return this.maxClients;
+    public int getPopulationSize() {
+        return this.populationSize;
     }
 
 }
