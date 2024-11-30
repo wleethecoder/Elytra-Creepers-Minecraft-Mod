@@ -41,27 +41,7 @@ public class ModEvents {
                     player.level() instanceof ServerLevel serverLevel) {
                 if (event.getItemStack().is(Items.FEATHER)) {
                     neatController = new NEATController(NEATUtil.INPUT_SIZE, NEATUtil.OUTPUT_SIZE, NEATUtil.POPULATION_SIZE);
-                    NEATUtil.initializeEntityPopulation(serverLevel, SIGHT_DISTANCE, neatController.getPopulationSize());
-                    // spawn population of creepers, do data attachments
-                    /*
-                    for (int i = 0; i < NeuralNetworkUtil.POPULATION_SIZE; i++) {
-                        Entity entity = Config.spawnedElytraEntityType.spawn(serverLevel, NeuralNetworkUtil.SPAWN_POS, MobSpawnType.MOB_SUMMONED);
-                        if (entity instanceof LivingEntity livingEntity) {
-                            livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
-
-                            List<Player> candidates = livingEntity.level().getNearbyPlayers(
-                                    TargetingConditions.forNonCombat().ignoreLineOfSight().range(SIGHT_DISTANCE),
-                                    livingEntity,
-                                    livingEntity.getBoundingBox().inflate(SIGHT_DISTANCE));
-                            int index = entity.getRandom().nextInt(candidates.size());
-                            livingEntity.setData(ModAttachments.TARGET_ENTITY, candidates.get(index));
-
-                            if (livingEntity instanceof Mob mob) {
-                                mob.setPersistenceRequired();
-                            }
-                        }
-                    }
-                     */
+                    NEATUtil.initializeEntityPopulation(serverLevel, SIGHT_DISTANCE, neatController);
                 }
             }
         }
@@ -103,13 +83,11 @@ public class ModEvents {
         @SubscribeEvent
         public static void agentRunEnd(LivingFallEvent event) {
             LivingEntity livingEntity = event.getEntity();
-            if (!livingEntity.level().isClientSide &&
+            if (NEATUtil.TRAINING &&
+                    livingEntity.level() instanceof ServerLevel serverLevel &&
                     livingEntity.getType() == Config.spawnedElytraEntityType &&
                     NeuralElytra.isWearing(livingEntity)) {
-                double fitness = 0;
-//                neatController.recordFitness(livingEntity, fitness);
-//                ^ livingEntity.getData(GENOME).fitness = fitness;
-                livingEntity.discard();
+                NEATUtil.recordFitness(livingEntity, serverLevel, SIGHT_DISTANCE, neatController);
             }
         }
 
