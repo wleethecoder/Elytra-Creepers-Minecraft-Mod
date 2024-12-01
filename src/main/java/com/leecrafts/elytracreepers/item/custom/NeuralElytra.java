@@ -53,7 +53,6 @@ public class NeuralElytra extends ElytraItem {
         double pitchDifference = pitchFacingTarget - Math.toRadians(entity.getXRot());
         double yawDifference = normalizeAngle(yawFacingTarget - Math.toRadians(entity.getYRot()));
 
-        // TODO check if server handles movement speed
         double speed = entity.getDeltaMovement().length();
 
         if (print && entity.tickCount % 40 == 0) {
@@ -77,7 +76,6 @@ public class NeuralElytra extends ElytraItem {
     private static void handleOutputs(LivingEntity entity, double[] outputs, double pitchFacingTarget, double yawFacingTarget) {
         double xRotOffset = Math.atan2(outputs[0], outputs[1]);
         double yRotOffset = Math.atan2(outputs[2], outputs[3]);
-        // TODO decide if you should use gaussian noise
         double xRot = Mth.clamp(Math.toDegrees(pitchFacingTarget + xRotOffset), -90, 90);
         double yRot = Math.toDegrees(normalizeAngle(yawFacingTarget + yRotOffset));
         entity.setXRot((float) xRot);
@@ -91,9 +89,9 @@ public class NeuralElytra extends ElytraItem {
     private static Vec3 getTargetVec(LivingEntity entity) {
         Entity target = entity.getData(ModAttachments.TARGET_ENTITY);
         if (target != null) {
-//                if (entity.tickCount % 20 == 0) {
-//                    System.out.println(target.getX() + " " + target.getY() + " " + target.getZ());
-//                }
+//            if (entity.tickCount % 20 == 0) {
+//                System.out.println(target.getX() + " " + target.getY() + " " + target.getZ());
+//            }
             return new Vec3(target.getX(), target.getY(), target.getZ());
         }
         else {
