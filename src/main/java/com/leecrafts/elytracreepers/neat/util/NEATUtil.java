@@ -19,10 +19,16 @@ public class NEATUtil {
 
     public static final boolean TRAINING = true;
     public static final BlockPos SPAWN_POS = new BlockPos(-189 - 100, -64 + 100 + 1, -2);
+
     public static final int POPULATION_SIZE = 50; // TODO change to 250
     public static final int NUM_GENERATIONS = 2; // TODO change to 1000
     public static final int INPUT_SIZE = 5;
     public static final int OUTPUT_SIZE = 4;
+
+    // TODO adjust hyperparameters
+    public static final double FAST_FALL_PUNISHMENT = 5;
+    public static final double DISTANCE_PUNISHMENT = 1;
+    public static final double TIME_PUNISHMENT = 0.05;
 
     public static void initializeEntityPopulation(ServerLevel serverLevel, int sightDistance, NEATController neatController) {
         // initialize population
@@ -55,12 +61,11 @@ public class NEATUtil {
         }
     }
 
-    public static void recordFitness(LivingEntity livingEntity, ServerLevel serverLevel, int sightDistance, NEATController neatController) {
-        // TODO calculate fitness
-        double fitness = Math.random() * 1000;
+    public static void recordFitness(LivingEntity livingEntity, float fastFallDistance, ServerLevel serverLevel, int sightDistance, NEATController neatController) {
         Agent agent = livingEntity.getData(ModAttachments.AGENT);
-        if (agent != null) {
-            agent.setScore(fitness);
+        Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
+        if (agent != null && target != null) {
+            agent.setScore(calculateFitness(livingEntity, target, fastFallDistance));
         }
         livingEntity.discard();
 
@@ -76,6 +81,12 @@ public class NEATUtil {
                 // TODO save best agent/genome to file
             }
         }
+    }
+
+    private static double calculateFitness(LivingEntity livingEntity, Entity target, float fastFallDistance) {
+        return -(FAST_FALL_PUNISHMENT * Math.max(0, fastFallDistance - 3) +
+                DISTANCE_PUNISHMENT * livingEntity.distanceTo(target) +
+                TIME_PUNISHMENT * livingEntity.tickCount);
     }
 
 }

@@ -88,7 +88,7 @@ public class ModEvents {
                     livingEntity.level() instanceof ServerLevel serverLevel &&
                     livingEntity.getType() == Config.spawnedElytraEntityType &&
                     NeuralElytra.isWearing(livingEntity)) {
-                NEATUtil.recordFitness(livingEntity, serverLevel, SIGHT_DISTANCE, neatController);
+                NEATUtil.recordFitness(livingEntity, event.getDistance(), serverLevel, SIGHT_DISTANCE, neatController);
             }
         }
 
