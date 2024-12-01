@@ -21,11 +21,11 @@ public class RandomSelector<T> {
     public T random() {
         // scores are normalized so that the smallest score is 1 (if the smallest score is < 1)
         // this is to deal with negative scores
-        double offset = Double.MAX_VALUE;
+        double smallest = Double.MAX_VALUE;
         for (Double score : this.scores) {
-            offset = Math.min(offset, score);
+            smallest = Math.min(smallest, score);
         }
-        offset += Math.max(1 - offset, 0);
+        double offset = Math.max(1 - smallest, 0);
 
         double v = Math.random() * (this.totalScore + offset * this.scores.size());
         double c = 0;

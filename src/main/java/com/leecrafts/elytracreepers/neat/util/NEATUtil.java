@@ -75,9 +75,10 @@ public class NEATUtil {
             ModEvents.REMAINING_GENERATIONS--;
             if (ModEvents.REMAINING_GENERATIONS > 0) {
                 neatController.evolve();
+                System.out.println("GENERATION " + (NUM_GENERATIONS - ModEvents.REMAINING_GENERATIONS));
+                neatController.printSpecies();
                 initializeEntityPopulation(serverLevel, sightDistance, neatController);
             } else {
-                neatController.printSpecies();
                 // TODO save best agent/genome to file
             }
         }
