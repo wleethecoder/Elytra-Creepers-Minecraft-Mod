@@ -28,8 +28,8 @@ public class Node implements Comparable<Node> {
         if (this.getX() >= 0.9) {
             return x;
         }
-        // for hidden nodes, use ReLU
-        return Math.max(0, x);
+        // for hidden nodes, use tanh
+        return Math.tanh(x);
     }
 
     public void setX(double x) {
