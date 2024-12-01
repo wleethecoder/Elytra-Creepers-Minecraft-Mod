@@ -3,7 +3,9 @@ package com.leecrafts.elytracreepers.neat.genome;
 import com.leecrafts.elytracreepers.neat.controller.NEATController;
 import com.leecrafts.elytracreepers.neat.datastructures.RandomHashSet;
 
-public class Genome {
+import java.io.Serializable;
+
+public class Genome implements Serializable {
 
     private RandomHashSet<ConnectionGene> connections = new RandomHashSet<>();
     private RandomHashSet<NodeGene> nodes = new RandomHashSet<>();

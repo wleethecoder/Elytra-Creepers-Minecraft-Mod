@@ -13,15 +13,22 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
+import java.io.*;
 import java.util.List;
 
 public class NEATUtil {
 
-    public static final boolean TRAINING = true;
+    public static final boolean TRAINING = false;
+    public static final boolean PRODUCTION = true;
+
+    private static final String BASE_DIRECTORY_PATH = new File(System.getProperty("user.dir")).getParent();
+    public static final String AGENT_FILE_PATH = "/assets/elytracreepers/agent/agent.dat";
+    public static final File MODEL_DIRECTORY_PATH = new File(BASE_DIRECTORY_PATH, "src/main/resources" + AGENT_FILE_PATH);
+
     public static final BlockPos SPAWN_POS = new BlockPos(-189 - 100, -64 + 100 + 1, -2);
 
-    public static final int POPULATION_SIZE = 500; // TODO change to at least 250
-    public static final int NUM_GENERATIONS = 5; // TODO change to 1000
+    public static final int POPULATION_SIZE = 5; // TODO change to at least 250
+    public static final int NUM_GENERATIONS = 2; // TODO change to 1000
     public static final int INPUT_SIZE = 5;
     public static final int OUTPUT_SIZE = 4;
 
@@ -44,7 +51,7 @@ public class NEATUtil {
                 // setting target
                 List<ArmorStand> candidates = livingEntity.level().getEntitiesOfClass(
                         ArmorStand.class, livingEntity.getBoundingBox().inflate(sightDistance));
-                // TODO this commented out code is for production mode
+                // TODO this commented out code is for testing mode
 //                List<Player> candidates = livingEntity.level().getNearbyPlayers(
 //                        TargetingConditions.forNonCombat().ignoreLineOfSight().range(sightDistance),
 //                        livingEntity,
@@ -79,7 +86,14 @@ public class NEATUtil {
                 neatController.printSpecies();
                 initializeEntityPopulation(serverLevel, sightDistance, neatController);
             } else {
-                // TODO save best agent/genome to file
+                Agent bestAgent = neatController.getBestAgent();
+
+                // TODO testing
+                double score = (int) (Math.random() * 666);
+                System.out.println("changed score of best agent = " + score);
+                bestAgent.setScore(score);
+
+                saveAgent(bestAgent);
             }
         }
     }
@@ -88,6 +102,40 @@ public class NEATUtil {
         return -(FAST_FALL_PUNISHMENT * Math.max(0, fastFallDistance - 3) +
                 DISTANCE_PUNISHMENT * livingEntity.distanceTo(target) +
                 TIME_PUNISHMENT * livingEntity.tickCount);
+    }
+
+    public static void saveAgent(Agent agent) {
+        File file = MODEL_DIRECTORY_PATH;
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
+            out.writeObject(agent);
+            System.out.println("Agent saved to " + file.getPath());
+        } catch (IOException e) {
+            System.out.println("Error saving agent: " + e.getMessage());
+            System.out.println(e.toString());
+        }
+    }
+
+    public static Agent loadAgent() {
+        Agent agent = null;
+        if (PRODUCTION) {
+            try (InputStream inputStream = NEATUtil.class.getResourceAsStream(AGENT_FILE_PATH);
+                 ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
+                System.out.println("existing agent in resources folder found");
+                agent = (Agent) objectInputStream.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                System.out.println("Error loading agent: " + e.getMessage());
+            }
+        }
+        else {
+            File file = MODEL_DIRECTORY_PATH;
+            try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+                agent = (Agent) in.readObject();
+                System.out.println("Agent loaded from " + file.getPath());
+            } catch (IOException | ClassNotFoundException e) {
+                System.out.println("Error loading agent: " + e.getMessage());
+            }
+        }
+        return agent;
     }
 
 }

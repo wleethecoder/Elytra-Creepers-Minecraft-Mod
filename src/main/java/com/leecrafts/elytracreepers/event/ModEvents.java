@@ -6,6 +6,7 @@ import com.leecrafts.elytracreepers.attachment.ModAttachments;
 import com.leecrafts.elytracreepers.entity.ModEntities;
 import com.leecrafts.elytracreepers.item.ModItems;
 import com.leecrafts.elytracreepers.item.custom.NeuralElytra;
+import com.leecrafts.elytracreepers.neat.controller.Agent;
 import com.leecrafts.elytracreepers.neat.controller.NEATController;
 import com.leecrafts.elytracreepers.neat.util.NEATUtil;
 import net.minecraft.nbt.CompoundTag;
@@ -22,6 +23,7 @@ import net.minecraft.world.level.ItemLike;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -56,6 +58,22 @@ public class ModEvents {
                     event.getItemStack().is(ModItems.NEURAL_ELYTRA)) {
                 livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
                 System.out.println(livingEntity.getItemBySlot(EquipmentSlot.CHEST).getItem());
+            }
+        }
+
+        @SubscribeEvent
+        public static void loadAgent(LivingEquipmentChangeEvent event) {
+            LivingEntity livingEntity = event.getEntity();
+            Agent agent = livingEntity.getData(ModAttachments.AGENT);
+            if (agent == null &&
+                    !NEATUtil.TRAINING &&
+                    !livingEntity.level().isClientSide &&
+                    event.getTo().is(ModItems.NEURAL_ELYTRA.asItem()) &&
+                    NeuralElytra.isNonPlayerLivingEntity(livingEntity)) {
+                livingEntity.setData(ModAttachments.AGENT, NEATUtil.loadAgent());
+
+                // TODO testing
+                System.out.println(livingEntity.getData(ModAttachments.AGENT).getScore());
             }
         }
 

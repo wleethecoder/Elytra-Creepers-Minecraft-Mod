@@ -3,7 +3,9 @@ package com.leecrafts.elytracreepers.neat.controller;
 import com.leecrafts.elytracreepers.neat.calculations.Calculator;
 import com.leecrafts.elytracreepers.neat.genome.Genome;
 
-public class Agent {
+import java.io.Serializable;
+
+public class Agent implements Serializable {
 
     private Calculator calculator;
 

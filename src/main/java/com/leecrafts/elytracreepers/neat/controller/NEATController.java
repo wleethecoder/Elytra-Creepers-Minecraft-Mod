@@ -6,12 +6,14 @@ import com.leecrafts.elytracreepers.neat.genome.ConnectionGene;
 import com.leecrafts.elytracreepers.neat.genome.Genome;
 import com.leecrafts.elytracreepers.neat.genome.NodeGene;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
-public class NEATController {
+public class NEATController implements Serializable {
 
     public static final int MAX_NODES = (int) Math.pow(2, 20);
 
+    // TODO adjust hyperparameters
     private final double C1 = 1;
     private final double C2 = 1;
     private final double C3 = 1;
@@ -23,11 +25,11 @@ public class NEATController {
 
     private static final double SURVIVAL_RATE = 0.8;
 
-    private final double PROBABILITY_MUTATE_LINK = 0.01;
-    private final double PROBABILITY_MUTATE_NODE = 0.003;
-    private final double PROBABILITY_MUTATE_WEIGHT_SHIFT = 0.002;
-    private final double PROBABILITY_MUTATE_WEIGHT_RANDOM = 0.002;
-    private final double PROBABILITY_MUTATE_TOGGLE_LINK = 0;
+    private final double PROBABILITY_MUTATE_LINK = 0.05;
+    private final double PROBABILITY_MUTATE_NODE = 0.05;
+    private final double PROBABILITY_MUTATE_WEIGHT_SHIFT = 0.1;
+    private final double PROBABILITY_MUTATE_WEIGHT_RANDOM = 0.1;
+    private final double PROBABILITY_MUTATE_TOGGLE_LINK = 0.01;
 
     // We COULD use an ArrayList<ConnectionGene>, but we want O(1) access time
     // Using a HashMap works because we overrode hashCode for ConnectionGene so that hash codes are unique for all connection genes
@@ -205,6 +207,18 @@ public class NEATController {
         for (Agent agent : this.agents.getData()) {
             agent.mutate();
         }
+    }
+
+    public Agent getBestAgent() {
+        Agent bestAgent = null;
+        double bestScore = -Double.MAX_VALUE;
+        for (Agent agent : this.agents.getData()) {
+            if (agent.getScore() > bestScore) {
+                bestScore = agent.getScore();
+                bestAgent = agent;
+            }
+        }
+        return bestAgent;
     }
 
     public void printSpecies() {

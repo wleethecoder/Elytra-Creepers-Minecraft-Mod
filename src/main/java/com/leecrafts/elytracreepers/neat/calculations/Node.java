@@ -1,8 +1,9 @@
 package com.leecrafts.elytracreepers.neat.calculations;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Node implements Comparable<Node> {
+public class Node implements Comparable<Node>, Serializable {
 
     private double x;
     private double output;

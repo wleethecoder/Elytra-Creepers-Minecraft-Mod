@@ -1,6 +1,8 @@
 package com.leecrafts.elytracreepers.neat.calculations;
 
-public class Connection {
+import java.io.Serializable;
+
+public class Connection implements Serializable {
 
     private Node from;
     private Node to;

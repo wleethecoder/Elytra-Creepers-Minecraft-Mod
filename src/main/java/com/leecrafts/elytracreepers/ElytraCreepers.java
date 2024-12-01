@@ -4,6 +4,7 @@ import com.leecrafts.elytracreepers.attachment.ModAttachments;
 import com.leecrafts.elytracreepers.client.trainee.TraineeRenderer;
 import com.leecrafts.elytracreepers.entity.ModEntities;
 import com.leecrafts.elytracreepers.item.ModItems;
+import com.leecrafts.elytracreepers.neat.util.NEATUtil;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import org.slf4j.Logger;
 
@@ -35,6 +36,8 @@ public class ElytraCreepers {
     // The constructor for the mod class is the first code that is run when your mod is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public ElytraCreepers(IEventBus modEventBus, ModContainer modContainer) {
+        assert !NEATUtil.TRAINING || !NEATUtil.PRODUCTION;
+
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
 

@@ -2,10 +2,11 @@ package com.leecrafts.elytracreepers.neat.datastructures;
 
 import com.leecrafts.elytracreepers.neat.genome.Gene;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class RandomHashSet<T> {
+public class RandomHashSet<T> implements Serializable {
 
     // using both a hashset and arraylist
     // reason: use hashing to detect if data is in it or not (O(1) operation)

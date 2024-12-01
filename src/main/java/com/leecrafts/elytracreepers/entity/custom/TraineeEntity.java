@@ -29,7 +29,7 @@ public class TraineeEntity extends Mob implements GeoEntity {
     @Override
     public void tick() {
         super.tick();
-        if (!NEATUtil.TRAINING &&
+        if (NEATUtil.PRODUCTION &&
                 this.isFallFlying() &&
                 this.tickCount > 10 * TICKS_PER_SECOND &&
                 this.level() instanceof ServerLevel serverLevel) {

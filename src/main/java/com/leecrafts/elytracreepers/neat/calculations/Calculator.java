@@ -1,15 +1,16 @@
 package com.leecrafts.elytracreepers.neat.calculations;
 
+import com.leecrafts.elytracreepers.neat.datastructures.RandomHashSet;
 import com.leecrafts.elytracreepers.neat.genome.ConnectionGene;
 import com.leecrafts.elytracreepers.neat.genome.Genome;
 import com.leecrafts.elytracreepers.neat.genome.NodeGene;
-import com.leecrafts.elytracreepers.neat.datastructures.RandomHashSet;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 
-public class Calculator {
+public class Calculator implements Serializable {
 
     private ArrayList<Node> input_nodes = new ArrayList<>();
     private ArrayList<Node> hidden_nodes = new ArrayList<>();
