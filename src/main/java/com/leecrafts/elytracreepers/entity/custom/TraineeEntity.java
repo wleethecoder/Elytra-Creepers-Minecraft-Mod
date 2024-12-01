@@ -29,7 +29,10 @@ public class TraineeEntity extends Mob implements GeoEntity {
     @Override
     public void tick() {
         super.tick();
-        if (!NEATUtil.TRAINING && this.tickCount > 10 * TICKS_PER_SECOND && this.level() instanceof ServerLevel serverLevel) {
+        if (!NEATUtil.TRAINING &&
+                this.isFallFlying() &&
+                this.tickCount > 10 * TICKS_PER_SECOND &&
+                this.level() instanceof ServerLevel serverLevel) {
             // during production mode, this entity dies, spawning a cookie in its place
             serverLevel.addFreshEntity(
                     new ItemEntity(serverLevel, this.getX(), this.getY(), this.getZ(), new ItemStack(Items.COOKIE)));
@@ -46,7 +49,7 @@ public class TraineeEntity extends Mob implements GeoEntity {
 
     @Override
     public boolean isPushable() {
-        return true; // TODO make it not pushable
+        return false;
     }
 
     @Override
