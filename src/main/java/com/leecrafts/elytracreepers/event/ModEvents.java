@@ -2,6 +2,7 @@ package com.leecrafts.elytracreepers.event;
 
 import com.leecrafts.elytracreepers.Config;
 import com.leecrafts.elytracreepers.ElytraCreepers;
+import com.leecrafts.elytracreepers.attachment.ModAttachments;
 import com.leecrafts.elytracreepers.entity.ModEntities;
 import com.leecrafts.elytracreepers.item.ModItems;
 import com.leecrafts.elytracreepers.item.custom.NeuralElytra;
@@ -9,6 +10,7 @@ import com.leecrafts.elytracreepers.neat.controller.NEATController;
 import com.leecrafts.elytracreepers.neat.util.NEATUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -81,14 +83,34 @@ public class ModEvents {
             }
         }
 
+        // if agent lands, it is terminated and its score is recorded
         @SubscribeEvent
-        public static void agentRunEnd(LivingFallEvent event) {
+        public static void agentRunEndFromLand(LivingFallEvent event) {
             LivingEntity livingEntity = event.getEntity();
             if (NEATUtil.TRAINING &&
                     livingEntity.level() instanceof ServerLevel serverLevel &&
                     livingEntity.getType() == Config.spawnedElytraEntityType &&
                     NeuralElytra.isWearing(livingEntity)) {
                 NEATUtil.recordFitness(livingEntity, event.getDistance(), serverLevel, SIGHT_DISTANCE, neatController);
+
+                // the noise of 500 entities falling onto the ground at once can be a bit distracting
+                // see LivingEntity#causeFallDamage
+                event.setCanceled(true);
+            }
+        }
+
+        // agent is automatically terminated if it is too far from the target
+        @SubscribeEvent
+        public static void agentRunEndFromDistance(EntityTickEvent.Pre event) {
+            if (NEATUtil.TRAINING &&
+                    event.getEntity() instanceof LivingEntity livingEntity &&
+                    livingEntity.level() instanceof ServerLevel serverLevel &&
+                    livingEntity.getType() == Config.spawnedElytraEntityType &&
+                    NeuralElytra.isWearing(livingEntity)) {
+                Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
+                if (target != null && livingEntity.distanceTo(target) > SIGHT_DISTANCE) {
+                    NEATUtil.recordFitness(livingEntity, (float) Math.abs(livingEntity.getY() - target.getY()), serverLevel, SIGHT_DISTANCE, neatController);
+                }
             }
         }
 

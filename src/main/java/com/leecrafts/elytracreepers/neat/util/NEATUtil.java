@@ -20,8 +20,8 @@ public class NEATUtil {
     public static final boolean TRAINING = true;
     public static final BlockPos SPAWN_POS = new BlockPos(-189 - 100, -64 + 100 + 1, -2);
 
-    public static final int POPULATION_SIZE = 50; // TODO change to 250
-    public static final int NUM_GENERATIONS = 2; // TODO change to 1000
+    public static final int POPULATION_SIZE = 500; // TODO change to at least 250
+    public static final int NUM_GENERATIONS = 5; // TODO change to 1000
     public static final int INPUT_SIZE = 5;
     public static final int OUTPUT_SIZE = 4;
 
