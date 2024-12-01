@@ -27,8 +27,8 @@ public class TraineeRenderer extends GeoEntityRenderer<TraineeEntity> {
     @Override
     public void actuallyRender(PoseStack poseStack, TraineeEntity animatable, BakedGeoModel model, @Nullable RenderType renderType, MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
         if (animatable.isFallFlying()) {
-            poseStack.mulPose(Axis.YP.rotationDegrees(animatable.getYRot()));
-            poseStack.mulPose(Axis.XP.rotationDegrees(-animatable.getXRot() + 90));
+            poseStack.mulPose(Axis.YP.rotationDegrees(-animatable.getYRot()));
+            poseStack.mulPose(Axis.XP.rotationDegrees(animatable.getXRot() + 90));
         }
         super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
     }
