@@ -19,13 +19,14 @@ public class NEATUtil {
 
     public static final boolean TRAINING = true;
     public static final BlockPos SPAWN_POS = new BlockPos(-24, -23, 3);
-    public static final int POPULATION_SIZE = 5;
-    public static final int INPUT_SIZE = 5; // TODO change if needed
+    public static final int POPULATION_SIZE = 250;
+    public static final int NUM_GENERATIONS = 1000;
+    public static final int INPUT_SIZE = 5;
     public static final int OUTPUT_SIZE = 4;
 
     public static void initializeEntityPopulation(ServerLevel serverLevel, int sightDistance, NEATController neatController) {
         // initialize population
-        ModEvents.REMAINING = neatController.getPopulationSize();
+        ModEvents.REMAINING_AGENTS = neatController.getPopulationSize();
         for (int i = 0; i < neatController.getPopulationSize(); i++) {
             Entity entity = Config.spawnedElytraEntityType.spawn(serverLevel, NEATUtil.SPAWN_POS, MobSpawnType.MOB_SUMMONED);
             if (entity instanceof LivingEntity livingEntity) {
@@ -63,11 +64,17 @@ public class NEATUtil {
         }
         livingEntity.discard();
 
-        ModEvents.REMAINING--;
+        ModEvents.REMAINING_AGENTS--;
 
-        if (ModEvents.REMAINING == 0) {
-            neatController.evolve();
-            initializeEntityPopulation(serverLevel, sightDistance, neatController);
+        if (ModEvents.REMAINING_AGENTS <= 0 && neatController != null) {
+            ModEvents.REMAINING_GENERATIONS--;
+            if (ModEvents.REMAINING_GENERATIONS > 0) {
+                neatController.evolve();
+                initializeEntityPopulation(serverLevel, sightDistance, neatController);
+            } else {
+                neatController.printSpecies();
+                // TODO save best genome to file
+            }
         }
     }
 

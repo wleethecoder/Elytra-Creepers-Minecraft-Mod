@@ -27,7 +27,8 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 public class ModEvents {
 
     private static NEATController neatController;
-    public static int REMAINING;
+    public static int REMAINING_AGENTS;
+    public static int REMAINING_GENERATIONS;
     private static final int SIGHT_DISTANCE = 200;
 
     @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.GAME)
@@ -41,6 +42,7 @@ public class ModEvents {
                 if (event.getItemStack().is(Items.FEATHER)) {
                     neatController = new NEATController(NEATUtil.INPUT_SIZE, NEATUtil.OUTPUT_SIZE, NEATUtil.POPULATION_SIZE);
                     NEATUtil.initializeEntityPopulation(serverLevel, SIGHT_DISTANCE, neatController);
+                    REMAINING_GENERATIONS = NEATUtil.NUM_GENERATIONS;
                 }
             }
         }
