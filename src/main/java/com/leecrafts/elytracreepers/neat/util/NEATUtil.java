@@ -20,8 +20,8 @@ import java.util.regex.Pattern;
 
 public class NEATUtil {
 
-    public static final boolean TRAINING = false;
-    public static final boolean PRODUCTION = true;
+    public static final boolean TRAINING = true;
+    public static final boolean PRODUCTION = false;
 
     private static final String BASE_DIRECTORY_PATH = new File(System.getProperty("user.dir")).getParent();
     private static final String ASSETS_DIRECTORY_PATH = "/assets/elytracreepers/agent/";
@@ -30,8 +30,8 @@ public class NEATUtil {
 
     public static final BlockPos SPAWN_POS = new BlockPos(-189 - 100, -64 + 100 + 1, -2);
 
-    public static final int POPULATION_SIZE = 5; // TODO change to at least 250
-    public static final int NUM_GENERATIONS = 2; // TODO change to 1000
+    public static final int POPULATION_SIZE = 500;
+    public static final int NUM_GENERATIONS = 1000;
     public static final int INPUT_SIZE = 5;
     public static final int OUTPUT_SIZE = 4;
 
