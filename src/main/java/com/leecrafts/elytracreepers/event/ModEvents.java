@@ -71,9 +71,7 @@ public class ModEvents {
                     event.getTo().is(ModItems.NEURAL_ELYTRA.asItem()) &&
                     NeuralElytra.isNonPlayerLivingEntity(livingEntity)) {
                 livingEntity.setData(ModAttachments.AGENT, NEATUtil.loadAgent());
-
-                // TODO testing
-                System.out.println(livingEntity.getData(ModAttachments.AGENT).getScore());
+//                System.out.println(livingEntity.getData(ModAttachments.AGENT).getScore());
             }
         }
 

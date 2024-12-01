@@ -15,6 +15,8 @@ import net.minecraft.world.level.ItemLike;
 
 import java.io.*;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class NEATUtil {
 
@@ -22,8 +24,9 @@ public class NEATUtil {
     public static final boolean PRODUCTION = true;
 
     private static final String BASE_DIRECTORY_PATH = new File(System.getProperty("user.dir")).getParent();
-    public static final String AGENT_FILE_PATH = "/assets/elytracreepers/agent/agent.dat";
-    public static final File MODEL_DIRECTORY_PATH = new File(BASE_DIRECTORY_PATH, "src/main/resources" + AGENT_FILE_PATH);
+    private static final String ASSETS_DIRECTORY_PATH = "/assets/elytracreepers/agent/";
+    private static final File AGENT_DIRECTORY_PATH = new File(BASE_DIRECTORY_PATH, "src/main/resources" + ASSETS_DIRECTORY_PATH);
+    private static final String AGENT_BASE_NAME = "agent";
 
     public static final BlockPos SPAWN_POS = new BlockPos(-189 - 100, -64 + 100 + 1, -2);
 
@@ -51,7 +54,7 @@ public class NEATUtil {
                 // setting target
                 List<ArmorStand> candidates = livingEntity.level().getEntitiesOfClass(
                         ArmorStand.class, livingEntity.getBoundingBox().inflate(sightDistance));
-                // TODO this commented out code is for testing mode
+                // TODO this commented out code is for production mode
 //                List<Player> candidates = livingEntity.level().getNearbyPlayers(
 //                        TargetingConditions.forNonCombat().ignoreLineOfSight().range(sightDistance),
 //                        livingEntity,
@@ -86,14 +89,7 @@ public class NEATUtil {
                 neatController.printSpecies();
                 initializeEntityPopulation(serverLevel, sightDistance, neatController);
             } else {
-                Agent bestAgent = neatController.getBestAgent();
-
-                // TODO testing
-                double score = (int) (Math.random() * 666);
-                System.out.println("changed score of best agent = " + score);
-                bestAgent.setScore(score);
-
-                saveAgent(bestAgent);
+                saveAgent(neatController.getBestAgent());
             }
         }
     }
@@ -104,8 +100,8 @@ public class NEATUtil {
                 TIME_PUNISHMENT * livingEntity.tickCount);
     }
 
-    public static void saveAgent(Agent agent) {
-        File file = MODEL_DIRECTORY_PATH;
+    private static void saveAgent(Agent agent) {
+        File file = agentFile(getNewestAgentNumber() + 1);
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
             out.writeObject(agent);
             System.out.println("Agent saved to " + file.getPath());
@@ -118,7 +114,9 @@ public class NEATUtil {
     public static Agent loadAgent() {
         Agent agent = null;
         if (PRODUCTION) {
-            try (InputStream inputStream = NEATUtil.class.getResourceAsStream(AGENT_FILE_PATH);
+            int bestAgentNumber = 2; // change this number according to the best agent of all best agents
+            try (InputStream inputStream = NEATUtil.class.getResourceAsStream(
+                    String.format(ASSETS_DIRECTORY_PATH + "%s-%d.dat", AGENT_BASE_NAME, bestAgentNumber));
                  ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
                 System.out.println("existing agent in resources folder found");
                 agent = (Agent) objectInputStream.readObject();
@@ -127,7 +125,7 @@ public class NEATUtil {
             }
         }
         else {
-            File file = MODEL_DIRECTORY_PATH;
+            File file = agentFile(getNewestAgentNumber());
             try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
                 agent = (Agent) in.readObject();
                 System.out.println("Agent loaded from " + file.getPath());
@@ -136,6 +134,30 @@ public class NEATUtil {
             }
         }
         return agent;
+    }
+
+    private static File agentFile(int agentNumber) {
+        return new File(AGENT_DIRECTORY_PATH, String.format("%s-%d.dat", AGENT_BASE_NAME, agentNumber));
+    }
+
+    private static int getNewestAgentNumber() {
+        File[] files = AGENT_DIRECTORY_PATH.listFiles();  // Get all files in the directory
+        int maxNum = 0;
+        if (files == null) {
+            return maxNum;
+        }
+
+        Pattern pattern = Pattern.compile(String.format("^%s-(\\d+)\\.dat$", AGENT_BASE_NAME));  // Regex to find files
+        for (File file : files) {
+            if (file.isFile()) {
+                Matcher matcher = pattern.matcher(file.getName());
+                if (matcher.matches()) {
+                    maxNum = Math.max(maxNum, Integer.parseInt(matcher.group(1)));
+                }
+            }
+        }
+
+        return maxNum;
     }
 
 }
