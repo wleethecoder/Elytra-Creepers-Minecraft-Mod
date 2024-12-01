@@ -30,7 +30,7 @@ public class TraineeEntity extends Mob implements GeoEntity {
     public void tick() {
         super.tick();
         if (NEATUtil.PRODUCTION &&
-                this.isFallFlying() &&
+                !this.isFallFlying() &&
                 this.tickCount > 10 * TICKS_PER_SECOND &&
                 this.level() instanceof ServerLevel serverLevel) {
             // during production mode, this entity dies, spawning a cookie in its place
