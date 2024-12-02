@@ -6,12 +6,16 @@ import com.leecrafts.elytracreepers.neat.genome.ConnectionGene;
 import com.leecrafts.elytracreepers.neat.genome.Genome;
 import com.leecrafts.elytracreepers.neat.genome.NodeGene;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 
 public class NEATController implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     public static final int MAX_NODES = (int) Math.pow(2, 20);
 

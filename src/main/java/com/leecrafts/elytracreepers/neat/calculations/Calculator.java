@@ -5,12 +5,16 @@ import com.leecrafts.elytracreepers.neat.genome.ConnectionGene;
 import com.leecrafts.elytracreepers.neat.genome.Genome;
 import com.leecrafts.elytracreepers.neat.genome.NodeGene;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 
 public class Calculator implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private final ArrayList<Node> input_nodes = new ArrayList<>();
     private final ArrayList<Node> hidden_nodes = new ArrayList<>();

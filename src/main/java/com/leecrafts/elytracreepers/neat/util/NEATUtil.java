@@ -39,10 +39,10 @@ public class NEATUtil {
     public static final File OVERALL_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/overall.csv");
     public static final File PER_SPECIES_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/per_species.csv");
 
-    public static final BlockPos SPAWN_POS = new BlockPos(-189 - 100, -64 + 100 + 1, -2);
+    public static final BlockPos SPAWN_POS = new BlockPos(-189 - 50, -64 + 50 + 1, -2);
 
-    public static final int POPULATION_SIZE = 500;
-    public static final int NUM_GENERATIONS = 1000;
+    public static final int POPULATION_SIZE = 5;
+    public static final int NUM_GENERATIONS = 4;
     public static final int INPUT_SIZE = 5;
     public static final int OUTPUT_SIZE = 4;
 
@@ -99,16 +99,17 @@ public class NEATUtil {
 
             int generationNumber = generationNumber();
             System.out.println("GENERATION " + generationNumber);
-            if ((generationNumber - 1) % N == 0) {
-                saveNEATController(neatController, generationNumber);
-            }
             neatController.printSpecies();
             logMetrics(neatController);
-            if (ModEvents.REMAINING_GENERATIONS > 0) {
+            if (generationNumber < NUM_GENERATIONS) {
                 neatController.evolve();
                 initializeEntityPopulation(serverLevel, sightDistance, neatController, trackingPlayer);
             } else {
                 saveAgent(neatController.getBestAgent());
+            }
+
+            if ((generationNumber - 1) % N == 0 || generationNumber == NUM_GENERATIONS) {
+                saveNEATController(neatController, generationNumber);
             }
         }
     }
@@ -131,8 +132,14 @@ public class NEATUtil {
     }
 
     private static void saveNEATController(NEATController neatController, int generationNumber) {
+        int[] numbers = getNewestNEATControllerNumberAndGenerationNumber();
+        int maxNum = numbers[0];
+        int maxGenerationNumber = numbers[1];
+        if (generationNumber > 1 && generationNumber <= maxGenerationNumber) {
+            maxNum++;
+        }
         File file = objectFile(
-                String.format("%d-%d", getNewestNEATControllerNumber(generationNumber), generationNumber),
+                String.format("%d-%d", maxNum, generationNumber),
                 NEATCONTROLLER_BASE_NAME);
         saveObject(neatController, file, NEATCONTROLLER_BASE_NAME);
     }
@@ -153,6 +160,13 @@ public class NEATUtil {
 
     public static NEATController loadNEATController(int neatControllerNumber, int generationNumber) {
         return (NEATController) loadObject(NEATCONTROLLER_BASE_NAME, String.format("%d-%d", neatControllerNumber, generationNumber));
+    }
+
+    // this is used for the neatcontroller to pick up from where it left off during the training process
+    public static NEATController loadNEATController() {
+        int[] numbers = getNewestNEATControllerNumberAndGenerationNumber();
+        ModEvents.REMAINING_GENERATIONS = NUM_GENERATIONS - numbers[1];
+        return (NEATController) loadObject(NEATCONTROLLER_BASE_NAME, String.format("%d-%d", numbers[0], numbers[1]));
     }
 
     public static Object loadObject(String type, String numberString) {
@@ -204,35 +218,38 @@ public class NEATUtil {
     }
 
     private static int getNewestNEATControllerNumber(int currentGenerationNumber) {
-        File[] files = new File(OBJECT_DIRECTORY_PATH, NEATCONTROLLER_BASE_NAME).listFiles();  // Get all files in the directory
-        int maxNum = 1;
-        if (files == null) {
-            return maxNum;
-        }
-
-        Pattern pattern = Pattern.compile(String.format(NEATCONTROLLER_REGEX, NEATCONTROLLER_BASE_NAME));  // Regex to find files
-        int maxGenerationNumber = 0;
-        for (File file : files) {
-            if (file.isFile()) {
-                Matcher matcher = pattern.matcher(file.getName());
-                if (matcher.matches()) {
-                    int number = Integer.parseInt(matcher.group(1));
-                    int generationNumber = Integer.parseInt(matcher.group(2));
-                    if (number > maxNum) {
-                        maxNum = number;
-                        maxGenerationNumber = generationNumber;
-                    }
-                    else if (number == maxNum) {
-                        maxGenerationNumber = Math.max(maxGenerationNumber, generationNumber);
-                    }
-                }
-            }
-        }
-
+        int[] numbers = getNewestNEATControllerNumberAndGenerationNumber();
+        int maxNum = numbers[0];
+        int maxGenerationNumber = numbers[1];
         if (currentGenerationNumber <= maxGenerationNumber) {
             maxNum++;
         }
         return maxNum;
+    }
+
+    private static int[] getNewestNEATControllerNumberAndGenerationNumber() {
+        File[] files = new File(OBJECT_DIRECTORY_PATH, NEATCONTROLLER_BASE_NAME).listFiles();  // Get all files in the directory
+        int maxNum = 1;
+        int maxGenerationNumber = 1;
+        if (files != null) {
+            Pattern pattern = Pattern.compile(String.format(NEATCONTROLLER_REGEX, NEATCONTROLLER_BASE_NAME));  // Regex to find files
+            for (File file : files) {
+                if (file.isFile()) {
+                    Matcher matcher = pattern.matcher(file.getName());
+                    if (matcher.matches()) {
+                        int number = Integer.parseInt(matcher.group(1));
+                        int generationNumber = Integer.parseInt(matcher.group(2));
+                        if (number > maxNum) {
+                            maxNum = number;
+                            maxGenerationNumber = generationNumber;
+                        } else if (number == maxNum) {
+                            maxGenerationNumber = Math.max(maxGenerationNumber, generationNumber);
+                        }
+                    }
+                }
+            }
+        }
+        return new int[] {maxNum, maxGenerationNumber};
     }
 
     public static void logMetrics(NEATController neatController) {

@@ -1,8 +1,12 @@
 package com.leecrafts.elytracreepers.neat.genome;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class NodeGene extends Gene implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     // x and y values are for drawing the network
     private double x;

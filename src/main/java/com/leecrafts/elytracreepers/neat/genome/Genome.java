@@ -3,9 +3,13 @@ package com.leecrafts.elytracreepers.neat.genome;
 import com.leecrafts.elytracreepers.neat.controller.NEATController;
 import com.leecrafts.elytracreepers.neat.datastructures.RandomHashSet;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class Genome implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private final RandomHashSet<ConnectionGene> connections = new RandomHashSet<>();
     private final RandomHashSet<NodeGene> nodes = new RandomHashSet<>();

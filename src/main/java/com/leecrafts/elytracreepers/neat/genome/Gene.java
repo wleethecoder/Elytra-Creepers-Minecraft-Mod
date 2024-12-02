@@ -1,6 +1,12 @@
 package com.leecrafts.elytracreepers.neat.genome;
 
-public class Gene {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class Gene implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     protected int innovationNumber;
 

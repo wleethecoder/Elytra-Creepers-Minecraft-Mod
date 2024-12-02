@@ -1,8 +1,12 @@
 package com.leecrafts.elytracreepers.neat.calculations;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class Connection implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private Node from;
     private Node to;

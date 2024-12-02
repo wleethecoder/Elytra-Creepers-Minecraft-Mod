@@ -3,9 +3,13 @@ package com.leecrafts.elytracreepers.neat.controller;
 import com.leecrafts.elytracreepers.neat.calculations.Calculator;
 import com.leecrafts.elytracreepers.neat.genome.Genome;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class Agent implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private Calculator calculator;
 

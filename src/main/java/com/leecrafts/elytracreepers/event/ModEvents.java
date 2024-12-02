@@ -45,9 +45,12 @@ public class ModEvents {
                     event.getEntity() instanceof ServerPlayer serverPlayer &&
                     serverPlayer.level() instanceof ServerLevel serverLevel) {
                 if (event.getItemStack().is(Items.FEATHER)) {
-                    neatController = new NEATController(NEATUtil.INPUT_SIZE, NEATUtil.OUTPUT_SIZE, NEATUtil.POPULATION_SIZE);
+                    neatController = NEATUtil.loadNEATController();
+                    if (neatController == null) {
+                        neatController = new NEATController(NEATUtil.INPUT_SIZE, NEATUtil.OUTPUT_SIZE, NEATUtil.POPULATION_SIZE);
+                        REMAINING_GENERATIONS = NEATUtil.NUM_GENERATIONS;
+                    }
                     trackingPlayer = serverPlayer;
-                    REMAINING_GENERATIONS = NEATUtil.NUM_GENERATIONS;
                     NEATUtil.initializeEntityPopulation(serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
                 }
             }

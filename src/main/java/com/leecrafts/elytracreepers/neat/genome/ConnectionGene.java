@@ -2,9 +2,13 @@ package com.leecrafts.elytracreepers.neat.genome;
 
 import com.leecrafts.elytracreepers.neat.controller.NEATController;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class ConnectionGene extends Gene implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private NodeGene from;
     private NodeGene to;

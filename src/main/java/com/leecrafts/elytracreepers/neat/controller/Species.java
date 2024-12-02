@@ -3,10 +3,14 @@ package com.leecrafts.elytracreepers.neat.controller;
 import com.leecrafts.elytracreepers.neat.datastructures.RandomHashSet;
 import com.leecrafts.elytracreepers.neat.genome.Genome;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Comparator;
 
 public class Species implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private final RandomHashSet<Agent> agents = new RandomHashSet<>();
     private Agent representative;
