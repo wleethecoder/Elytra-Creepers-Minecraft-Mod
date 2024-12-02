@@ -177,7 +177,7 @@ public class NEATUtil {
         try {
             FileWriter writer = new FileWriter(OVERALL_METRICS_LOG_PATH, true);
             if (OVERALL_METRICS_LOG_PATH.length() == 0) {
-                writer.append("Generation,Population Mean Score,Population Std Score,Best Species Mean Score,Best Species Std Score,Num Species")
+                writer.append("Generation,Population Mean Score,Population Std Score,Best Species Mean Score,Best Species Std Score,Best Agent Score,Num Species")
                         .append("\n");
             }
             double[] populationMeanAndStd = neatController.populationMeanAndStd();
@@ -192,6 +192,8 @@ public class NEATUtil {
                     .append(",")
                     .append(String.valueOf(bestSpeciesMeanAndStd[1]))
                     .append(",")
+                    .append(String.valueOf(neatController.getBestAgent().getScore()))
+                    .append(",")
                     .append(String.valueOf(neatController.numSpecies()))
                     .append("\n");
             writer.close();
@@ -205,7 +207,7 @@ public class NEATUtil {
         try {
             FileWriter writer = new FileWriter(PER_SPECIES_METRICS_LOG_PATH, true);
             if (PER_SPECIES_METRICS_LOG_PATH.length() == 0) {
-                writer.append("Species Name,Mean Score,Std Score,Size")
+                writer.append("Species Name,Mean Score,Std Score,Best Agent Score,Size")
                         .append("\n");
             }
             writer.append("GENERATION ")

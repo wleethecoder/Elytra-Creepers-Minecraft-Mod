@@ -276,11 +276,17 @@ public class NEATController implements Serializable {
                 .append("\n");
         for (Species s : this.species.getData()) {
             double[] meanAndStd = this.meanAndStd(s.getAgents());
+            double bestScore = -Double.MAX_VALUE;
+            for (Agent agent : s.getAgents().getData()) {
+                bestScore = Math.max(bestScore, agent.getScore());
+            }
             stringBuilder.append(s)
                     .append(",")
                     .append(meanAndStd[0])
                     .append(",")
                     .append(meanAndStd[1])
+                    .append(",")
+                    .append(bestScore)
                     .append(",")
                     .append(s.size());
         }
