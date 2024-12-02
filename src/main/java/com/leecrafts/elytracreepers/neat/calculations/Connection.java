@@ -19,16 +19,8 @@ public class Connection implements Serializable {
         return from;
     }
 
-    public void setFrom(Node from) {
-        this.from = from;
-    }
-
     public Node getTo() {
         return to;
-    }
-
-    public void setTo(Node to) {
-        this.to = to;
     }
 
     public double getWeight() {

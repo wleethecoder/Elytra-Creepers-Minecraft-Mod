@@ -33,16 +33,8 @@ public class Node implements Comparable<Node>, Serializable {
         return Math.tanh(x);
     }
 
-    public void setX(double x) {
-        this.x = x;
-    }
-
     public void setOutput(double output) {
         this.output = output;
-    }
-
-    public void setConnections(ArrayList<Connection> connections) {
-        this.connections = connections;
     }
 
     public double getX() {

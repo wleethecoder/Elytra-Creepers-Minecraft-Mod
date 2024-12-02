@@ -7,10 +7,10 @@ import java.io.Serializable;
 
 public class Genome implements Serializable {
 
-    private RandomHashSet<ConnectionGene> connections = new RandomHashSet<>();
-    private RandomHashSet<NodeGene> nodes = new RandomHashSet<>();
+    private final RandomHashSet<ConnectionGene> connections = new RandomHashSet<>();
+    private final RandomHashSet<NodeGene> nodes = new RandomHashSet<>();
 
-    private NEATController neatController;
+    private final NEATController neatController;
 
     public Genome(NEATController neatController) {
         this.neatController = neatController;
@@ -39,7 +39,7 @@ public class Genome implements Serializable {
         int j = 0;
 
         int disjoint = 0;
-        int excess = 0;
+        int excess;
         double weightDiff = 0;
         int similar = 0;
 

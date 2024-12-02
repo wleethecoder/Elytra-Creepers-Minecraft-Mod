@@ -41,10 +41,4 @@ public class RandomSelector<T> {
         return null;
     }
 
-    public void reset() {
-        this.objects.clear();
-        this.scores.clear();
-        this.totalScore = 0;
-    }
-
 }

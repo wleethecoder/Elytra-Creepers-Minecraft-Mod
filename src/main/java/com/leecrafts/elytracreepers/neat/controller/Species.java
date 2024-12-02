@@ -8,7 +8,7 @@ import java.util.Comparator;
 
 public class Species implements Serializable {
 
-    private RandomHashSet<Agent> agents = new RandomHashSet<>();
+    private final RandomHashSet<Agent> agents = new RandomHashSet<>();
     private Agent representative;
     private double score;
 

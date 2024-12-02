@@ -23,16 +23,8 @@ public class ConnectionGene extends Gene implements Serializable {
         return this.from;
     }
 
-    public void setFrom(NodeGene from) {
-        this.from = from;
-    }
-
     public NodeGene getTo() {
         return this.to;
-    }
-
-    public void setTo(NodeGene to) {
-        this.to = to;
     }
 
     public double getWeight() {

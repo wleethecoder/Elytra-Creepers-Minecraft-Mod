@@ -66,10 +66,6 @@ public class RandomHashSet<T> implements Serializable {
         return this.data.get(index);
     }
 
-    public T get(T template) {
-        return this.data.get(this.data.indexOf(template));
-    }
-
     public void remove(int index) {
         if (index < 0 || index >= this.size()) {
             return;

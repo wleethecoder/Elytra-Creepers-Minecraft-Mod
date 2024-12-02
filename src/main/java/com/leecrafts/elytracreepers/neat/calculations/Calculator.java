@@ -12,9 +12,9 @@ import java.util.HashMap;
 
 public class Calculator implements Serializable {
 
-    private ArrayList<Node> input_nodes = new ArrayList<>();
-    private ArrayList<Node> hidden_nodes = new ArrayList<>();
-    private ArrayList<Node> output_nodes = new ArrayList<>();
+    private final ArrayList<Node> input_nodes = new ArrayList<>();
+    private final ArrayList<Node> hidden_nodes = new ArrayList<>();
+    private final ArrayList<Node> output_nodes = new ArrayList<>();
 
     public Calculator(Genome g){
         RandomHashSet<NodeGene> nodes = g.getNodes();
