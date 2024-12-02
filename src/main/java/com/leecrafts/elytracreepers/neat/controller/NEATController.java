@@ -39,8 +39,8 @@ public class NEATController implements Serializable {
 
     private final RandomHashSet<NodeGene> allNodes = new RandomHashSet<>();
 
-    private RandomHashSet<Agent> agents = new RandomHashSet<>();
-    private RandomHashSet<Species> species = new RandomHashSet<>();
+    private final RandomHashSet<Agent> agents = new RandomHashSet<>();
+    private final RandomHashSet<Species> species = new RandomHashSet<>();
 
     private int inputSize;
     private int outputSize;
@@ -240,7 +240,6 @@ public class NEATController implements Serializable {
             return metrics(bestSpecies.getAgents());
         }
 
-        // this code shouldn't run
         return null;
     }
 
@@ -286,15 +285,15 @@ public class NEATController implements Serializable {
 
     public String perSpeciesMetricsString() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("####################################")
-                .append("\n");
+        stringBuilder.append("####################################");
         for (Species s : this.species.getData()) {
             double[] metrics = this.metrics(s.getAgents());
             double bestScore = -Double.MAX_VALUE;
             for (Agent agent : s.getAgents().getData()) {
                 bestScore = Math.max(bestScore, agent.getScore());
             }
-            stringBuilder.append(s)
+            stringBuilder.append("\n")
+                    .append(s)
                     .append(",")
                     .append(metrics[0])
                     .append(",")
@@ -305,6 +304,10 @@ public class NEATController implements Serializable {
                     .append(bestScore)
                     .append(",")
                     .append(s.size());
+        }
+        if (this.numSpecies() == 0) {
+            stringBuilder.append("\n")
+                    .append("(no species)");
         }
         return stringBuilder.toString();
     }

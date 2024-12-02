@@ -90,15 +90,15 @@ public class NEATUtil {
 
         if (ModEvents.REMAINING_AGENTS <= 0 && neatController != null) {
             ModEvents.REMAINING_GENERATIONS--;
+            System.out.println("GENERATION " + generationNumber());
+            neatController.printSpecies();
+            logMetrics(neatController);
             if (ModEvents.REMAINING_GENERATIONS > 0) {
                 neatController.evolve();
                 initializeEntityPopulation(serverLevel, sightDistance, neatController, trackingPlayer);
             } else {
                 saveAgent(neatController.getBestAgent());
             }
-            System.out.println("GENERATION " + generationNumber());
-            neatController.printSpecies();
-            logMetrics(neatController);
         }
     }
 
@@ -189,6 +189,14 @@ public class NEATUtil {
             }
             double[] populationMetrics = neatController.populationMetrics();
             double[] bestSpeciesMetrics = neatController.bestSpeciesMetrics();
+            String bestSpeciesMean = ""; // blank values in a csv file are NaN
+            String bestSpeciesStd = "";
+            String bestSpeciesMedian = "";
+            if (bestSpeciesMetrics != null) {
+                bestSpeciesMean = String.valueOf(bestSpeciesMetrics[0]);
+                bestSpeciesStd = String.valueOf(bestSpeciesMetrics[1]);
+                bestSpeciesMedian = String.valueOf(bestSpeciesMetrics[2]);
+            }
             writer.append(String.valueOf(generationNumber()))
                     .append(",")
                     .append(String.valueOf(populationMetrics[0]))
@@ -197,11 +205,11 @@ public class NEATUtil {
                     .append(",")
                     .append(String.valueOf(populationMetrics[2]))
                     .append(",")
-                    .append(String.valueOf(bestSpeciesMetrics[0]))
+                    .append(bestSpeciesMean)
                     .append(",")
-                    .append(String.valueOf(bestSpeciesMetrics[1]))
+                    .append(bestSpeciesStd)
                     .append(",")
-                    .append(String.valueOf(bestSpeciesMetrics[2]))
+                    .append(bestSpeciesMedian)
                     .append(",")
                     .append(String.valueOf(neatController.getBestAgent().getScore()))
                     .append(",")
