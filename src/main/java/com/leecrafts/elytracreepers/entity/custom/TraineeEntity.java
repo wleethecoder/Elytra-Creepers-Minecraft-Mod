@@ -42,8 +42,9 @@ public class TraineeEntity extends Mob implements GeoEntity {
 
     @Override
     public boolean hurt(@NotNull DamageSource source, float amount) {
-        // immune to entity cramming damage
-        if (source.is(DamageTypes.CRAMMING)) return false;
+        // Immune to any damage except from the /kill command.
+        // This prevents the agent from prematurely dying before reaching the end of its run.
+        if (!source.is(DamageTypes.GENERIC_KILL)) return false;
         return super.hurt(source, amount);
     }
 
