@@ -75,10 +75,8 @@ public class ModEvents {
                 livingEntity.setData(ModAttachments.AGENT, agent);
 //                System.out.println("loaded agent score: " + livingEntity.getData(ModAttachments.AGENT).getScore());
 
-                // TODO testing
-                System.out.println("loaded agent score: " + livingEntity.getData(ModAttachments.AGENT).getScore());
-                NEATController neatController1 = NEATUtil.loadNEATController(4, 5);
-                System.out.println("loaded neatController score: " + neatController1.getBestAgent().getScore());
+//                NEATController neatController1 = NEATUtil.loadNEATController(4, 5);
+//                System.out.println("loaded neatController best agent score: " + neatController1.getBestAgent().getScore());
             }
         }
 
