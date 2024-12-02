@@ -7,6 +7,8 @@ import com.leecrafts.elytracreepers.neat.genome.Genome;
 import com.leecrafts.elytracreepers.neat.genome.NodeGene;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 
 public class NEATController implements Serializable {
@@ -221,11 +223,11 @@ public class NEATController implements Serializable {
         return bestAgent;
     }
 
-    public double[] populationMeanAndStd() {
-        return meanAndStd(this.agents);
+    public double[] populationMetrics() {
+        return metrics(this.agents);
     }
 
-    public double[] bestSpeciesMeanAndStd() {
+    public double[] bestSpeciesMetrics() {
         double bestScore = -Double.MAX_VALUE;
         Species bestSpecies = null;
         for (Species s : this.species.getData()) {
@@ -235,28 +237,40 @@ public class NEATController implements Serializable {
             }
         }
         if (bestSpecies != null) {
-            return meanAndStd(bestSpecies.getAgents());
+            return metrics(bestSpecies.getAgents());
         }
 
         // this code shouldn't run
         return null;
     }
 
-    private double[] meanAndStd(RandomHashSet<Agent> agents) {
-        int size = agents.getData().size();
+    private double[] metrics(RandomHashSet<Agent> a) {
+        ArrayList<Agent> agents = new ArrayList<>(a.getData());
+        agents.sort(
+                new Comparator<Agent>() {
+                    @Override
+                    public int compare(Agent o1, Agent o2) {
+                        return Double.compare(o1.getScore(), o2.getScore());
+                    }
+                }
+        );
+
+        int size = agents.size();
         double mean = 0;
-        for (Agent agent : agents.getData()) {
+        for (Agent agent : agents) {
             mean += agent.getScore();
         }
         mean /= size;
 
         double std = 0;
-        for (Agent agent : agents.getData()) {
+        for (Agent agent : agents) {
             std += Math.pow(agent.getScore() - mean, 2);
         }
         std = Math.sqrt(std / size);
 
-        return new double[] {mean, std};
+        double median = agents.get(size / 2).getScore();
+
+        return new double[] {mean, std, median};
     }
 
     public int numSpecies() {
@@ -270,27 +284,58 @@ public class NEATController implements Serializable {
         }
     }
 
-    public String perSpeciesMetrics() {
+    public String perSpeciesMetricsString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("####################################")
                 .append("\n");
         for (Species s : this.species.getData()) {
-            double[] meanAndStd = this.meanAndStd(s.getAgents());
+            double[] metrics = this.metrics(s.getAgents());
             double bestScore = -Double.MAX_VALUE;
             for (Agent agent : s.getAgents().getData()) {
                 bestScore = Math.max(bestScore, agent.getScore());
             }
             stringBuilder.append(s)
                     .append(",")
-                    .append(meanAndStd[0])
+                    .append(metrics[0])
                     .append(",")
-                    .append(meanAndStd[1])
+                    .append(metrics[1])
+                    .append(",")
+                    .append(metrics[2])
                     .append(",")
                     .append(bestScore)
                     .append(",")
                     .append(s.size());
         }
-        return stringBuilder.append("\n").toString();
+        return stringBuilder.toString();
+    }
+
+    public String hyperparametersString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("C1=")
+                .append(C1)
+                .append(",C2=")
+                .append(C2)
+                .append(",C3=")
+                .append(C3)
+                .append(",CP=")
+                .append(CP)
+                .append(",WEIGHT_SHIFT_STRENGTH=")
+                .append(WEIGHT_SHIFT_STRENGTH)
+                .append(",WEIGHT_RANDOM_STRENGTH=")
+                .append(WEIGHT_RANDOM_STRENGTH)
+                .append(",SURVIVAL_RATE=")
+                .append(SURVIVAL_RATE)
+                .append(",PROBABILITY_MUTATE_LINK=")
+                .append(PROBABILITY_MUTATE_LINK)
+                .append(",PROBABILITY_MUTATE_NODE=")
+                .append(PROBABILITY_MUTATE_NODE)
+                .append(",PROBABILITY_MUTATE_WEIGHT_SHIFT=")
+                .append(PROBABILITY_MUTATE_WEIGHT_SHIFT)
+                .append(",PROBABILITY_MUTATE_WEIGHT_RANDOM=")
+                .append(PROBABILITY_MUTATE_WEIGHT_RANDOM)
+                .append(",PROBABILITY_MUTATE_TOGGLE_LINK=")
+                .append(PROBABILITY_MUTATE_TOGGLE_LINK);
+        return stringBuilder.toString();
     }
 
     public double getC1() {

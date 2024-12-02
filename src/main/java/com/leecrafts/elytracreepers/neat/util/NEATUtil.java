@@ -75,7 +75,7 @@ public class NEATUtil {
             }
         }
 
-        trackingPlayer.displayClientMessage(Component.literal("Generation " + (NUM_GENERATIONS - ModEvents.REMAINING_GENERATIONS + 1)), true);
+        trackingPlayer.displayClientMessage(Component.literal("Generation " + (generationNumber() + 1)), true);
     }
 
     public static void recordFitness(LivingEntity livingEntity, float fastFallDistance, ServerLevel serverLevel, int sightDistance, NEATController neatController, ServerPlayer trackingPlayer) {
@@ -96,7 +96,7 @@ public class NEATUtil {
             } else {
                 saveAgent(neatController.getBestAgent());
             }
-            System.out.println("GENERATION " + (NUM_GENERATIONS - ModEvents.REMAINING_GENERATIONS));
+            System.out.println("GENERATION " + generationNumber());
             neatController.printSpecies();
             logMetrics(neatController);
         }
@@ -106,6 +106,10 @@ public class NEATUtil {
         return -(FAST_FALL_PUNISHMENT * Math.max(0, fastFallDistance - 3) +
                 DISTANCE_PUNISHMENT * livingEntity.distanceTo(target) +
                 TIME_PUNISHMENT * livingEntity.tickCount);
+    }
+
+    private static int generationNumber() {
+        return NUM_GENERATIONS - ModEvents.REMAINING_GENERATIONS;
     }
 
     private static void saveAgent(Agent agent) {
@@ -171,26 +175,33 @@ public class NEATUtil {
     public static void logMetrics(NEATController neatController) {
         // OVERALL
         // generation number
-        // mean and std scores of population
-        // mean and std scores of best species
+        // mean, std, and median scores of population
+        // mean, std, and median scores of best species
+        // best agent score
         // species count
         try {
             FileWriter writer = new FileWriter(OVERALL_METRICS_LOG_PATH, true);
-            if (OVERALL_METRICS_LOG_PATH.length() == 0) {
-                writer.append("Generation,Population Mean Score,Population Std Score,Best Species Mean Score,Best Species Std Score,Best Agent Score,Num Species")
+            if (generationNumber() == 1) {
+                writer.append(neatController.hyperparametersString())
+                        .append("\n")
+                        .append("Generation,Population Mean Score,Population Std Score,Population Median Score,Best Species Mean Score,Best Species Std Score,Best Species Median Score,Best Agent Score,Num Species")
                         .append("\n");
             }
-            double[] populationMeanAndStd = neatController.populationMeanAndStd();
-            double[] bestSpeciesMeanAndStd = neatController.bestSpeciesMeanAndStd();
-            writer.append(String.valueOf(NUM_GENERATIONS - ModEvents.REMAINING_GENERATIONS))
+            double[] populationMetrics = neatController.populationMetrics();
+            double[] bestSpeciesMetrics = neatController.bestSpeciesMetrics();
+            writer.append(String.valueOf(generationNumber()))
                     .append(",")
-                    .append(String.valueOf(populationMeanAndStd[0]))
+                    .append(String.valueOf(populationMetrics[0]))
                     .append(",")
-                    .append(String.valueOf(populationMeanAndStd[1]))
+                    .append(String.valueOf(populationMetrics[1]))
                     .append(",")
-                    .append(String.valueOf(bestSpeciesMeanAndStd[0]))
+                    .append(String.valueOf(populationMetrics[2]))
                     .append(",")
-                    .append(String.valueOf(bestSpeciesMeanAndStd[1]))
+                    .append(String.valueOf(bestSpeciesMetrics[0]))
+                    .append(",")
+                    .append(String.valueOf(bestSpeciesMetrics[1]))
+                    .append(",")
+                    .append(String.valueOf(bestSpeciesMetrics[2]))
                     .append(",")
                     .append(String.valueOf(neatController.getBestAgent().getScore()))
                     .append(",")
@@ -203,17 +214,23 @@ public class NEATUtil {
         }
 
         // PER SPECIES
-        // mean and std scores and size of each species
+        // species name
+        // mean, std, and median scores
+        // best agent score
+        // size
         try {
             FileWriter writer = new FileWriter(PER_SPECIES_METRICS_LOG_PATH, true);
-            if (PER_SPECIES_METRICS_LOG_PATH.length() == 0) {
-                writer.append("Species Name,Mean Score,Std Score,Best Agent Score,Size")
+            if (generationNumber() == 1) {
+                writer.append(neatController.hyperparametersString())
+                        .append("\n")
+                        .append("Species Name,Mean Score,Std Score,Median Score,Best Agent Score,Size")
                         .append("\n");
             }
             writer.append("GENERATION ")
-                    .append(String.valueOf(NUM_GENERATIONS - ModEvents.REMAINING_GENERATIONS))
+                    .append(String.valueOf(generationNumber()))
                     .append("\n")
-                    .append(neatController.perSpeciesMetrics());
+                    .append(neatController.perSpeciesMetricsString())
+                    .append("\n");
             writer.close();
             System.out.println("Per species metrics have been logged.");
         } catch (IOException e) {
