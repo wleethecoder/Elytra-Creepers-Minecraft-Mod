@@ -210,8 +210,8 @@ public class NEATController implements Serializable {
     }
 
     public Agent getBestAgent() {
-        Agent bestAgent = null;
         double bestScore = -Double.MAX_VALUE;
+        Agent bestAgent = null;
         for (Agent agent : this.agents.getData()) {
             if (agent.getScore() > bestScore) {
                 bestScore = agent.getScore();
@@ -221,11 +221,72 @@ public class NEATController implements Serializable {
         return bestAgent;
     }
 
+    public double[] populationMeanAndStd() {
+        return meanAndStd(this.agents);
+    }
+
+    public double[] bestSpeciesMeanAndStd() {
+        double bestScore = -Double.MAX_VALUE;
+        Species bestSpecies = null;
+        for (Species s : this.species.getData()) {
+            if (s.getScore() > bestScore) {
+                bestScore = s.getScore();
+                bestSpecies = s;
+            }
+        }
+        if (bestSpecies != null) {
+            return meanAndStd(bestSpecies.getAgents());
+        }
+
+        // this code shouldn't run
+        return null;
+    }
+
+    private double[] meanAndStd(RandomHashSet<Agent> agents) {
+        int size = agents.getData().size();
+        double mean = 0;
+        for (Agent agent : agents.getData()) {
+            mean += agent.getScore();
+        }
+        mean /= size;
+
+        double std = 0;
+        for (Agent agent : agents.getData()) {
+            std += Math.pow(agent.getScore() - mean, 2);
+        }
+        std = Math.sqrt(std / size);
+
+        return new double[] {mean, std};
+    }
+
+    public int numSpecies() {
+        return this.species.getData().size();
+    }
+
     public void printSpecies() {
         System.out.println("####################################");
         for (Species s : this.species.getData()) {
             System.out.println("Species " + s + "; average score: " + s.getScore() + "; size: " + s.size());
         }
+    }
+
+    public String perSpeciesMetrics() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("####################################")
+                .append("\n")
+                .append("Species Name,Mean Score,Std Score,Size")
+                .append("\n");
+        for (Species s : this.species.getData()) {
+            double[] meanAndStd = this.meanAndStd(s.getAgents());
+            stringBuilder.append(s)
+                    .append(",")
+                    .append(meanAndStd[0])
+                    .append(",")
+                    .append(meanAndStd[1])
+                    .append(",")
+                    .append(s.size());
+        }
+        return stringBuilder.append("\n").toString();
     }
 
     public double getC1() {

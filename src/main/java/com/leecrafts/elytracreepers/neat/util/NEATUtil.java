@@ -28,6 +28,9 @@ public class NEATUtil {
     private static final File AGENT_DIRECTORY_PATH = new File(BASE_DIRECTORY_PATH, "src/main/resources" + ASSETS_DIRECTORY_PATH);
     private static final String AGENT_BASE_NAME = "agent";
 
+    public static final File OVERALL_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/overall.csv");
+    public static final File PER_SPECIES_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/per_species.csv");
+
     public static final BlockPos SPAWN_POS = new BlockPos(-189 - 100, -64 + 100 + 1, -2);
 
     public static final int POPULATION_SIZE = 500;
@@ -85,12 +88,13 @@ public class NEATUtil {
             ModEvents.REMAINING_GENERATIONS--;
             if (ModEvents.REMAINING_GENERATIONS > 0) {
                 neatController.evolve();
-                System.out.println("GENERATION " + (NUM_GENERATIONS - ModEvents.REMAINING_GENERATIONS));
-                neatController.printSpecies();
                 initializeEntityPopulation(serverLevel, sightDistance, neatController);
             } else {
                 saveAgent(neatController.getBestAgent());
             }
+            System.out.println("GENERATION " + (NUM_GENERATIONS - ModEvents.REMAINING_GENERATIONS));
+            neatController.printSpecies();
+            logMetrics(neatController);
         }
     }
 
@@ -158,6 +162,53 @@ public class NEATUtil {
         }
 
         return maxNum;
+    }
+
+    public static void logMetrics(NEATController neatController) {
+        // OVERALL
+        // generation number
+        // mean and std scores of population
+        // mean and std scores of best species
+        // species count
+        try {
+            FileWriter writer = new FileWriter(OVERALL_METRICS_LOG_PATH, true);
+            if (OVERALL_METRICS_LOG_PATH.length() == 0) {
+                writer.append("Generation,Population Mean Score,Population Std Score,Best Species Mean Score,Best Species Std Score,Num Species")
+                        .append("\n");
+            }
+            double[] populationMeanAndStd = neatController.populationMeanAndStd();
+            double[] bestSpeciesMeanAndStd = neatController.bestSpeciesMeanAndStd();
+            writer.append(String.valueOf(NUM_GENERATIONS - ModEvents.REMAINING_GENERATIONS))
+                    .append(",")
+                    .append(String.valueOf(populationMeanAndStd[0]))
+                    .append(",")
+                    .append(String.valueOf(populationMeanAndStd[1]))
+                    .append(",")
+                    .append(String.valueOf(bestSpeciesMeanAndStd[0]))
+                    .append(",")
+                    .append(String.valueOf(bestSpeciesMeanAndStd[1]))
+                    .append(",")
+                    .append(String.valueOf(neatController.numSpecies()))
+                    .append("\n");
+            writer.close();
+            System.out.println("Overall metrics have been logged.");
+        } catch (IOException e) {
+            System.out.println("Error logging overall metrics: " + e.getMessage());
+        }
+
+        // PER SPECIES
+        // mean and std scores and size of each species
+        try {
+            FileWriter writer = new FileWriter(PER_SPECIES_METRICS_LOG_PATH, true);
+            writer.append("GENERATION ")
+                    .append(String.valueOf(NUM_GENERATIONS - ModEvents.REMAINING_GENERATIONS))
+                    .append("\n")
+                    .append(neatController.perSpeciesMetrics());
+            writer.close();
+            System.out.println("Per species metrics have been logged.");
+        } catch (IOException e) {
+            System.out.println("Error logging per species metrics: " + e.getMessage());
+        }
     }
 
 }
