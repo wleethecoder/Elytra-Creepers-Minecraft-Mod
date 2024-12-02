@@ -26,9 +26,15 @@ public class NEATUtil {
     public static final boolean PRODUCTION = false;
 
     private static final String BASE_DIRECTORY_PATH = new File(System.getProperty("user.dir")).getParent();
-    private static final String ASSETS_DIRECTORY_PATH = "/assets/elytracreepers/agent/";
-    private static final File AGENT_DIRECTORY_PATH = new File(BASE_DIRECTORY_PATH, "src/main/resources" + ASSETS_DIRECTORY_PATH);
+    private static final String ASSETS_DIRECTORY_PATH = "/assets/elytracreepers/";
+    private static final File OBJECT_DIRECTORY_PATH = new File(BASE_DIRECTORY_PATH, "src/main/resources" + ASSETS_DIRECTORY_PATH);
     private static final String AGENT_BASE_NAME = "agent";
+    private static final String NEATCONTROLLER_BASE_NAME = "neatcontroller";
+    public static final String AGENT_REGEX = "^%s-(\\d+)\\.dat$";
+    public static final String NEATCONTROLLER_REGEX = "^%s-(\\d+)\\-(\\d+)\\.dat$";
+
+    // neatController is saved every N generations
+    private static final int N = 2;
 
     public static final File OVERALL_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/overall.csv");
     public static final File PER_SPECIES_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/per_species.csv");
@@ -90,7 +96,12 @@ public class NEATUtil {
 
         if (ModEvents.REMAINING_AGENTS <= 0 && neatController != null) {
             ModEvents.REMAINING_GENERATIONS--;
-            System.out.println("GENERATION " + generationNumber());
+
+            int generationNumber = generationNumber();
+            System.out.println("GENERATION " + generationNumber);
+            if ((generationNumber - 1) % N == 0) {
+                saveNEATController(neatController, generationNumber);
+            }
             neatController.printSpecies();
             logMetrics(neatController);
             if (ModEvents.REMAINING_GENERATIONS > 0) {
@@ -113,53 +124,73 @@ public class NEATUtil {
     }
 
     private static void saveAgent(Agent agent) {
-        File file = agentFile(getNewestAgentNumber() + 1);
+        File file = objectFile(
+                String.valueOf(getNewestAgentNumber() + 1),
+                AGENT_BASE_NAME);
+        saveObject(agent, file, AGENT_BASE_NAME);
+    }
+
+    private static void saveNEATController(NEATController neatController, int generationNumber) {
+        File file = objectFile(
+                String.format("%d-%d", getNewestNEATControllerNumber(generationNumber), generationNumber),
+                NEATCONTROLLER_BASE_NAME);
+        saveObject(neatController, file, NEATCONTROLLER_BASE_NAME);
+    }
+
+    private static void saveObject(Object object, File file, String type) {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
-            out.writeObject(agent);
-            System.out.println("Agent saved to " + file.getPath());
+            out.writeObject(object);
+            System.out.println(type + " saved to " + file.getPath());
         } catch (IOException e) {
-            System.out.println("Error saving agent: " + e.getMessage());
+            System.out.println("Error saving " + type + ": " + e.getMessage());
             System.out.println(e.toString());
         }
     }
 
-    public static Agent loadAgent() {
-        Agent agent = null;
+    public static Agent loadAgent(int agentNumber) {
+        return (Agent) loadObject(AGENT_BASE_NAME, String.valueOf(agentNumber));
+    }
+
+    public static NEATController loadNEATController(int neatControllerNumber, int generationNumber) {
+        return (NEATController) loadObject(NEATCONTROLLER_BASE_NAME, String.format("%d-%d", neatControllerNumber, generationNumber));
+    }
+
+    public static Object loadObject(String type, String numberString) {
+        Object object = null;
         if (PRODUCTION) {
-            int bestAgentNumber = 2; // change this number according to the best agent of all best agents
             try (InputStream inputStream = NEATUtil.class.getResourceAsStream(
-                    String.format(ASSETS_DIRECTORY_PATH + "%s-%d.dat", AGENT_BASE_NAME, bestAgentNumber));
+                    String.format("%s/%s/%s-%s.dat", ASSETS_DIRECTORY_PATH, type, type, numberString));
                  ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
-                System.out.println("existing agent in resources folder found");
-                agent = (Agent) objectInputStream.readObject();
+                System.out.println("existing " + type + " in resources folder found");
+                object = objectInputStream.readObject();
             } catch (IOException | ClassNotFoundException e) {
-                System.out.println("Error loading agent: " + e.getMessage());
+                System.out.println("Error loading object: " + e.getMessage());
             }
         }
         else {
-            File file = agentFile(getNewestAgentNumber());
+            File file = objectFile(numberString, type);
             try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
-                agent = (Agent) in.readObject();
-                System.out.println("Agent loaded from " + file.getPath());
+                object = in.readObject();
+                System.out.println(type + " loaded from " + file.getPath());
             } catch (IOException | ClassNotFoundException e) {
-                System.out.println("Error loading agent: " + e.getMessage());
+                System.out.println("Error loading " + type + ": " + e.getMessage());
             }
         }
-        return agent;
+        return object;
     }
 
-    private static File agentFile(int agentNumber) {
-        return new File(AGENT_DIRECTORY_PATH, String.format("%s-%d.dat", AGENT_BASE_NAME, agentNumber));
+    private static File objectFile(String numberString, String type) {
+        return new File(OBJECT_DIRECTORY_PATH, String.format("%s/%s-%s.dat", type, type, numberString));
     }
 
     private static int getNewestAgentNumber() {
-        File[] files = AGENT_DIRECTORY_PATH.listFiles();  // Get all files in the directory
+        File[] files = new File(OBJECT_DIRECTORY_PATH, AGENT_BASE_NAME).listFiles();  // Get all files in the directory
         int maxNum = 0;
         if (files == null) {
             return maxNum;
         }
 
-        Pattern pattern = Pattern.compile(String.format("^%s-(\\d+)\\.dat$", AGENT_BASE_NAME));  // Regex to find files
+        Pattern pattern = Pattern.compile(String.format(AGENT_REGEX, AGENT_BASE_NAME));  // Regex to find files
         for (File file : files) {
             if (file.isFile()) {
                 Matcher matcher = pattern.matcher(file.getName());
@@ -172,6 +203,38 @@ public class NEATUtil {
         return maxNum;
     }
 
+    private static int getNewestNEATControllerNumber(int currentGenerationNumber) {
+        File[] files = new File(OBJECT_DIRECTORY_PATH, NEATCONTROLLER_BASE_NAME).listFiles();  // Get all files in the directory
+        int maxNum = 1;
+        if (files == null) {
+            return maxNum;
+        }
+
+        Pattern pattern = Pattern.compile(String.format(NEATCONTROLLER_REGEX, NEATCONTROLLER_BASE_NAME));  // Regex to find files
+        int maxGenerationNumber = 0;
+        for (File file : files) {
+            if (file.isFile()) {
+                Matcher matcher = pattern.matcher(file.getName());
+                if (matcher.matches()) {
+                    int number = Integer.parseInt(matcher.group(1));
+                    int generationNumber = Integer.parseInt(matcher.group(2));
+                    if (number > maxNum) {
+                        maxNum = number;
+                        maxGenerationNumber = generationNumber;
+                    }
+                    else if (number == maxNum) {
+                        maxGenerationNumber = Math.max(maxGenerationNumber, generationNumber);
+                    }
+                }
+            }
+        }
+
+        if (currentGenerationNumber <= maxGenerationNumber) {
+            maxNum++;
+        }
+        return maxNum;
+    }
+
     public static void logMetrics(NEATController neatController) {
         // OVERALL
         // generation number
@@ -179,9 +242,10 @@ public class NEATUtil {
         // mean, std, and median scores of best species
         // best agent score
         // species count
+        int generationNumber = generationNumber();
         try {
             FileWriter writer = new FileWriter(OVERALL_METRICS_LOG_PATH, true);
-            if (generationNumber() == 1) {
+            if (generationNumber == 1) {
                 writer.append(neatController.hyperparametersString())
                         .append("\n")
                         .append("Generation,Population Mean Score,Population Std Score,Population Median Score,Best Species Mean Score,Best Species Std Score,Best Species Median Score,Best Agent Score,Num Species")
@@ -197,7 +261,7 @@ public class NEATUtil {
                 bestSpeciesStd = String.valueOf(bestSpeciesMetrics[1]);
                 bestSpeciesMedian = String.valueOf(bestSpeciesMetrics[2]);
             }
-            writer.append(String.valueOf(generationNumber()))
+            writer.append(String.valueOf(generationNumber))
                     .append(",")
                     .append(String.valueOf(populationMetrics[0]))
                     .append(",")
@@ -228,14 +292,14 @@ public class NEATUtil {
         // size
         try {
             FileWriter writer = new FileWriter(PER_SPECIES_METRICS_LOG_PATH, true);
-            if (generationNumber() == 1) {
+            if (generationNumber == 1) {
                 writer.append(neatController.hyperparametersString())
                         .append("\n")
                         .append("Species Name,Mean Score,Std Score,Median Score,Best Agent Score,Size")
                         .append("\n");
             }
             writer.append("GENERATION ")
-                    .append(String.valueOf(generationNumber()))
+                    .append(String.valueOf(generationNumber))
                     .append("\n")
                     .append(neatController.perSpeciesMetricsString())
                     .append("\n");

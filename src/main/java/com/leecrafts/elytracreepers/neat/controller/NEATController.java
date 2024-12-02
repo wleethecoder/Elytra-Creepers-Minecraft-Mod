@@ -91,6 +91,10 @@ public class NEATController implements Serializable {
         return this.agents.get(index);
     }
 
+    public Species getSpecies(int index) {
+        return this.species.get(index);
+    }
+
     // returns copy of a ConnectionGene
     public static ConnectionGene getConnection(ConnectionGene connectionGene) {
         ConnectionGene connectionGene1 = new ConnectionGene(connectionGene.getFrom(), connectionGene.getTo());

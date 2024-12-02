@@ -23,5 +23,6 @@ run
 runs
 run-data
 src/main/resources/assets/elytracreepers/agent/
+src/main/resources/assets/elytracreepers/neatcontroller/
 
 repo

@@ -2,6 +2,7 @@ package com.leecrafts.elytracreepers.neat.util;
 
 import com.leecrafts.elytracreepers.neat.controller.Agent;
 import com.leecrafts.elytracreepers.neat.controller.NEATController;
+import com.leecrafts.elytracreepers.neat.controller.Species;
 import com.leecrafts.elytracreepers.neat.genome.Genome;
 import com.leecrafts.elytracreepers.neat.visual.Frame;
 
@@ -11,7 +12,8 @@ public class NEATTest {
 
     private static final double[] in = new double[] {0.04406537922176701, 0.18126992327777725, 0.24199198935168187, 0.1813263608295541, 0.24448311455523108, 0.14145820074195736, 0.2602359917148832, 0.3497226936060528, 0.9711452639458819, 0.8405658596218063};
     private static final String ASSETS_DIRECTORY_PATH = "/assets/elytracreepers/agent";
-    public static final File AGENT_DIRECTORY_PATH = new File(System.getProperty("user.dir"), "src/main/resources" + ASSETS_DIRECTORY_PATH);
+    public static final File AGENT_DIRECTORY_PATH = new File(System.getProperty("user.dir"), "src/main/resources/assets/elytracreepers/agent");
+    public static final File NEATCONTROLLER_DIRECTORY_PATH = new File(System.getProperty("user.dir"), "src/main/resources/assets/elytracreepers/neatcontroller");
 
     private static void emptyGenomeSize() {
         NEATController neatController = new NEATController(4,10,50);
@@ -76,7 +78,7 @@ public class NEATTest {
         }
     }
 
-    private static void printGenomeOfEntityAgent(int agentNumber) {
+    private static void displayGenomeOfLoadedEntityAgent(int agentNumber) {
         File file = new File(AGENT_DIRECTORY_PATH, String.format("%s-%d.dat", "agent", agentNumber));
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             Agent agent = (Agent) in.readObject();
@@ -87,12 +89,32 @@ public class NEATTest {
         }
     }
 
+    private static void displayGenomeOfLoadedNeatController(int number, int generationNumber) {
+        File file = new File(NEATCONTROLLER_DIRECTORY_PATH, String.format("%s-%d-%d.dat", "neatcontroller", number, generationNumber));
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+            NEATController neatController = (NEATController) in.readObject();
+            System.out.println("Neatcontroller loaded from " + file.getPath());
+            Agent bestAgent = neatController.getBestAgent();
+            System.out.println(bestAgent.getScore());
+            new Frame(bestAgent.getGenome());
+            for (int i = 0; i < neatController.numSpecies(); i++) {
+                Species species = neatController.getSpecies(i);
+                Agent representative = species.getRepresentative();
+                System.out.println(representative.getScore());
+                new Frame(representative.getGenome());
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error loading neatcontroller: " + e.getMessage());
+        }
+    }
+
     public static void main(String[] args) {
 //        emptyGenomeSize();
 //        displayFrame();
 //        agents(true);
 //        saveAndLoad();
-        printGenomeOfEntityAgent(2);
+//        displayGenomeOfLoadedEntityAgent(4);
+        displayGenomeOfLoadedNeatController(4, 5);
     }
 
 }

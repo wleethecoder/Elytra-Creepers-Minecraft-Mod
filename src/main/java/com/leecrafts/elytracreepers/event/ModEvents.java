@@ -66,14 +66,19 @@ public class ModEvents {
         @SubscribeEvent
         public static void loadAgent(LivingEquipmentChangeEvent event) {
             LivingEntity livingEntity = event.getEntity();
-            Agent agent = livingEntity.getData(ModAttachments.AGENT);
-            if (agent == null &&
+            if (livingEntity.getData(ModAttachments.AGENT) == null &&
                     !NEATUtil.TRAINING &&
                     !livingEntity.level().isClientSide &&
                     event.getTo().is(ModItems.NEURAL_ELYTRA.asItem()) &&
                     NeuralElytra.isNonPlayerLivingEntity(livingEntity)) {
-                livingEntity.setData(ModAttachments.AGENT, NEATUtil.loadAgent());
-//                System.out.println(livingEntity.getData(ModAttachments.AGENT).getScore());
+                Agent agent = NEATUtil.loadAgent(4);
+                livingEntity.setData(ModAttachments.AGENT, agent);
+//                System.out.println("loaded agent score: " + livingEntity.getData(ModAttachments.AGENT).getScore());
+
+                // TODO testing
+                System.out.println("loaded agent score: " + livingEntity.getData(ModAttachments.AGENT).getScore());
+                NEATController neatController1 = NEATUtil.loadNEATController(4, 5);
+                System.out.println("loaded neatController score: " + neatController1.getBestAgent().getScore());
             }
         }
 
