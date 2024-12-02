@@ -1,32 +1,15 @@
 
-Installation information
-=======
+# Elytra Creepers
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+The Elytra Creepers mod features AI-controlled creepers capable of advanced aerial navigation using elytras. The creepers should be able to fly to a grounded target--while maximizing flight time efficiency and minimizing fall damage.
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+The creepers are trained using Neuroevolution of Augmented Topologies (NEAT), a well-known neuroevolution method. Neuroevolution is a “survival of the fittest” deep learning technique that combines evolutionary biology with neural networks: a population of agents run a task, a fitness score is used to evaluate performance, those deemed the fittest produce the next generation of agents, and so on.
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
-
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
-
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+This is a work in progress, and I am currently running the training for the neural networks.
 
 
-MIT License of Neuroevolution of Augmented Topologies (NEAT) implementation (https://github.com/Luecx/NEAT)
-==========
+### MIT License of NEAT implementation (https://github.com/Luecx/NEAT)
+
 Copyright (c) 2019 Luecx
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
