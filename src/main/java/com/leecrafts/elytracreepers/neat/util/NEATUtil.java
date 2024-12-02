@@ -7,7 +7,9 @@ import com.leecrafts.elytracreepers.item.ModItems;
 import com.leecrafts.elytracreepers.neat.controller.Agent;
 import com.leecrafts.elytracreepers.neat.controller.NEATController;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.ItemStack;
@@ -43,7 +45,7 @@ public class NEATUtil {
     public static final double DISTANCE_PUNISHMENT = 1;
     public static final double TIME_PUNISHMENT = 0.05;
 
-    public static void initializeEntityPopulation(ServerLevel serverLevel, int sightDistance, NEATController neatController) {
+    public static void initializeEntityPopulation(ServerLevel serverLevel, int sightDistance, NEATController neatController, ServerPlayer trackingPlayer) {
         // initialize population
         ModEvents.REMAINING_AGENTS = neatController.getPopulationSize();
         for (int i = 0; i < neatController.getPopulationSize(); i++) {
@@ -72,9 +74,11 @@ public class NEATUtil {
                 }
             }
         }
+
+        trackingPlayer.displayClientMessage(Component.literal("Generation " + (NUM_GENERATIONS - ModEvents.REMAINING_GENERATIONS + 1)), true);
     }
 
-    public static void recordFitness(LivingEntity livingEntity, float fastFallDistance, ServerLevel serverLevel, int sightDistance, NEATController neatController) {
+    public static void recordFitness(LivingEntity livingEntity, float fastFallDistance, ServerLevel serverLevel, int sightDistance, NEATController neatController, ServerPlayer trackingPlayer) {
         Agent agent = livingEntity.getData(ModAttachments.AGENT);
         Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
         if (agent != null && target != null) {
@@ -88,7 +92,7 @@ public class NEATUtil {
             ModEvents.REMAINING_GENERATIONS--;
             if (ModEvents.REMAINING_GENERATIONS > 0) {
                 neatController.evolve();
-                initializeEntityPopulation(serverLevel, sightDistance, neatController);
+                initializeEntityPopulation(serverLevel, sightDistance, neatController, trackingPlayer);
             } else {
                 saveAgent(neatController.getBestAgent());
             }
@@ -200,6 +204,10 @@ public class NEATUtil {
         // mean and std scores and size of each species
         try {
             FileWriter writer = new FileWriter(PER_SPECIES_METRICS_LOG_PATH, true);
+            if (PER_SPECIES_METRICS_LOG_PATH.length() == 0) {
+                writer.append("Species Name,Mean Score,Std Score,Size")
+                        .append("\n");
+            }
             writer.append("GENERATION ")
                     .append(String.valueOf(NUM_GENERATIONS - ModEvents.REMAINING_GENERATIONS))
                     .append("\n")

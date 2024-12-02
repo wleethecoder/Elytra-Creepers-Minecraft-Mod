@@ -273,8 +273,6 @@ public class NEATController implements Serializable {
     public String perSpeciesMetrics() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("####################################")
-                .append("\n")
-                .append("Species Name,Mean Score,Std Score,Size")
                 .append("\n");
         for (Species s : this.species.getData()) {
             double[] meanAndStd = this.meanAndStd(s.getAgents());
