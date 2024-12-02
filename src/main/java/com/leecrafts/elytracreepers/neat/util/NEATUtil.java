@@ -34,15 +34,15 @@ public class NEATUtil {
     public static final String NEATCONTROLLER_REGEX = "^%s-(\\d+)\\-(\\d+)\\.dat$";
 
     // neatController is saved every N generations
-    private static final int N = 2;
+    private static final int N = 25;
 
     public static final File OVERALL_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/overall.csv");
     public static final File PER_SPECIES_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/per_species.csv");
 
-    public static final BlockPos SPAWN_POS = new BlockPos(-189 - 50, -64 + 50 + 1, -2);
+    public static final BlockPos SPAWN_POS = new BlockPos(-189 - 100, -64 + 100 + 1, -2);
 
-    public static final int POPULATION_SIZE = 5;
-    public static final int NUM_GENERATIONS = 4;
+    public static final int POPULATION_SIZE = 500;
+    public static final int NUM_GENERATIONS = 1000;
     public static final int INPUT_SIZE = 5;
     public static final int OUTPUT_SIZE = 4;
 
@@ -158,6 +158,8 @@ public class NEATUtil {
         return (Agent) loadObject(AGENT_BASE_NAME, String.valueOf(agentNumber));
     }
 
+    // this should be used outside of the training process
+    // with the Frame class, you can visualize the loaded neatController's genomes
     public static NEATController loadNEATController(int neatControllerNumber, int generationNumber) {
         return (NEATController) loadObject(NEATCONTROLLER_BASE_NAME, String.format("%d-%d", neatControllerNumber, generationNumber));
     }
