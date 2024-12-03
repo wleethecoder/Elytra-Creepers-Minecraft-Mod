@@ -5,11 +5,42 @@ The Elytra Creepers mod features AI-controlled creepers capable of advanced aeri
 
 The creepers are trained using Neuroevolution of Augmented Topologies (NEAT), a well-known neuroevolution method. Neuroevolution is a “survival of the fittest” deep learning technique that combines evolutionary biology with neural networks: a population of agents run a task, a fitness score is used to evaluate performance, those deemed the fittest produce the next generation of agents, and so on.
 
+I am currently running the training for the neural networks, but I've already made some promising progress! See clip below. After iterating over 300 generations, the agents are consistently able to land on the ground smoothly and efficiently.
 
-https://github.com/user-attachments/assets/60d48890-36ac-4c5f-9d79-516558afbffd
+https://github.com/user-attachments/assets/6da7b2a4-a452-4303-bf57-57f3d6e21bdf
 
-This is a work in progress, and I am currently running the training for the neural networks. But here's a little preview of my training process. This is the 25th generation. You can see that the agents are already making some progress. Some are swirling around the grounded target so that the landing is smoothened!
+<details> 
+  <summary>(Click here) These are clips showing the training process during the earlier generations.</summary>
 
+https://github.com/user-attachments/assets/43966ebc-b96e-4030-8fa6-a90540f2a580
+
+
+
+https://github.com/user-attachments/assets/8aa95f54-1322-4c1a-90ae-a275c9ef7220
+
+
+
+https://github.com/user-attachments/assets/725cfdda-0aeb-4e93-a96c-6f7695f431f0
+
+
+
+https://github.com/user-attachments/assets/a2fbea35-dc06-4bcc-a471-0e0aa655a82b
+
+
+
+https://github.com/user-attachments/assets/1bbf4e96-a5a1-4d7a-b89a-a5399542d0c6
+
+
+
+https://github.com/user-attachments/assets/96a6654f-ebbe-4c78-adb0-d05c360c79a7
+
+
+</details>
+
+
+Here is a bonus video of me trying to avoid the elytra-flying creepers but failing!
+
+https://github.com/user-attachments/assets/03ef2a31-faa2-4a63-a10f-859b4030ccac
 
 ### MIT License of NEAT implementation (https://github.com/Luecx/NEAT)
 
