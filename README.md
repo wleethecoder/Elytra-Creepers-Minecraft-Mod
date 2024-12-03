@@ -20,11 +20,11 @@ https://github.com/user-attachments/assets/43966ebc-b96e-4030-8fa6-a90540f2a580
 
 https://github.com/user-attachments/assets/8aa95f54-1322-4c1a-90ae-a275c9ef7220
 
+Convergence was achieved around Generation 180.
 
 
 https://github.com/user-attachments/assets/725cfdda-0aeb-4e93-a96c-6f7695f431f0
 
-Convergence was achieved around Generation 180.
 
 
 https://github.com/user-attachments/assets/a2fbea35-dc06-4bcc-a471-0e0aa655a82b
