@@ -9,14 +9,13 @@ import com.leecrafts.elytracreepers.item.custom.NeuralElytra;
 import com.leecrafts.elytracreepers.neat.controller.Agent;
 import com.leecrafts.elytracreepers.neat.controller.NEATController;
 import com.leecrafts.elytracreepers.neat.util.NEATUtil;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
@@ -28,22 +27,28 @@ import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
+import java.util.List;
+
+import static net.minecraft.SharedConstants.TICKS_PER_SECOND;
+
 public class ModEvents {
 
     private static NEATController neatController;
     private static ServerPlayer trackingPlayer;
     public static int REMAINING_AGENTS;
     public static int REMAINING_GENERATIONS;
-    private static final int SIGHT_DISTANCE = 200;
+
+    private static final double SIGHT_DISTANCE = 200;
+    private static final double SPAWN_DISTANCE = 100;
+    public static final BlockPos SPAWN_POS = new BlockPos((int) (-189 - SPAWN_DISTANCE), (int) (-64 + SPAWN_DISTANCE + 1), -2);
 
     @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.GAME)
     public static class GameBusEvents {
 
         @SubscribeEvent
-        public static void spawnAgents(PlayerInteractEvent.RightClickItem event) {
+        public static void spawnAgentsTrain(PlayerInteractEvent.RightClickItem event) {
             if (NEATUtil.TRAINING &&
-                    event.getEntity() instanceof ServerPlayer serverPlayer &&
-                    serverPlayer.level() instanceof ServerLevel serverLevel) {
+                    event.getEntity() instanceof ServerPlayer serverPlayer) {
                 if (event.getItemStack().is(Items.FEATHER)) {
                     neatController = NEATUtil.loadNEATController();
                     if (neatController == null) {
@@ -51,7 +56,35 @@ public class ModEvents {
                         REMAINING_GENERATIONS = NEATUtil.NUM_GENERATIONS;
                     }
                     trackingPlayer = serverPlayer;
-                    NEATUtil.initializeEntityPopulation(serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
+                    NEATUtil.initializeEntityPopulation(serverPlayer.serverLevel(), SIGHT_DISTANCE, neatController, trackingPlayer);
+                }
+            }
+        }
+
+        @SubscribeEvent
+        public static void spawnAgentsProduction(EntityTickEvent.Pre event) {
+            if (NEATUtil.PRODUCTION &&
+                    event.getEntity() instanceof ServerPlayer serverPlayer &&
+                    serverPlayer.tickCount % (5 * TICKS_PER_SECOND) == 0 &&
+                    serverPlayer.getMainHandItem().is(Items.OAK_BUTTON)) {
+                double angle = Math.random() * 2 * Math.PI;
+                int xOffset = (int) (SPAWN_DISTANCE * Math.cos(angle));
+                int zOffset = (int) (SPAWN_DISTANCE * Math.sin(angle));
+                BlockPos blockPos = serverPlayer.blockPosition().offset(xOffset, (int) SPAWN_DISTANCE, zOffset);
+                Entity entity = Config.spawnedElytraEntityType.spawn(serverPlayer.serverLevel(), blockPos, MobSpawnType.MOB_SUMMONED);
+                if (entity instanceof LivingEntity livingEntity) {
+                    livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
+
+                    List<Player> candidates = livingEntity.level().getEntitiesOfClass(
+                            Player.class, livingEntity.getBoundingBox().inflate(SIGHT_DISTANCE));
+                    if (!candidates.isEmpty()) {
+                        int index = entity.getRandom().nextInt(candidates.size());
+                        livingEntity.setData(ModAttachments.TARGET_ENTITY, candidates.get(index));
+                    }
+
+                    if (livingEntity instanceof Mob mob) {
+                        mob.setPersistenceRequired();
+                    }
                 }
             }
         }
@@ -74,11 +107,11 @@ public class ModEvents {
                     !livingEntity.level().isClientSide &&
                     event.getTo().is(ModItems.NEURAL_ELYTRA.asItem()) &&
                     NeuralElytra.isNonPlayerLivingEntity(livingEntity)) {
-                Agent agent = NEATUtil.loadAgent(4);
+                Agent agent = NEATUtil.loadAgent(999);
                 livingEntity.setData(ModAttachments.AGENT, agent);
-//                System.out.println("loaded agent score: " + livingEntity.getData(ModAttachments.AGENT).getScore());
+                System.out.println("loaded agent score: " + livingEntity.getData(ModAttachments.AGENT).getScore());
 
-//                NEATController neatController1 = NEATUtil.loadNEATController(4, 5);
+//                NEATController neatController1 = NEATUtil.loadNEATController(1, 301);
 //                System.out.println("loaded neatController best agent score: " + neatController1.getBestAgent().getScore());
             }
         }

@@ -6,7 +6,6 @@ import com.leecrafts.elytracreepers.event.ModEvents;
 import com.leecrafts.elytracreepers.item.ModItems;
 import com.leecrafts.elytracreepers.neat.controller.Agent;
 import com.leecrafts.elytracreepers.neat.controller.NEATController;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,8 +21,8 @@ import java.util.regex.Pattern;
 
 public class NEATUtil {
 
-    public static final boolean TRAINING = true;
-    public static final boolean PRODUCTION = false;
+    public static final boolean TRAINING = false;
+    public static final boolean PRODUCTION = true;
 
     private static final String BASE_DIRECTORY_PATH = new File(System.getProperty("user.dir")).getParent();
     private static final String ASSETS_DIRECTORY_PATH = "/assets/elytracreepers/";
@@ -39,8 +38,6 @@ public class NEATUtil {
     public static final File OVERALL_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/overall.csv");
     public static final File PER_SPECIES_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/per_species.csv");
 
-    public static final BlockPos SPAWN_POS = new BlockPos(-189 - 100, -64 + 100 + 1, -2);
-
     public static final int POPULATION_SIZE = 500;
     public static final int NUM_GENERATIONS = 1000;
     public static final int INPUT_SIZE = 5;
@@ -51,11 +48,11 @@ public class NEATUtil {
     public static final double DISTANCE_PUNISHMENT = 1;
     public static final double TIME_PUNISHMENT = 0.05;
 
-    public static void initializeEntityPopulation(ServerLevel serverLevel, int sightDistance, NEATController neatController, ServerPlayer trackingPlayer) {
+    public static void initializeEntityPopulation(ServerLevel serverLevel, double sightDistance, NEATController neatController, ServerPlayer trackingPlayer) {
         // initialize population
         ModEvents.REMAINING_AGENTS = neatController.getPopulationSize();
         for (int i = 0; i < neatController.getPopulationSize(); i++) {
-            Entity entity = Config.spawnedElytraEntityType.spawn(serverLevel, NEATUtil.SPAWN_POS, MobSpawnType.MOB_SUMMONED);
+            Entity entity = Config.spawnedElytraEntityType.spawn(serverLevel, ModEvents.SPAWN_POS, MobSpawnType.MOB_SUMMONED);
             if (entity instanceof LivingEntity livingEntity) {
                 livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
 
@@ -65,11 +62,6 @@ public class NEATUtil {
                 // setting target
                 List<ArmorStand> candidates = livingEntity.level().getEntitiesOfClass(
                         ArmorStand.class, livingEntity.getBoundingBox().inflate(sightDistance));
-                // TODO this commented out code is for production mode
-//                List<Player> candidates = livingEntity.level().getNearbyPlayers(
-//                        TargetingConditions.forNonCombat().ignoreLineOfSight().range(sightDistance),
-//                        livingEntity,
-//                        livingEntity.getBoundingBox().inflate(sightDistance));
                 if (!candidates.isEmpty()) {
                     int index = entity.getRandom().nextInt(candidates.size());
                     livingEntity.setData(ModAttachments.TARGET_ENTITY, candidates.get(index));
@@ -84,7 +76,7 @@ public class NEATUtil {
         trackingPlayer.displayClientMessage(Component.literal("Generation " + (generationNumber() + 1)), true);
     }
 
-    public static void recordFitness(LivingEntity livingEntity, float fastFallDistance, ServerLevel serverLevel, int sightDistance, NEATController neatController, ServerPlayer trackingPlayer) {
+    public static void recordFitness(LivingEntity livingEntity, float fastFallDistance, ServerLevel serverLevel, double sightDistance, NEATController neatController, ServerPlayer trackingPlayer) {
         Agent agent = livingEntity.getData(ModAttachments.AGENT);
         Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
         if (agent != null && target != null) {
@@ -99,7 +91,7 @@ public class NEATUtil {
 
             int generationNumber = generationNumber();
             System.out.println("GENERATION " + generationNumber);
-            neatController.printSpecies();
+//            neatController.printSpecies();
             logMetrics(neatController);
             if (generationNumber < NUM_GENERATIONS) {
                 neatController.evolve();
