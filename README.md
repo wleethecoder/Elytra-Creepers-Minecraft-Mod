@@ -5,7 +5,7 @@ The Elytra Creepers mod features AI-controlled creepers capable of advanced aeri
 
 The creepers are trained using Neuroevolution of Augmented Topologies (NEAT), a well-known neuroevolution method. Neuroevolution is a “survival of the fittest” deep learning technique that combines evolutionary biology with neural networks: a population of agents run a task, a fitness score is used to evaluate performance, those deemed the fittest produce the next generation of agents, and so on.
 
-I am currently training the neural networks, but I've already made some promising progress! See clip below. After iterating over 300 generations, the agents are consistently able to land on the ground smoothly and efficiently.
+I am currently training the neural networks, but I've already made some promising progress! See clip below. After iterating over 300 generations, the agents are consistently able to land on the grounded destination smoothly and efficiently. Starting from over 100 blocks away, ~95% of the agents are able land within 3 blocks of the target in under 6 seconds.
 
 https://github.com/user-attachments/assets/6da7b2a4-a452-4303-bf57-57f3d6e21bdf
 
