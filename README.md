@@ -3,8 +3,9 @@
 
 The Elytra Creepers mod features AI-controlled creepers capable of advanced aerial navigation using elytras. The creepers should be able to fly to a grounded target--while **maximizing flight time efficiency** and **minimizing fall damage**.
 
-The creepers are trained using Neuroevolution of Augmented Topologies (NEAT), a well-known neuroevolution method. Neuroevolution is a “survival of the fittest” deep learning technique that combines evolutionary biology with neural networks: a population of agents run a task, a fitness score is used to evaluate performance, those deemed the fittest produce the next generation of agents, and so on.
+The creepers are trained using [Neuroevolution of Augmented Topologies (NEAT)](https://en.wikipedia.org/wiki/Neuroevolution_of_augmenting_topologies), a well-known neuroevolution method. Neuroevolution is a “survival of the fittest” genetic algorithm that combines evolutionary biology with neural networks: a population of agents run a task, a fitness score is used to evaluate performance, those deemed the fittest produce the next generation of agents, and so on.
 
+## Progress
 I am currently training the neural networks, but I've already made some promising progress! See clip below. After iterating over 300 generations, the agents are consistently able to land on the grounded destination smoothly and efficiently. Starting from over 100 blocks away, ~95% of the agents are able land within 3 blocks of the target in under 6 seconds.
 
 https://github.com/user-attachments/assets/6da7b2a4-a452-4303-bf57-57f3d6e21bdf
@@ -44,6 +45,12 @@ For Generation 1, the agents get to their target very quickly, but they take mas
 Here is a bonus video of me trying to avoid the elytra-flying creepers but failing!
 
 https://github.com/user-attachments/assets/03ef2a31-faa2-4a63-a10f-859b4030ccac
+
+## Future Plans
+
+Currently, the agents are trained to reach a stationary target that is 100 blocks away from them, in both horizontal and vertical distance. To increase network robustness, I am planning to train agents for different target distances. I may even make the target move in random directions. 
+
+Additionally, I am considering training agents to avoid obstacles, but this would be a difficult and computationally intensive task; detecting obstacles requires either raytracing or image recognition. It is definitely possible, however.
 
 ### MIT License of NEAT implementation (https://github.com/Luecx/NEAT)
 
