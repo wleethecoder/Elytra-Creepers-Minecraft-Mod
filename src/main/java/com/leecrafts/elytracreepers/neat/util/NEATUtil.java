@@ -107,7 +107,7 @@ public class NEATUtil {
     }
 
     private static double calculateFitness(LivingEntity livingEntity, Entity target, float fastFallDistance) {
-        return -(FAST_FALL_PUNISHMENT * Math.max(0, fastFallDistance - 3) +
+        return -(FAST_FALL_PUNISHMENT * Math.max(0, fastFallDistance - 2) +
                 DISTANCE_PUNISHMENT * livingEntity.distanceTo(target) +
                 TIME_PUNISHMENT * livingEntity.tickCount);
     }
