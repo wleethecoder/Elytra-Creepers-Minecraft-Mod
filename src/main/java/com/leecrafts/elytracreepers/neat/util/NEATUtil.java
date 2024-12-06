@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
 
 public class NEATUtil {
 
-    public static final boolean TRAINING = false;
-    public static final boolean PRODUCTION = true;
+    public static final boolean TRAINING = true;
+    public static final boolean PRODUCTION = false;
 
     private static final String BASE_DIRECTORY_PATH = new File(System.getProperty("user.dir")).getParent();
     private static final String ASSETS_DIRECTORY_PATH = "/assets/elytracreepers/";

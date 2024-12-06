@@ -23,6 +23,14 @@ public class ModAttachments {
             "target_entity", () -> AttachmentType.builder(() -> (Entity) null).build()
     );
 
+    public static final Supplier<AttachmentType<Float>> FALL_DISTANCE = ATTACHMENT_TYPES.register(
+            "fall_distance", () -> AttachmentType.builder(() -> 0f).build()
+    );
+
+    public static final Supplier<AttachmentType<Integer>> LAND_TIMESTAMP = ATTACHMENT_TYPES.register(
+            "land_timestamp", () -> AttachmentType.builder(() -> -1).build()
+    );
+
     public static void register(IEventBus eventBus) {
         ATTACHMENT_TYPES.register(eventBus);
     }

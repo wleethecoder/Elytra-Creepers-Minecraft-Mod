@@ -10,7 +10,6 @@ import com.leecrafts.elytracreepers.neat.controller.Agent;
 import com.leecrafts.elytracreepers.neat.controller.NEATController;
 import com.leecrafts.elytracreepers.neat.util.NEATUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.*;
@@ -124,35 +123,57 @@ public class ModEvents {
                 LivingEntity livingEntity = (LivingEntity) event.getEntity();
                 if (!livingEntity.level().isClientSide && NeuralElytra.isWearing(livingEntity)) {
                     // I have to use NBTs because Entity#setSharedFlag is a protected method
-                    CompoundTag compoundTag = livingEntity.saveWithoutId(new CompoundTag());
+//                    CompoundTag compoundTag = livingEntity.saveWithoutId(new CompoundTag());
                     if (!livingEntity.onGround() && !livingEntity.isFallFlying()) {
-                        compoundTag.putBoolean("FallFlying", true);
-                        livingEntity.load(compoundTag);
+//                        compoundTag.putBoolean("FallFlying", true);
+//                        livingEntity.load(compoundTag);
                         livingEntity.setSharedFlag(7, true);
                     }
                     else if (livingEntity.onGround()) {
                         // TODO change this part
-                        compoundTag.putBoolean("FallFlying", false);
-                        livingEntity.load(compoundTag);
-                        livingEntity.setSharedFlag(7, false);
+//                        compoundTag.putBoolean("FallFlying", false);
+//                        livingEntity.load(compoundTag);
+                        livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.AIR));
+//                        livingEntity.setSharedFlag(7, false);
                     }
                 }
             }
         }
 
-        // if agent lands, it is terminated and its score is recorded
+        // When a flying entity lands, it slides a little on the ground.
+        // This means I should terminate an agent's run when it finishes sliding on the ground, rather than as soon as it
+        // touches the ground.
+        // I wouldn't want a flying creeper slide too far past its victims every time.
         @SubscribeEvent
-        public static void agentRunEndFromLand(LivingFallEvent event) {
+        public static void agentLand(LivingFallEvent event) {
             LivingEntity livingEntity = event.getEntity();
             if (NEATUtil.TRAINING &&
                     livingEntity.level() instanceof ServerLevel serverLevel &&
                     livingEntity.getType() == Config.spawnedElytraEntityType &&
                     NeuralElytra.isWearing(livingEntity)) {
-                NEATUtil.recordFitness(livingEntity, event.getDistance(), serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
+//                NEATUtil.recordFitness(livingEntity, event.getDistance(), serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
+                livingEntity.setData(ModAttachments.FALL_DISTANCE, event.getDistance());
+                livingEntity.setData(ModAttachments.LAND_TIMESTAMP, livingEntity.tickCount);
 
                 // the noise of 500 entities falling onto the ground at once can be a bit distracting
                 // see LivingEntity#causeFallDamage
                 event.setCanceled(true);
+            }
+        }
+
+        // After a few ticks on the ground, the agent's run ends and score is recorded
+        @SubscribeEvent
+        public static void agentRunEndAfterLanding(EntityTickEvent.Pre event) {
+            if (NEATUtil.TRAINING &&
+                    event.getEntity() instanceof LivingEntity livingEntity &&
+                    livingEntity.level() instanceof ServerLevel serverLevel &&
+                    livingEntity.getType() == Config.spawnedElytraEntityType &&
+                    livingEntity.onGround()/* &&
+                    NeuralElytra.isWearing(livingEntity)*/) {
+                int landTimestamp = livingEntity.getData(ModAttachments.LAND_TIMESTAMP);
+                if (landTimestamp != -1 && livingEntity.tickCount - landTimestamp > TICKS_PER_SECOND) {
+                    NEATUtil.recordFitness(livingEntity, livingEntity.getData(ModAttachments.FALL_DISTANCE), serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
+                }
             }
         }
 
