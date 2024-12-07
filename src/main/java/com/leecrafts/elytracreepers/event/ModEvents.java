@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -38,7 +39,7 @@ public class ModEvents {
     public static int REMAINING_GENERATIONS;
 
     private static final double SIGHT_DISTANCE = 200;
-    private static final double SPAWN_DISTANCE = 100;
+    public static final double SPAWN_DISTANCE = 100;
     public static final BlockPos SPAWN_POS = new BlockPos((int) (-189 - SPAWN_DISTANCE), (int) (-64 + SPAWN_DISTANCE + 1), -2);
 
     @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.GAME)
@@ -172,7 +173,7 @@ public class ModEvents {
                     NeuralElytra.isWearing(livingEntity)*/) {
                 int landTimestamp = livingEntity.getData(ModAttachments.LAND_TIMESTAMP);
                 if (landTimestamp != -1 && livingEntity.tickCount - landTimestamp > TICKS_PER_SECOND) {
-                    NEATUtil.recordFitness(livingEntity, livingEntity.getData(ModAttachments.FALL_DISTANCE), serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
+                    NEATUtil.recordFitness(livingEntity, livingEntity.getData(ModAttachments.FALL_DISTANCE), landTimestamp, serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
                 }
             }
         }
@@ -187,8 +188,18 @@ public class ModEvents {
                     NeuralElytra.isWearing(livingEntity)) {
                 Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
                 if (target != null && livingEntity.distanceTo(target) > SIGHT_DISTANCE) {
-                    NEATUtil.recordFitness(livingEntity, (float) Math.abs(livingEntity.getY() - target.getY()), serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
+                    NEATUtil.recordFitness(livingEntity, (float) Math.abs(livingEntity.getY() - target.getY()), livingEntity.tickCount, serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
                 }
+            }
+        }
+
+        // TODO initialize location of armor stand
+        @SubscribeEvent
+        public static void armorStandTargetRandomMovement(EntityTickEvent.Pre event) {
+            if (NEATUtil.TRAINING &&
+                    NEATUtil.RANDOM_MODE &&
+                    event.getEntity() instanceof ArmorStand armorStand &&
+                    armorStand.level() instanceof ServerLevel serverLevel) {
             }
         }
 

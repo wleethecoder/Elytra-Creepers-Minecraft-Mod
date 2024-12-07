@@ -23,6 +23,7 @@ public class NEATUtil {
 
     public static final boolean TRAINING = true;
     public static final boolean PRODUCTION = false;
+    public static final boolean RANDOM_MODE = false;
 
     private static final String BASE_DIRECTORY_PATH = new File(System.getProperty("user.dir")).getParent();
     private static final String ASSETS_DIRECTORY_PATH = "/assets/elytracreepers/";
@@ -33,13 +34,13 @@ public class NEATUtil {
     public static final String NEATCONTROLLER_REGEX = "^%s-(\\d+)\\-(\\d+)\\.dat$";
 
     // neatController is saved every N generations
-    private static final int N = 25;
+    private static final int N = 10;
 
     public static final File OVERALL_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/overall.csv");
     public static final File PER_SPECIES_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/per_species.csv");
 
     public static final int POPULATION_SIZE = 500;
-    public static final int NUM_GENERATIONS = 1000;
+    public static final int NUM_GENERATIONS = 250;
     public static final int INPUT_SIZE = 5;
     public static final int OUTPUT_SIZE = 4;
 
@@ -53,6 +54,13 @@ public class NEATUtil {
         ModEvents.REMAINING_AGENTS = neatController.getPopulationSize();
         for (int i = 0; i < neatController.getPopulationSize(); i++) {
             Entity entity = Config.spawnedElytraEntityType.spawn(serverLevel, ModEvents.SPAWN_POS, MobSpawnType.MOB_SUMMONED);
+            // TODO random location
+            if (RANDOM_MODE) {
+                entity.setPos(entity.getX() +
+                        1.0*Math.max(180, generationNumber())/180 * Math.random() * ModEvents.SPAWN_DISTANCE,
+                        entity.getY(),
+                        entity.getZ());
+            }
             if (entity instanceof LivingEntity livingEntity) {
                 livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
 
@@ -67,6 +75,7 @@ public class NEATUtil {
                     livingEntity.setData(ModAttachments.TARGET_ENTITY, candidates.get(index));
                 }
 
+                // TODO not sure if needed because entity is already wearing elytra
                 if (livingEntity instanceof Mob mob) {
                     mob.setPersistenceRequired();
                 }
@@ -76,11 +85,11 @@ public class NEATUtil {
         trackingPlayer.displayClientMessage(Component.literal("Generation " + (generationNumber() + 1)), true);
     }
 
-    public static void recordFitness(LivingEntity livingEntity, float fastFallDistance, ServerLevel serverLevel, double sightDistance, NEATController neatController, ServerPlayer trackingPlayer) {
+    public static void recordFitness(LivingEntity livingEntity, float fastFallDistance, int landTimestamp, ServerLevel serverLevel, double sightDistance, NEATController neatController, ServerPlayer trackingPlayer) {
         Agent agent = livingEntity.getData(ModAttachments.AGENT);
         Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
         if (agent != null && target != null) {
-            agent.setScore(calculateFitness(livingEntity, target, fastFallDistance));
+            agent.setScore(calculateFitness(livingEntity, target, fastFallDistance, landTimestamp));
         }
         livingEntity.discard();
 
@@ -106,10 +115,10 @@ public class NEATUtil {
         }
     }
 
-    private static double calculateFitness(LivingEntity livingEntity, Entity target, float fastFallDistance) {
+    private static double calculateFitness(LivingEntity livingEntity, Entity target, float fastFallDistance, int landTimestamp) {
         return -(FAST_FALL_PUNISHMENT * Math.max(0, fastFallDistance - 2) +
                 DISTANCE_PUNISHMENT * livingEntity.distanceTo(target) +
-                TIME_PUNISHMENT * livingEntity.tickCount);
+                TIME_PUNISHMENT * landTimestamp);
     }
 
     private static int generationNumber() {
