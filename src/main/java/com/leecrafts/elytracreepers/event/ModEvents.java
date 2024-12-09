@@ -107,7 +107,7 @@ public class ModEvents {
                     !livingEntity.level().isClientSide &&
                     event.getTo().is(ModItems.NEURAL_ELYTRA.asItem()) &&
                     NeuralElytra.isNonPlayerLivingEntity(livingEntity)) {
-                Agent agent = NEATUtil.loadAgent(999);
+                Agent agent = NEATUtil.loadAgent(3);
                 livingEntity.setData(ModAttachments.AGENT, agent);
                 System.out.println("loaded agent score: " + livingEntity.getData(ModAttachments.AGENT).getScore());
 

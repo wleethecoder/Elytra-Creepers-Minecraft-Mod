@@ -30,13 +30,23 @@ public class NeuralElytra extends ElytraItem {
     public boolean elytraFlightTick(@NotNull ItemStack stack, @NotNull LivingEntity entity, int flightTicks) {
         super.elytraFlightTick(stack, entity, flightTicks);
         if (isNonPlayerLivingEntity(entity) && !entity.level().isClientSide) {
-            Vec3 targetVec = getTargetVec(entity);
+            Entity target = entity.getData(ModAttachments.TARGET_ENTITY);
+            Vec3 targetVec;
+            Vec3 targetVelocity;
+            if (target != null) {
+                targetVec = new Vec3(target.getX(), target.getY(), target.getZ());
+                targetVelocity = target.getDeltaMovement();
+            }
+            else {
+                targetVec = getGroundTargetVec(entity);
+                targetVelocity = Vec3.ZERO;
+            }
             Vec3 distance = targetVec.subtract(entity.position());
             Vec3 distanceNormalized = distance.normalize();
             double pitchFacingTarget = Math.asin(-distanceNormalized.y); // in radians
             double yawFacingTarget = Math.atan2(-distanceNormalized.x, distanceNormalized.z); // in radians
 
-            double[] observations = getObservations(entity, distance, pitchFacingTarget, yawFacingTarget, false);
+            double[] observations = getObservations(entity, distance, pitchFacingTarget, yawFacingTarget, targetVelocity, false);
             Agent agent = entity.getData(ModAttachments.AGENT);
             if (agent != null) {
                 double[] outputs = agent.calculate(observations);
@@ -46,14 +56,18 @@ public class NeuralElytra extends ElytraItem {
         return true;
     }
 
-    private static double[] getObservations(LivingEntity entity, Vec3 distance, double pitchFacingTarget, double yawFacingTarget, boolean print) {
+    private static double[] getObservations(LivingEntity entity, Vec3 distance, double pitchFacingTarget, double yawFacingTarget, Vec3 targetVelocity, boolean print) {
         double horizontalDistance = Math.sqrt(distance.x * distance.x + distance.z * distance.z);
         double verticalDistance = distance.y;
 
         double pitchDifference = pitchFacingTarget - Math.toRadians(entity.getXRot());
         double yawDifference = normalizeAngle(yawFacingTarget - Math.toRadians(entity.getYRot()));
 
-        double speed = entity.getDeltaMovement().length();
+        double agentSpeed = entity.getDeltaMovement().length();
+
+        double[] target_FB_LR = calculate_FB_LR_ofVelocity(distance, targetVelocity);
+        double target_fb = target_FB_LR[0];
+        double target_lr = target_FB_LR[1];
 
         if (print && entity.tickCount % 40 == 0) {
             System.out.println("OBSERVATIONS of entity " + entity.getId());
@@ -63,14 +77,33 @@ public class NeuralElytra extends ElytraItem {
             System.out.println("yawFacingTarget (degrees): " + Math.toDegrees(yawFacingTarget));
             System.out.println("pitchDifference (degrees): " + Math.toDegrees(pitchDifference));
             System.out.println("yawDifference (degrees): " + Math.toDegrees(yawDifference));
-            System.out.println("speed: " + speed);
+            System.out.println("agentSpeed: " + agentSpeed);
+            System.out.println("target_fb: " + target_fb);
+            System.out.println("target_lr: " + target_lr);
             System.out.println();
         }
         return new double[] {
                 horizontalDistance, verticalDistance,
                 pitchDifference, yawDifference,
-                speed
+                agentSpeed,
+                target_fb, target_lr
         };
+    }
+
+    // 2 scalar values
+    // Calculate v_forwardbackward, the object's forward/backward velocity relative to the agent
+    // Calculate v_leftright, the object's left/right velocity relative to the agent
+    private static double[] calculate_FB_LR_ofVelocity(Vec3 distance, Vec3 velocity) {
+        double v_fb = velocity.dot(distance.normalize());
+
+        Vec3 up = new Vec3(0, 1, 0);
+        Vec3 vHorizontal = new Vec3(distance.x, 0, distance.z);
+        Vec3 right = vHorizontal.cross(up).normalize();
+
+        double v_lr = velocity.dot(right);
+//        double v_ud = velocity.dot(up);
+
+        return new double[] {v_fb, v_lr};
     }
 
     private static void handleOutputs(LivingEntity entity, double[] outputs, double pitchFacingTarget, double yawFacingTarget) {
@@ -86,25 +119,16 @@ public class NeuralElytra extends ElytraItem {
         return entity instanceof LivingEntity livingEntity && !(livingEntity instanceof Player);
     }
 
-    private static Vec3 getTargetVec(LivingEntity entity) {
-        Entity target = entity.getData(ModAttachments.TARGET_ENTITY);
-        if (target != null) {
-//            if (entity.tickCount % 20 == 0) {
-//                System.out.println(target.getX() + " " + target.getY() + " " + target.getZ());
-//            }
-            return new Vec3(target.getX(), target.getY(), target.getZ());
-        }
-        else {
-            int i = (int) entity.getY();
-            while (i >= LOWEST_TARGET_POINT) {
-                BlockState blockState = entity.level().getBlockState(entity.blockPosition().atY(i));
-                if (!blockState.isAir() && blockState.getFluidState().isEmpty()) {
-                    break;
-                }
-                i--;
+    private static Vec3 getGroundTargetVec(Entity entity) {
+        int i = (int) entity.getY();
+        while (i >= LOWEST_TARGET_POINT) {
+            BlockState blockState = entity.level().getBlockState(entity.blockPosition().atY(i));
+            if (!blockState.isAir() && blockState.getFluidState().isEmpty()) {
+                break;
             }
-            return new Vec3(entity.getX(), i, entity.getZ());
+            i--;
         }
+        return new Vec3(entity.getX(), i, entity.getZ());
     }
 
     // Normalize angle to range [-pi, pi]
