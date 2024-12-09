@@ -46,7 +46,7 @@ public class NeuralElytra extends ElytraItem {
             double pitchFacingTarget = Math.asin(-distanceNormalized.y); // in radians
             double yawFacingTarget = Math.atan2(-distanceNormalized.x, distanceNormalized.z); // in radians
 
-            double[] observations = getObservations(entity, distance, pitchFacingTarget, yawFacingTarget, targetVelocity, false);
+            double[] observations = getObservations(entity, distance, pitchFacingTarget, yawFacingTarget, targetVelocity, true);
             Agent agent = entity.getData(ModAttachments.AGENT);
             if (agent != null) {
                 double[] outputs = agent.calculate(observations);
@@ -57,7 +57,7 @@ public class NeuralElytra extends ElytraItem {
     }
 
     private static double[] getObservations(LivingEntity entity, Vec3 distance, double pitchFacingTarget, double yawFacingTarget, Vec3 targetVelocity, boolean print) {
-        double horizontalDistance = Math.sqrt(distance.x * distance.x + distance.z * distance.z);
+        double horizontalDistance = distance.horizontalDistance();
         double verticalDistance = distance.y;
 
         double pitchDifference = pitchFacingTarget - Math.toRadians(entity.getXRot());
@@ -94,15 +94,11 @@ public class NeuralElytra extends ElytraItem {
     // Calculate v_forwardbackward, the object's forward/backward velocity relative to the agent
     // Calculate v_leftright, the object's left/right velocity relative to the agent
     private static double[] calculate_FB_LR_ofVelocity(Vec3 distance, Vec3 velocity) {
-        double v_fb = velocity.dot(distance.normalize());
-
-        Vec3 up = new Vec3(0, 1, 0);
-        Vec3 vHorizontal = new Vec3(distance.x, 0, distance.z);
-        Vec3 right = vHorizontal.cross(up).normalize();
-
-        double v_lr = velocity.dot(right);
-//        double v_ud = velocity.dot(up);
-
+        Vec3 distanceHorizontal = new Vec3(distance.x, 0, distance.z);
+        Vec3 velocityHorizontal = new Vec3(velocity.x, 0, velocity.z);
+        double v_fb = velocityHorizontal.dot(distanceHorizontal.normalize());
+        Vec3 vec_fb = distanceHorizontal.normalize().scale(v_fb);
+        double v_lr = velocityHorizontal.subtract(vec_fb).length();
         return new double[] {v_fb, v_lr};
     }
 

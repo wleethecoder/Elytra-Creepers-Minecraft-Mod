@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
 
 public class NEATUtil {
 
-    public static final boolean TRAINING = false;
-    public static final boolean PRODUCTION = true;
+    public static final boolean TRAINING = true;
+    public static final boolean PRODUCTION = false;
     public static final boolean RANDOM_MODE = false;
 
     private static final String BASE_DIRECTORY_PATH = new File(System.getProperty("user.dir")).getParent();
@@ -39,7 +39,7 @@ public class NEATUtil {
     public static final File OVERALL_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/overall.csv");
     public static final File PER_SPECIES_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/per_species.csv");
 
-    public static final int POPULATION_SIZE = 500;
+    public static final int POPULATION_SIZE = 5;
     public static final int NUM_GENERATIONS = 400;
     public static final int INPUT_SIZE = 7;
     public static final int OUTPUT_SIZE = 4;
