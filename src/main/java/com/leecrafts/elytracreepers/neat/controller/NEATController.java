@@ -235,6 +235,8 @@ public class NEATController implements Serializable {
         return metrics(this.agents);
     }
 
+    // for some reason, the metrics for the best species are inaccurate
+    // so for now we have to rely on the per-species metrics (see perSpeciesMetricsString)
     public double[] bestSpeciesMetrics() {
         double bestScore = -Double.MAX_VALUE;
         Species bestSpecies = null;
