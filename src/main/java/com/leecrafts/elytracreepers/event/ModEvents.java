@@ -40,7 +40,8 @@ public class ModEvents {
 
     private static final double SIGHT_DISTANCE = 200;
     public static final double SPAWN_DISTANCE = 100;
-    public static final BlockPos SPAWN_POS = new BlockPos((int) (-189 - SPAWN_DISTANCE), (int) (-64 + SPAWN_DISTANCE + 1), -2);
+    public static final BlockPos TARGET_INIT_POS = new BlockPos(-189, -63, -2);
+    public static final BlockPos AGENT_SPAWN_POS = TARGET_INIT_POS.offset((int) -SPAWN_DISTANCE, (int) SPAWN_DISTANCE, 0);
 
     @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.GAME)
     public static class GameBusEvents {
@@ -193,13 +194,13 @@ public class ModEvents {
             }
         }
 
-        // TODO initialize location of armor stand
         @SubscribeEvent
         public static void armorStandTargetRandomMovement(EntityTickEvent.Pre event) {
             if (NEATUtil.TRAINING &&
                     NEATUtil.RANDOM_MODE &&
                     event.getEntity() instanceof ArmorStand armorStand &&
                     armorStand.level() instanceof ServerLevel serverLevel) {
+                armorStand.setDeltaMovement(armorStand.getData(ModAttachments.TARGET_MOVEMENT));
             }
         }
 

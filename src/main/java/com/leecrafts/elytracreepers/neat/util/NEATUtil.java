@@ -13,6 +13,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.phys.Vec3;
 
 import java.io.*;
 import java.util.List;
@@ -23,7 +24,7 @@ public class NEATUtil {
 
     public static final boolean TRAINING = true;
     public static final boolean PRODUCTION = false;
-    public static final boolean RANDOM_MODE = false;
+    public static final boolean RANDOM_MODE = true;
 
     private static final String BASE_DIRECTORY_PATH = new File(System.getProperty("user.dir")).getParent();
     private static final String ASSETS_DIRECTORY_PATH = "/assets/elytracreepers/";
@@ -49,35 +50,58 @@ public class NEATUtil {
     public static final double DISTANCE_PUNISHMENT = 1;
     public static final double TIME_PUNISHMENT = 0.05;
 
+    // I am trying out a naive method of adding randomness into the training process.
+    // First of all, without the randomization of agent spawn points and target movement, convergence was reached after 330 generations.
+    // Therefore, I want the randomness to be the smallest at generation 0 and the largest at generation 330.
+    // For example, at generation 0 the range of horizontal distances between the target and agent spawn points is [100, 100].
+    // But eventually, that range would increase, becoming [50, 100] at generation 165 and [0, 100] at generation 330.
+    public static final int GENERATIONAL_RANDOMNESS_BOUND = 330;
+
+    public static final int MAX_TARGET_SPEED = 8;
+
     public static void initializeEntityPopulation(ServerLevel serverLevel, double sightDistance, NEATController neatController, ServerPlayer trackingPlayer) {
         // initialize population
+
         ModEvents.REMAINING_AGENTS = neatController.getPopulationSize();
-        for (int i = 0; i < neatController.getPopulationSize(); i++) {
-            Entity entity = Config.spawnedElytraEntityType.spawn(serverLevel, ModEvents.SPAWN_POS, MobSpawnType.MOB_SUMMONED);
-            // TODO random location
+
+        // getting target
+        List<ArmorStand> candidates = trackingPlayer.level().getEntitiesOfClass(
+                ArmorStand.class, trackingPlayer.getBoundingBox().inflate(sightDistance));
+        if (!candidates.isEmpty()) {
+            // initialize target initial position and speed
+            int index = trackingPlayer.getRandom().nextInt(candidates.size());
+            ArmorStand armorStand = candidates.get(index);
             if (RANDOM_MODE) {
-                entity.setPos(entity.getX() +
-                        1.0*Math.max(180, generationNumber())/180 * Math.random() * ModEvents.SPAWN_DISTANCE,
-                        entity.getY(),
-                        entity.getZ());
+                armorStand.moveTo(Vec3.atBottomCenterOf(ModEvents.TARGET_INIT_POS));
+                double angle = Math.random() * 2 * Math.PI;
+                double magnitude = Math.random() *
+                        Math.min(MAX_TARGET_SPEED, MAX_TARGET_SPEED * generationNumber()/GENERATIONAL_RANDOMNESS_BOUND); // TODO add randomness to magnitude as well
+                double xSpeed = magnitude * Math.cos(angle);
+                double zSpeed = magnitude * Math.sin(angle);
+                armorStand.setData(ModAttachments.TARGET_MOVEMENT, new Vec3(xSpeed, 0, zSpeed));
             }
-            if (entity instanceof LivingEntity livingEntity) {
-                livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
-
-                // setting agent data attachment
-                livingEntity.setData(ModAttachments.AGENT, neatController.getAgent(i));
-
-                // setting target
-                List<ArmorStand> candidates = livingEntity.level().getEntitiesOfClass(
-                        ArmorStand.class, livingEntity.getBoundingBox().inflate(sightDistance));
-                if (!candidates.isEmpty()) {
-                    int index = entity.getRandom().nextInt(candidates.size());
-                    livingEntity.setData(ModAttachments.TARGET_ENTITY, candidates.get(index));
+            for (int i = 0; i < neatController.getPopulationSize(); i++) {
+                Entity entity = Config.spawnedElytraEntityType.spawn(serverLevel, ModEvents.AGENT_SPAWN_POS, MobSpawnType.MOB_SUMMONED);
+                // TODO random location
+                if (RANDOM_MODE) {
+                    entity.setPos(entity.getX() +
+                            1.0*Math.max(GENERATIONAL_RANDOMNESS_BOUND, generationNumber())/ GENERATIONAL_RANDOMNESS_BOUND * Math.random() * ModEvents.SPAWN_DISTANCE,
+                            entity.getY(),
+                            entity.getZ());
                 }
+                if (entity instanceof LivingEntity livingEntity) {
+                    livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
 
-                // TODO not sure if needed because entity is already wearing elytra
-                if (livingEntity instanceof Mob mob) {
-                    mob.setPersistenceRequired();
+                    // setting agent data attachment
+                    livingEntity.setData(ModAttachments.AGENT, neatController.getAgent(i));
+
+                    // setting target
+                    livingEntity.setData(ModAttachments.TARGET_ENTITY, armorStand);
+
+                    // TODO not sure if needed because entity is already wearing elytra
+                    if (livingEntity instanceof Mob mob) {
+                        mob.setPersistenceRequired();
+                    }
                 }
             }
         }

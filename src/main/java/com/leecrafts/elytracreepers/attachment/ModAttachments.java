@@ -3,6 +3,7 @@ package com.leecrafts.elytracreepers.attachment;
 import com.leecrafts.elytracreepers.ElytraCreepers;
 import com.leecrafts.elytracreepers.neat.controller.Agent;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -21,6 +22,10 @@ public class ModAttachments {
 
     public static final Supplier<AttachmentType<Entity>> TARGET_ENTITY = ATTACHMENT_TYPES.register(
             "target_entity", () -> AttachmentType.builder(() -> (Entity) null).build()
+    );
+
+    public static final Supplier<AttachmentType<Vec3>> TARGET_MOVEMENT = ATTACHMENT_TYPES.register(
+            "target_movement", () -> AttachmentType.builder(() -> Vec3.ZERO).build()
     );
 
     public static final Supplier<AttachmentType<Float>> FALL_DISTANCE = ATTACHMENT_TYPES.register(
