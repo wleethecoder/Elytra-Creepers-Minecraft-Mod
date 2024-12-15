@@ -64,14 +64,14 @@ public class NEATUtil {
     // According to the Minecraft Wiki, jumping while sprinting allows the player to move with an average speed of 7.127 m/s.
     public static final double MAX_TARGET_SPEED = 7.127 / TICKS_PER_SECOND;
 
-    public static void initializeEntityPopulation(ServerLevel serverLevel, double sightDistance, NEATController neatController, ServerPlayer trackingPlayer) {
+    public static void initializeEntityPopulation(ServerLevel serverLevel, NEATController neatController, ServerPlayer trackingPlayer) {
         // initialize population
 
         ModEvents.REMAINING_AGENTS = neatController.getPopulationSize();
 
         // getting target
         List<ArmorStand> candidates = trackingPlayer.level().getEntitiesOfClass(
-                ArmorStand.class, trackingPlayer.getBoundingBox().inflate(sightDistance));
+                ArmorStand.class, trackingPlayer.getBoundingBox().inflate(500));
         if (!candidates.isEmpty()) {
             // initialize target initial position and speed
             int index = trackingPlayer.getRandom().nextInt(candidates.size());
@@ -112,7 +112,7 @@ public class NEATUtil {
         trackingPlayer.displayClientMessage(Component.literal("Generation " + (generationNumber() + 1)), true);
     }
 
-    public static void recordFitness(LivingEntity livingEntity, float fastFallDistance, int timeElapsed, ServerLevel serverLevel, double sightDistance, NEATController neatController, ServerPlayer trackingPlayer) {
+    public static void recordFitness(LivingEntity livingEntity, float fastFallDistance, int timeElapsed, ServerLevel serverLevel, NEATController neatController, ServerPlayer trackingPlayer) {
         Agent agent = livingEntity.getData(ModAttachments.AGENT);
         Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
         if (agent != null && target != null) {
@@ -131,7 +131,7 @@ public class NEATUtil {
             logMetrics(neatController);
             if (generationNumber < NUM_GENERATIONS) {
                 neatController.evolve();
-                initializeEntityPopulation(serverLevel, sightDistance, neatController, trackingPlayer);
+                initializeEntityPopulation(serverLevel, neatController, trackingPlayer);
             } else {
                 saveAgent(neatController.getBestAgent());
             }

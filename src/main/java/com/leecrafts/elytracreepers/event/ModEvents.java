@@ -56,7 +56,7 @@ public class ModEvents {
                         REMAINING_GENERATIONS = NEATUtil.NUM_GENERATIONS;
                     }
                     trackingPlayer = serverPlayer;
-                    NEATUtil.initializeEntityPopulation(serverPlayer.serverLevel(), SIGHT_DISTANCE, neatController, trackingPlayer);
+                    NEATUtil.initializeEntityPopulation(serverPlayer.serverLevel(), neatController, trackingPlayer);
                 }
             }
         }
@@ -178,7 +178,7 @@ public class ModEvents {
                     livingEntity.onGround()/* &&
                     NeuralElytra.isWearing(livingEntity)*/) {
                 if (livingEntity.getDeltaMovement().horizontalDistance() < 1e-8) {
-                    NEATUtil.recordFitness(livingEntity, livingEntity.getData(ModAttachments.FALL_DISTANCE), livingEntity.tickCount, serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
+                    NEATUtil.recordFitness(livingEntity, livingEntity.getData(ModAttachments.FALL_DISTANCE), livingEntity.tickCount, serverLevel, neatController, trackingPlayer);
                 }
             }
         }
@@ -193,7 +193,7 @@ public class ModEvents {
                     NeuralElytra.isWearing(livingEntity)) {
                 Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
                 if (target != null && livingEntity.distanceTo(target) > SIGHT_DISTANCE) {
-                    NEATUtil.recordFitness(livingEntity, (float) Math.abs(livingEntity.getY() - target.getY()), livingEntity.tickCount, serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
+                    NEATUtil.recordFitness(livingEntity, (float) Math.abs(livingEntity.getY() - target.getY()), livingEntity.tickCount, serverLevel, neatController, trackingPlayer);
                 }
             }
         }
@@ -204,7 +204,10 @@ public class ModEvents {
                     NEATUtil.RANDOM_MODE &&
                     event.getEntity() instanceof ArmorStand armorStand &&
                     armorStand.level() instanceof ServerLevel serverLevel) {
-                armorStand.setDeltaMovement(armorStand.getData(ModAttachments.TARGET_MOVEMENT));
+                // armor stand stops moving after it goes 45 * 8 = 360 blocks so that it will not go too far
+                if (armorStand.distanceToSqr(TARGET_INIT_POS.getX(), TARGET_INIT_POS.getY(), TARGET_INIT_POS.getZ()) < 360 * 360) {
+                    armorStand.setDeltaMovement(armorStand.getData(ModAttachments.TARGET_MOVEMENT));
+                }
             }
         }
 
