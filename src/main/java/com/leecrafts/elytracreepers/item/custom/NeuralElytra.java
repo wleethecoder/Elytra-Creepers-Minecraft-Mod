@@ -46,7 +46,7 @@ public class NeuralElytra extends ElytraItem {
             double pitchFacingTarget = Math.asin(-distanceNormalized.y); // in radians
             double yawFacingTarget = Math.atan2(-distanceNormalized.x, distanceNormalized.z); // in radians
 
-            double[] observations = getObservations(entity, distance, pitchFacingTarget, yawFacingTarget, targetVelocity, true);
+            double[] observations = getObservations(entity, distance, pitchFacingTarget, yawFacingTarget, targetVelocity, false);
             Agent agent = entity.getData(ModAttachments.AGENT);
             if (agent != null) {
                 double[] outputs = agent.calculate(observations);
