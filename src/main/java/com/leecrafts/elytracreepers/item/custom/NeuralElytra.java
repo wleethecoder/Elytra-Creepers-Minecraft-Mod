@@ -46,7 +46,7 @@ public class NeuralElytra extends ElytraItem {
             double pitchFacingTarget = Math.asin(-distanceNormalized.y); // in radians
             double yawFacingTarget = Math.atan2(-distanceNormalized.x, distanceNormalized.z); // in radians
 
-            double[] observations = getObservations(entity, distance, pitchFacingTarget, yawFacingTarget, targetVelocity, false);
+            double[] observations = getObservations(entity, distance, pitchFacingTarget, yawFacingTarget, targetVelocity, true);
             Agent agent = entity.getData(ModAttachments.AGENT);
             if (agent != null) {
                 double[] outputs = agent.calculate(observations);
@@ -94,11 +94,13 @@ public class NeuralElytra extends ElytraItem {
     // Calculate v_forwardbackward, the object's forward/backward velocity relative to the agent
     // Calculate v_leftright, the object's left/right velocity relative to the agent
     private static double[] calculate_FB_LR_ofVelocity(Vec3 distance, Vec3 velocity) {
-        Vec3 distanceHorizontal = new Vec3(distance.x, 0, distance.z).normalize();
+        Vec3 distanceHorizontal = new Vec3(-distance.x, 0, -distance.z).normalize();
         Vec3 velocityHorizontal = new Vec3(velocity.x, 0, velocity.z);
         double v_fb = velocityHorizontal.dot(distanceHorizontal);
-        Vec3 vec_fb = distanceHorizontal.scale(v_fb);
-        double v_lr = velocityHorizontal.subtract(vec_fb).length();
+
+        // distance vector rotated 90 degrees counterclockwise
+        Vec3 perpendicularToDistanceVec = new Vec3(distance.z, 0, -distance.x).normalize();
+        double v_lr = velocityHorizontal.dot(perpendicularToDistanceVec);
         return new double[] {v_fb, v_lr};
     }
 
