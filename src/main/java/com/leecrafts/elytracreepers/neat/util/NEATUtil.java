@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static net.minecraft.SharedConstants.TICKS_PER_SECOND;
+
 public class NEATUtil {
 
     public static final boolean TRAINING = true;
@@ -40,8 +42,8 @@ public class NEATUtil {
     public static final File OVERALL_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/overall.csv");
     public static final File PER_SPECIES_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/per_species.csv");
 
-    public static final int POPULATION_SIZE = 5;
-    public static final int NUM_GENERATIONS = 400;
+    public static final int POPULATION_SIZE = 500;
+    public static final int NUM_GENERATIONS = 1000;
     public static final int INPUT_SIZE = 7;
     public static final int OUTPUT_SIZE = 4;
 
@@ -57,7 +59,10 @@ public class NEATUtil {
     // But eventually, that range would increase, becoming [50, 100] at generation 165 and [0, 100] at generation 330.
     public static final int GENERATIONAL_RANDOMNESS_BOUND = 330;
 
-    public static final int MAX_TARGET_SPEED = 8;
+    public static final double AGENT_SPAWN_DISTANCE = 100;
+    public static final double AGENT_SPAWN_Y_OFFSET = 50;
+    // According to the Minecraft Wiki, jumping while sprinting allows the player to move with an average speed of 7.127 m/s.
+    public static final double MAX_TARGET_SPEED = 7.127 / TICKS_PER_SECOND;
 
     public static void initializeEntityPopulation(ServerLevel serverLevel, double sightDistance, NEATController neatController, ServerPlayer trackingPlayer) {
         // initialize population
@@ -74,22 +79,21 @@ public class NEATUtil {
             if (RANDOM_MODE) {
                 armorStand.moveTo(Vec3.atBottomCenterOf(ModEvents.TARGET_INIT_POS));
                 double angle = Math.random() * 2 * Math.PI;
-                double magnitude = Math.random() *
-                        Math.min(MAX_TARGET_SPEED, MAX_TARGET_SPEED * generationNumber()/GENERATIONAL_RANDOMNESS_BOUND); // TODO add randomness to magnitude as well
+                double magnitude = degreeOfRandomness() * Math.random() * MAX_TARGET_SPEED;
                 double xSpeed = magnitude * Math.cos(angle);
                 double zSpeed = magnitude * Math.sin(angle);
                 armorStand.setData(ModAttachments.TARGET_MOVEMENT, new Vec3(xSpeed, 0, zSpeed));
             }
             for (int i = 0; i < neatController.getPopulationSize(); i++) {
                 Entity entity = Config.spawnedElytraEntityType.spawn(serverLevel, ModEvents.AGENT_SPAWN_POS, MobSpawnType.MOB_SUMMONED);
-                // TODO random location
-                if (RANDOM_MODE) {
-                    entity.setPos(entity.getX() +
-                            1.0*Math.max(GENERATIONAL_RANDOMNESS_BOUND, generationNumber())/ GENERATIONAL_RANDOMNESS_BOUND * Math.random() * ModEvents.SPAWN_DISTANCE,
-                            entity.getY(),
-                            entity.getZ());
-                }
                 if (entity instanceof LivingEntity livingEntity) {
+                    if (RANDOM_MODE) {
+                        livingEntity.setPos(livingEntity.getX() +
+                                        degreeOfRandomness() * Math.random() * AGENT_SPAWN_DISTANCE,
+                                livingEntity.getY() +
+                                        degreeOfRandomness() * Math.random() * AGENT_SPAWN_Y_OFFSET * (livingEntity.getRandom().nextBoolean() ? 1 : -1),
+                                livingEntity.getZ());
+                    }
                     livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
 
                     // setting agent data attachment
@@ -98,7 +102,6 @@ public class NEATUtil {
                     // setting target
                     livingEntity.setData(ModAttachments.TARGET_ENTITY, armorStand);
 
-                    // TODO not sure if needed because entity is already wearing elytra
                     if (livingEntity instanceof Mob mob) {
                         mob.setPersistenceRequired();
                     }
@@ -147,6 +150,10 @@ public class NEATUtil {
 
     private static int generationNumber() {
         return NUM_GENERATIONS - ModEvents.REMAINING_GENERATIONS;
+    }
+
+    private static double degreeOfRandomness() {
+        return 1.0 * Math.min(GENERATIONAL_RANDOMNESS_BOUND, generationNumber()) / GENERATIONAL_RANDOMNESS_BOUND;
     }
 
     private static void saveAgent(Agent agent) {

@@ -39,9 +39,8 @@ public class ModEvents {
     public static int REMAINING_GENERATIONS;
 
     private static final double SIGHT_DISTANCE = 200;
-    public static final double SPAWN_DISTANCE = 100;
     public static final BlockPos TARGET_INIT_POS = new BlockPos(-189, -63, -2);
-    public static final BlockPos AGENT_SPAWN_POS = TARGET_INIT_POS.offset((int) -SPAWN_DISTANCE, (int) SPAWN_DISTANCE, 0);
+    public static final BlockPos AGENT_SPAWN_POS = TARGET_INIT_POS.offset((int) -NEATUtil.AGENT_SPAWN_DISTANCE, (int) NEATUtil.AGENT_SPAWN_DISTANCE, 0);
 
     @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.GAME)
     public static class GameBusEvents {
@@ -68,10 +67,14 @@ public class ModEvents {
                     event.getEntity() instanceof ServerPlayer serverPlayer &&
                     serverPlayer.tickCount % (5 * TICKS_PER_SECOND) == 0 &&
                     serverPlayer.getMainHandItem().is(Items.OAK_BUTTON)) {
+                // TODO loop spawn attempts in production mode
                 double angle = Math.random() * 2 * Math.PI;
-                int xOffset = (int) (SPAWN_DISTANCE * Math.cos(angle));
-                int zOffset = (int) (SPAWN_DISTANCE * Math.sin(angle));
-                BlockPos blockPos = serverPlayer.blockPosition().offset(xOffset, (int) SPAWN_DISTANCE, zOffset);
+                double distance = Math.random() * NEATUtil.AGENT_SPAWN_DISTANCE;
+                int xOffset = (int) (distance * Math.cos(angle));
+                int yOffset = (int) (NEATUtil.AGENT_SPAWN_DISTANCE +
+                        Math.random() * NEATUtil.AGENT_SPAWN_Y_OFFSET * (serverPlayer.getRandom().nextBoolean() ? 1 : -1));
+                int zOffset = (int) (distance * Math.sin(angle));
+                BlockPos blockPos = serverPlayer.blockPosition().offset(xOffset, yOffset, zOffset);
                 Entity entity = Config.spawnedElytraEntityType.spawn(serverPlayer.serverLevel(), blockPos, MobSpawnType.MOB_SUMMONED);
                 if (entity instanceof LivingEntity livingEntity) {
                     livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
@@ -137,6 +140,9 @@ public class ModEvents {
 //                        livingEntity.load(compoundTag);
                         livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.AIR));
 //                        livingEntity.setSharedFlag(7, false);
+                        if (livingEntity instanceof Mob mob) {
+                            mob.setPersistenceRequired();
+                        }
                     }
                 }
             }
