@@ -161,7 +161,6 @@ public class ModEvents {
                     NeuralElytra.isWearing(livingEntity)) {
 //                NEATUtil.recordFitness(livingEntity, event.getDistance(), serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
                 livingEntity.setData(ModAttachments.FALL_DISTANCE, event.getDistance());
-                livingEntity.setData(ModAttachments.LAND_TIMESTAMP, livingEntity.tickCount);
 
                 // the noise of 500 entities falling onto the ground at once can be a bit distracting
                 // see LivingEntity#causeFallDamage
@@ -169,7 +168,7 @@ public class ModEvents {
             }
         }
 
-        // After a few ticks on the ground, the agent's run ends and score is recorded
+        // After the agent stops sliding on the ground, the agent's run ends and score is recorded
         @SubscribeEvent
         public static void agentRunEndAfterLanding(EntityTickEvent.Pre event) {
             if (NEATUtil.TRAINING &&
@@ -178,9 +177,8 @@ public class ModEvents {
                     livingEntity.getType() == Config.spawnedElytraEntityType &&
                     livingEntity.onGround()/* &&
                     NeuralElytra.isWearing(livingEntity)*/) {
-                int landTimestamp = livingEntity.getData(ModAttachments.LAND_TIMESTAMP);
-                if (landTimestamp != -1 && livingEntity.tickCount - landTimestamp > TICKS_PER_SECOND) {
-                    NEATUtil.recordFitness(livingEntity, livingEntity.getData(ModAttachments.FALL_DISTANCE), landTimestamp, serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
+                if (livingEntity.getDeltaMovement().horizontalDistance() < 1e-8) {
+                    NEATUtil.recordFitness(livingEntity, livingEntity.getData(ModAttachments.FALL_DISTANCE), livingEntity.tickCount, serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
                 }
             }
         }

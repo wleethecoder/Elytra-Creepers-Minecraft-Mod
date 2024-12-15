@@ -112,11 +112,11 @@ public class NEATUtil {
         trackingPlayer.displayClientMessage(Component.literal("Generation " + (generationNumber() + 1)), true);
     }
 
-    public static void recordFitness(LivingEntity livingEntity, float fastFallDistance, int landTimestamp, ServerLevel serverLevel, double sightDistance, NEATController neatController, ServerPlayer trackingPlayer) {
+    public static void recordFitness(LivingEntity livingEntity, float fastFallDistance, int timeElapsed, ServerLevel serverLevel, double sightDistance, NEATController neatController, ServerPlayer trackingPlayer) {
         Agent agent = livingEntity.getData(ModAttachments.AGENT);
         Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
         if (agent != null && target != null) {
-            agent.setScore(calculateFitness(livingEntity, target, fastFallDistance, landTimestamp));
+            agent.setScore(calculateFitness(livingEntity, target, fastFallDistance, timeElapsed));
         }
         livingEntity.discard();
 
@@ -142,10 +142,10 @@ public class NEATUtil {
         }
     }
 
-    private static double calculateFitness(LivingEntity livingEntity, Entity target, float fastFallDistance, int landTimestamp) {
+    private static double calculateFitness(LivingEntity livingEntity, Entity target, float fastFallDistance, int timeElapsed) {
         return -(FAST_FALL_PUNISHMENT * Math.max(0, fastFallDistance - 2) +
                 DISTANCE_PUNISHMENT * livingEntity.distanceTo(target) +
-                TIME_PUNISHMENT * landTimestamp);
+                TIME_PUNISHMENT * timeElapsed);
     }
 
     private static int generationNumber() {
