@@ -2,7 +2,9 @@ package com.leecrafts.elytracreepers.item.custom;
 
 import com.leecrafts.elytracreepers.attachment.ModAttachments;
 import com.leecrafts.elytracreepers.item.ModItems;
+import com.leecrafts.elytracreepers.neat.calculations.Calculator;
 import com.leecrafts.elytracreepers.neat.controller.Agent;
+import com.leecrafts.elytracreepers.neat.util.NEATUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -47,11 +49,20 @@ public class NeuralElytra extends ElytraItem {
             double yawFacingTarget = Math.atan2(-distanceNormalized.x, distanceNormalized.z); // in radians
 
             double[] observations = getObservations(entity, distance, pitchFacingTarget, yawFacingTarget, targetVelocity, false);
-            Agent agent = entity.getData(ModAttachments.AGENT);
-            if (agent != null) {
-                double[] outputs = agent.calculate(observations);
-                handleOutputs(entity, outputs, pitchFacingTarget, yawFacingTarget);
+            double[] outputs = new double[NEATUtil.OUTPUT_SIZE];
+            if (NEATUtil.TRAINING) {
+                Agent agent = entity.getData(ModAttachments.AGENT);
+                if (agent != null) {
+                    outputs = agent.calculate(observations);
+                }
             }
+            else {
+                Calculator calculator = entity.getData(ModAttachments.CALCULATOR);
+                if (calculator != null) {
+                    outputs = calculator.calculate(observations);
+                }
+            }
+            handleOutputs(entity, outputs, pitchFacingTarget, yawFacingTarget);
         }
         return true;
     }

@@ -4,6 +4,7 @@ import com.leecrafts.elytracreepers.Config;
 import com.leecrafts.elytracreepers.attachment.ModAttachments;
 import com.leecrafts.elytracreepers.event.ModEvents;
 import com.leecrafts.elytracreepers.item.ModItems;
+import com.leecrafts.elytracreepers.neat.calculations.Calculator;
 import com.leecrafts.elytracreepers.neat.controller.Agent;
 import com.leecrafts.elytracreepers.neat.controller.NEATController;
 import net.minecraft.network.chat.Component;
@@ -24,8 +25,8 @@ import static net.minecraft.SharedConstants.TICKS_PER_SECOND;
 
 public class NEATUtil {
 
-    public static final boolean TRAINING = true;
-    public static final boolean PRODUCTION = false;
+    public static final boolean TRAINING = false;
+    public static final boolean PRODUCTION = true;
     public static final boolean RANDOM_MODE = true;
 
     private static final String BASE_DIRECTORY_PATH = new File(System.getProperty("user.dir")).getParent();
@@ -37,7 +38,7 @@ public class NEATUtil {
     public static final String NEATCONTROLLER_REGEX = "^%s-(\\d+)\\-(\\d+)\\.dat$";
 
     // neatController is saved every N generations
-    private static final int N = 50;
+    private static final int N = 25;
 
     public static final File OVERALL_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/overall.csv");
     public static final File PER_SPECIES_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/per_species.csv");
@@ -133,7 +134,7 @@ public class NEATUtil {
                 neatController.evolve();
                 initializeEntityPopulation(serverLevel, neatController, trackingPlayer);
             } else {
-                saveAgent(neatController.getBestAgent());
+//                saveAgent(neatController.getBestAgent());
             }
 
             if ((generationNumber - 1) % N == 0 || generationNumber == NUM_GENERATIONS) {
@@ -156,12 +157,14 @@ public class NEATUtil {
         return 1.0 * Math.min(GENERATIONAL_RANDOMNESS_BOUND, generationNumber()) / GENERATIONAL_RANDOMNESS_BOUND;
     }
 
-    private static void saveAgent(Agent agent) {
-        File file = objectFile(
-                String.valueOf(getNewestAgentNumber() + 1),
-                AGENT_BASE_NAME);
-        saveObject(agent, file, AGENT_BASE_NAME);
-    }
+    // saving the agent itself has become redundant because the NEATController object is already being saved
+    // I can just use NEATUtil.java to extract an agent from the NEATController object of my choosing
+//    private static void saveAgent(Agent agent) {
+//        File file = objectFile(
+//                String.valueOf(getNewestAgentNumber() + 1),
+//                AGENT_BASE_NAME);
+//        saveObject(agent, file, AGENT_BASE_NAME);
+//    }
 
     private static void saveNEATController(NEATController neatController, int generationNumber) {
         int[] numbers = getNewestNEATControllerNumberAndGenerationNumber();
@@ -186,8 +189,9 @@ public class NEATUtil {
         }
     }
 
-    public static Agent loadAgent(int agentNumber) {
-        return (Agent) loadObject(AGENT_BASE_NAME, String.valueOf(agentNumber));
+    // production mode only
+    public static Calculator loadAgent(int agentNumber) {
+        return (Calculator) loadObject(AGENT_BASE_NAME, String.valueOf(agentNumber));
     }
 
     // this should be used outside of the training process

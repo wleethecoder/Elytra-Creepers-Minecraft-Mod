@@ -6,7 +6,7 @@ import com.leecrafts.elytracreepers.attachment.ModAttachments;
 import com.leecrafts.elytracreepers.entity.ModEntities;
 import com.leecrafts.elytracreepers.item.ModItems;
 import com.leecrafts.elytracreepers.item.custom.NeuralElytra;
-import com.leecrafts.elytracreepers.neat.controller.Agent;
+import com.leecrafts.elytracreepers.neat.calculations.Calculator;
 import com.leecrafts.elytracreepers.neat.controller.NEATController;
 import com.leecrafts.elytracreepers.neat.util.NEATUtil;
 import net.minecraft.core.BlockPos;
@@ -103,17 +103,18 @@ public class ModEvents {
             }
         }
 
+        // loading not the agent object itself (too much unnecessary data), but the agent's calculator object.
         @SubscribeEvent
         public static void loadAgent(LivingEquipmentChangeEvent event) {
             LivingEntity livingEntity = event.getEntity();
-            if (livingEntity.getData(ModAttachments.AGENT) == null &&
+            if (livingEntity.getData(ModAttachments.CALCULATOR) == null &&
                     !NEATUtil.TRAINING &&
                     !livingEntity.level().isClientSide &&
                     event.getTo().is(ModItems.NEURAL_ELYTRA.asItem()) &&
                     NeuralElytra.isNonPlayerLivingEntity(livingEntity)) {
-                Agent agent = NEATUtil.loadAgent(2);
-                livingEntity.setData(ModAttachments.AGENT, agent);
-                System.out.println("loaded agent score: " + livingEntity.getData(ModAttachments.AGENT).getScore());
+                Calculator agent = NEATUtil.loadAgent(2);
+                livingEntity.setData(ModAttachments.CALCULATOR, agent);
+//                System.out.println("loaded agent score: " + livingEntity.getData(ModAttachments.AGENT).getScore());
 
 //                NEATController neatController1 = NEATUtil.loadNEATController(1, 301);
 //                System.out.println("loaded neatController best agent score: " + neatController1.getBestAgent().getScore());

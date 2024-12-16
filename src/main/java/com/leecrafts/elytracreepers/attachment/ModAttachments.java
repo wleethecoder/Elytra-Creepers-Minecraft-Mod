@@ -1,6 +1,7 @@
 package com.leecrafts.elytracreepers.attachment;
 
 import com.leecrafts.elytracreepers.ElytraCreepers;
+import com.leecrafts.elytracreepers.neat.calculations.Calculator;
 import com.leecrafts.elytracreepers.neat.controller.Agent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -30,6 +31,10 @@ public class ModAttachments {
 
     public static final Supplier<AttachmentType<Float>> FALL_DISTANCE = ATTACHMENT_TYPES.register(
             "fall_distance", () -> AttachmentType.builder(() -> 0f).build()
+    );
+
+    public static final Supplier<AttachmentType<Calculator>> CALCULATOR = ATTACHMENT_TYPES.register(
+            "calculator", () -> AttachmentType.builder(() -> (Calculator) null).build()
     );
 
     public static void register(IEventBus eventBus) {

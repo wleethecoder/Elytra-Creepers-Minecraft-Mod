@@ -36,6 +36,10 @@ public class Agent implements Serializable {
         this.genome.mutate();
     }
 
+    public Calculator getCalculator() {
+        return this.calculator;
+    }
+
     public Genome getGenome() {
         return genome;
     }

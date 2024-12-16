@@ -2,12 +2,10 @@ package com.leecrafts.elytracreepers.neat.util;
 
 import com.leecrafts.elytracreepers.neat.controller.Agent;
 import com.leecrafts.elytracreepers.neat.controller.NEATController;
-import com.leecrafts.elytracreepers.neat.controller.Species;
 import com.leecrafts.elytracreepers.neat.genome.Genome;
 import com.leecrafts.elytracreepers.neat.visual.Frame;
 
 import java.io.*;
-import java.util.Arrays;
 
 public class NEATTest {
 
@@ -96,28 +94,29 @@ public class NEATTest {
             NEATController neatController = (NEATController) in.readObject();
             System.out.println("Neatcontroller loaded from " + file.getPath());
             Agent bestAgent = neatController.getBestAgent();
-            double[] output = bestAgent.calculate(100,-100,.7853,2.19,0);
-            System.out.println(Arrays.toString(output));
+//            double[] output = bestAgent.calculate(100,-100,.7853,2.19,0);
+//            System.out.println(Arrays.toString(output));
 
             // save best agent from loaded neatcontroller
-//            File file1 = new File(AGENT_DIRECTORY_PATH, String.format("/%s-%d.dat", "agent", 1));
-//            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file1))) {
-//                out.writeObject(bestAgent);
-//                System.out.println("this agent saved to " + file1.getPath());
-//            } catch (IOException e) {
-//                System.out.println("Error saving this agent: " + e.getMessage());
-//                System.out.println(e.toString());
-//            }
+            File file1 = new File(AGENT_DIRECTORY_PATH, String.format("/%s-%d.dat", "agent", 2));
+            try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file1))) {
+                out.writeObject(bestAgent.getCalculator());
+                System.out.println("this agent saved to " + file1.getPath());
+            } catch (IOException e) {
+                System.out.println("Error saving this agent: " + e.getMessage());
+                System.out.println(e.toString());
+            }
 
             System.out.println(bestAgent.getScore());
             new Frame(bestAgent.getGenome());
-            for (int i = 0; i < neatController.numSpecies(); i++) {
-                Species species = neatController.getSpecies(i);
-                Agent representative = species.getRepresentative();
-                System.out.println(Arrays.toString(representative.calculate(100, -100, .7853, 2.19, 0)));
-                System.out.println(representative.getScore());
-                new Frame(representative.getGenome());
-            }
+
+//            for (int i = 0; i < neatController.numSpecies(); i++) {
+//                Species species = neatController.getSpecies(i);
+//                Agent representative = species.getRepresentative();
+//                System.out.println(Arrays.toString(representative.calculate(100, -100, .7853, 2.19, 0)));
+//                System.out.println(representative.getScore());
+//                new Frame(representative.getGenome());
+//            }
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Error loading neatcontroller: " + e.getMessage());
         }
@@ -129,7 +128,7 @@ public class NEATTest {
 //        agents(true);
 //        saveAndLoad();
 //        displayGenomeOfLoadedEntityAgent(4);
-        displayGenomeOfLoadedNeatController(1, 301);
+        displayGenomeOfLoadedNeatController(1, 601);
     }
 
 }
