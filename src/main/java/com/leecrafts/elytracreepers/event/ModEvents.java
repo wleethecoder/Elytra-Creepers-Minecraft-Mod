@@ -111,7 +111,7 @@ public class ModEvents {
                     !livingEntity.level().isClientSide &&
                     event.getTo().is(ModItems.NEURAL_ELYTRA.asItem()) &&
                     NeuralElytra.isNonPlayerLivingEntity(livingEntity)) {
-                Agent agent = NEATUtil.loadAgent(3);
+                Agent agent = NEATUtil.loadAgent(2);
                 livingEntity.setData(ModAttachments.AGENT, agent);
                 System.out.println("loaded agent score: " + livingEntity.getData(ModAttachments.AGENT).getScore());
 
@@ -204,8 +204,8 @@ public class ModEvents {
                     NEATUtil.RANDOM_MODE &&
                     event.getEntity() instanceof ArmorStand armorStand &&
                     armorStand.level() instanceof ServerLevel serverLevel) {
-                // armor stand stops moving after it goes 45 * 8 = 360 blocks so that it will not go too far
-                if (armorStand.distanceToSqr(TARGET_INIT_POS.getX(), TARGET_INIT_POS.getY(), TARGET_INIT_POS.getZ()) < 360 * 360) {
+                // armor stand stops moving after it goes 20 * 8 = 160 blocks so that it will not go too far
+                if (armorStand.distanceToSqr(TARGET_INIT_POS.getX(), TARGET_INIT_POS.getY(), TARGET_INIT_POS.getZ()) < 160 * 160) {
                     armorStand.setDeltaMovement(armorStand.getData(ModAttachments.TARGET_MOVEMENT));
                 }
             }
