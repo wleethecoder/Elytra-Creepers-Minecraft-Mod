@@ -14,7 +14,7 @@ _(If you look closely, these are actually not creepers. They are custom entities
 
 Here is a bonus video of me trying to avoid the elytra-flying creepers but failing!
 
-https://github.com/user-attachments/assets/09f8dadb-d0c8-407e-bbfc-9971b899b67e
+https://github.com/user-attachments/assets/c2fa72ca-54ca-466d-85c1-7b49f3ae5e6a
 
 ### MIT License of NEAT implementation (https://github.com/Luecx/NEAT)
 
