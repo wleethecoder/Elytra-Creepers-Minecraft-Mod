@@ -12,6 +12,8 @@ import com.leecrafts.elytracreepers.neat.util.NEATUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -40,7 +42,11 @@ public class ModEvents {
 
     private static final double SIGHT_DISTANCE = 200;
     public static final BlockPos TARGET_INIT_POS = new BlockPos(-189, -63, -2);
-    public static final BlockPos AGENT_SPAWN_POS = TARGET_INIT_POS.offset((int) -NEATUtil.AGENT_SPAWN_DISTANCE, (int) NEATUtil.AGENT_SPAWN_DISTANCE, 0);
+    public static final BlockPos AGENT_SPAWN_POS = TARGET_INIT_POS.offset(0, (int) NEATUtil.AGENT_SPAWN_DISTANCE, 0);
+    public static final BlockPos AGENT_SPAWN_POS_PHASE_1 = TARGET_INIT_POS.offset(-100, 150, 0);
+    public static final BlockPos AGENT_SPAWN_POS_PHASE_2 = TARGET_INIT_POS.offset(-100, 100, 0);
+    public static final BlockPos AGENT_SPAWN_POS_PHASE_3 = TARGET_INIT_POS.offset(0, 150, 0);
+    public static final BlockPos AGENT_SPAWN_POS_PHASE_4 = TARGET_INIT_POS.offset(0, 100, 0);
 
     @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.GAME)
     public static class GameBusEvents {
@@ -56,7 +62,7 @@ public class ModEvents {
                         REMAINING_GENERATIONS = NEATUtil.NUM_GENERATIONS;
                     }
                     trackingPlayer = serverPlayer;
-                    NEATUtil.initializeEntityPopulation(serverPlayer.serverLevel(), neatController, trackingPlayer);
+                    NEATUtil.initializeEntityPopulation(serverPlayer.serverLevel(), neatController, trackingPlayer, 0);
                 }
             }
         }
@@ -65,7 +71,7 @@ public class ModEvents {
         public static void spawnAgentsProduction(EntityTickEvent.Pre event) {
             if (NEATUtil.PRODUCTION &&
                     event.getEntity() instanceof ServerPlayer serverPlayer &&
-                    serverPlayer.tickCount % (5 * TICKS_PER_SECOND) == 0 &&
+                    serverPlayer.tickCount % (1 * TICKS_PER_SECOND) == 0 &&
                     serverPlayer.getMainHandItem().is(Items.OAK_BUTTON)) {
                 // TODO loop spawn attempts in production mode
                 double angle = Math.random() * 2 * Math.PI;
@@ -90,6 +96,9 @@ public class ModEvents {
                         mob.setPersistenceRequired();
                     }
                 }
+
+                serverPlayer.serverLevel().playSound(
+                        null, serverPlayer.blockPosition(), SoundEvents.PHANTOM_SWOOP, SoundSource.HOSTILE);
             }
         }
 
@@ -112,7 +121,7 @@ public class ModEvents {
                     !livingEntity.level().isClientSide &&
                     event.getTo().is(ModItems.NEURAL_ELYTRA.asItem()) &&
                     NeuralElytra.isNonPlayerLivingEntity(livingEntity)) {
-                Calculator agent = NEATUtil.loadAgent(2);
+                Calculator agent = NEATUtil.loadAgent(1);
                 livingEntity.setData(ModAttachments.CALCULATOR, agent);
 //                System.out.println("loaded agent score: " + livingEntity.getData(ModAttachments.AGENT).getScore());
 
@@ -162,6 +171,7 @@ public class ModEvents {
                     NeuralElytra.isWearing(livingEntity)) {
 //                NEATUtil.recordFitness(livingEntity, event.getDistance(), serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
                 livingEntity.setData(ModAttachments.FALL_DISTANCE, event.getDistance());
+                livingEntity.setData(ModAttachments.LAND_TIMESTAMP, livingEntity.tickCount);
 
                 // the noise of 500 entities falling onto the ground at once can be a bit distracting
                 // see LivingEntity#causeFallDamage
@@ -169,7 +179,7 @@ public class ModEvents {
             }
         }
 
-        // After the agent stops sliding on the ground, the agent's run ends and score is recorded
+        // After sliding for 1 second on the ground, the agent's run ends and score is recorded
         @SubscribeEvent
         public static void agentRunEndAfterLanding(EntityTickEvent.Pre event) {
             if (NEATUtil.TRAINING &&
@@ -178,7 +188,8 @@ public class ModEvents {
                     livingEntity.getType() == Config.spawnedElytraEntityType &&
                     livingEntity.onGround()/* &&
                     NeuralElytra.isWearing(livingEntity)*/) {
-                if (livingEntity.getDeltaMovement().horizontalDistance() < 1e-8) {
+                int landTimestamp = livingEntity.getData(ModAttachments.LAND_TIMESTAMP);
+                if (landTimestamp != -1 && livingEntity.tickCount - landTimestamp > TICKS_PER_SECOND) {
                     NEATUtil.recordFitness(livingEntity, livingEntity.getData(ModAttachments.FALL_DISTANCE), livingEntity.tickCount, serverLevel, neatController, trackingPlayer);
                 }
             }

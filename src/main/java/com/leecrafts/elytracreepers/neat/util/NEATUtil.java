@@ -7,6 +7,7 @@ import com.leecrafts.elytracreepers.item.ModItems;
 import com.leecrafts.elytracreepers.neat.calculations.Calculator;
 import com.leecrafts.elytracreepers.neat.controller.Agent;
 import com.leecrafts.elytracreepers.neat.controller.NEATController;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,8 +26,8 @@ import static net.minecraft.SharedConstants.TICKS_PER_SECOND;
 
 public class NEATUtil {
 
-    public static final boolean TRAINING = false;
-    public static final boolean PRODUCTION = true;
+    public static final boolean TRAINING = true;
+    public static final boolean PRODUCTION = false;
     public static final boolean RANDOM_MODE = true;
 
     private static final String BASE_DIRECTORY_PATH = new File(System.getProperty("user.dir")).getParent();
@@ -38,7 +39,7 @@ public class NEATUtil {
     public static final String NEATCONTROLLER_REGEX = "^%s-(\\d+)\\-(\\d+)\\.dat$";
 
     // neatController is saved every N generations
-    private static final int N = 25;
+    private static final int N = 5;
 
     public static final File OVERALL_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/overall.csv");
     public static final File PER_SPECIES_METRICS_LOG_PATH = new File(System.getProperty("user.dir"), "metricslog/per_species.csv");
@@ -50,25 +51,31 @@ public class NEATUtil {
 
     // TODO adjust hyperparameters
     public static final double FAST_FALL_PUNISHMENT = 5;
-    public static final double DISTANCE_PUNISHMENT = 1;
+    public static final double DISTANCE_PUNISHMENT = 2;
     public static final double TIME_PUNISHMENT = 0.05;
 
+    // TODO change this comment
     // I am trying out a naive method of adding randomness into the training process.
     // First of all, without the randomization of agent spawn points and target movement, convergence was reached after 330 generations.
     // Therefore, I want the randomness to be the smallest at generation 0 and the largest at generation 330.
     // For example, at generation 0 the range of horizontal distances between the target and agent spawn points is [100, 100].
     // But eventually, that range would increase, becoming [50, 100] at generation 165 and [0, 100] at generation 330.
-    public static final int GENERATIONAL_RANDOMNESS_BOUND = 330;
+    public static final int GENERATIONAL_RANDOMNESS_BOUND = 175;
 
     public static final double AGENT_SPAWN_DISTANCE = 100;
     public static final double AGENT_SPAWN_Y_OFFSET = 50;
     // According to the Minecraft Wiki, jumping while sprinting allows the player to move with an average speed of 7.127 m/s.
-    public static final double MAX_TARGET_SPEED = 7.127 / TICKS_PER_SECOND;
+//    public static final double MAX_TARGET_SPEED = 7.127 / TICKS_PER_SECOND;
+    public static final double MAX_TARGET_SPEED = 10.0 / TICKS_PER_SECOND;
 
-    public static void initializeEntityPopulation(ServerLevel serverLevel, NEATController neatController, ServerPlayer trackingPlayer) {
+    private static int PHASE = 0;
+    private static final int NUM_PHASES = 4;
+
+    public static void initializeEntityPopulation(ServerLevel serverLevel, NEATController neatController, ServerPlayer trackingPlayer, int episodePhase) {
         // initialize population
 
         ModEvents.REMAINING_AGENTS = neatController.getPopulationSize();
+        PHASE = episodePhase;
 
         // getting target
         List<ArmorStand> candidates = trackingPlayer.level().getEntitiesOfClass(
@@ -80,20 +87,23 @@ public class NEATUtil {
             if (RANDOM_MODE) {
                 armorStand.moveTo(Vec3.atBottomCenterOf(ModEvents.TARGET_INIT_POS));
                 double angle = Math.random() * 2 * Math.PI;
-                double magnitude = degreeOfRandomness() * Math.random() * MAX_TARGET_SPEED;
+                double magnitude = degreeOfRandomness() * Math.random() * MAX_TARGET_SPEED * (PHASE < 2 ? 1 : 0.3);
                 double xSpeed = magnitude * Math.cos(angle);
                 double zSpeed = magnitude * Math.sin(angle);
                 armorStand.setData(ModAttachments.TARGET_MOVEMENT, new Vec3(xSpeed, 0, zSpeed));
             }
             for (int i = 0; i < neatController.getPopulationSize(); i++) {
-                Entity entity = Config.spawnedElytraEntityType.spawn(serverLevel, ModEvents.AGENT_SPAWN_POS, MobSpawnType.MOB_SUMMONED);
+                Entity entity = Config.spawnedElytraEntityType.spawn(serverLevel, spawnPositionFromPhase(), MobSpawnType.MOB_SUMMONED);
                 if (entity instanceof LivingEntity livingEntity) {
                     if (RANDOM_MODE) {
-                        livingEntity.setPos(livingEntity.getX() +
-                                        degreeOfRandomness() * Math.random() * AGENT_SPAWN_DISTANCE,
-                                livingEntity.getY() +
-                                        degreeOfRandomness() * Math.random() * AGENT_SPAWN_Y_OFFSET * (livingEntity.getRandom().nextBoolean() ? 1 : -1),
+                        double horizontalSpawnOffset = PHASE < 2 ? degreeOfRandomness() * Math.random() * 100 : 0;
+                        double verticalSpawnOffset = degreeOfRandomness() * Math.random() * 50;
+                        livingEntity.setPos(livingEntity.getX() + horizontalSpawnOffset,
+                                livingEntity.getY() - verticalSpawnOffset,
                                 livingEntity.getZ());
+
+                        livingEntity.setData(ModAttachments.HORIZONTAL_SPAWN_DISTANCE, Math.abs(livingEntity.getX() - armorStand.getX()));
+                        livingEntity.setData(ModAttachments.VERTICAL_SPAWN_DISTANCE, Math.abs(livingEntity.getY() - armorStand.getY()));
                     }
                     livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
 
@@ -117,36 +127,65 @@ public class NEATUtil {
         Agent agent = livingEntity.getData(ModAttachments.AGENT);
         Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
         if (agent != null && target != null) {
-            agent.setScore(calculateFitness(livingEntity, target, fastFallDistance, timeElapsed));
+            agent.setScore((PHASE == 0 ? 0 : agent.getScore()) + calculateFitness(livingEntity, target, fastFallDistance, timeElapsed) / NUM_PHASES);
         }
         livingEntity.discard();
 
         ModEvents.REMAINING_AGENTS--;
 
         if (ModEvents.REMAINING_AGENTS <= 0 && neatController != null) {
-            ModEvents.REMAINING_GENERATIONS--;
+            PHASE = (PHASE + 1) % NUM_PHASES;
+            boolean notFinished = true;
+            if (PHASE == 0) {
+                ModEvents.REMAINING_GENERATIONS--;
 
-            int generationNumber = generationNumber();
-            System.out.println("GENERATION " + generationNumber);
-//            neatController.printSpecies();
-            logMetrics(neatController);
-            if (generationNumber < NUM_GENERATIONS) {
-                neatController.evolve();
-                initializeEntityPopulation(serverLevel, neatController, trackingPlayer);
-            } else {
-//                saveAgent(neatController.getBestAgent());
+                int generationNumber = generationNumber();
+                System.out.println("GENERATION " + generationNumber);
+//                neatController.printSpecies();
+                logMetrics(neatController);
+                notFinished = generationNumber < NUM_GENERATIONS;
+                if (notFinished) {
+                    neatController.evolve();
+                } else {
+//                    saveAgent(neatController.getBestAgent());
+                }
+
+                if ((generationNumber - 1) % N == 0 || generationNumber == NUM_GENERATIONS) {
+                    saveNEATController(neatController, generationNumber);
+                }
             }
-
-            if ((generationNumber - 1) % N == 0 || generationNumber == NUM_GENERATIONS) {
-                saveNEATController(neatController, generationNumber);
+            if (notFinished) {
+                initializeEntityPopulation(serverLevel, neatController, trackingPlayer, PHASE);
             }
         }
     }
 
     private static double calculateFitness(LivingEntity livingEntity, Entity target, float fastFallDistance, int timeElapsed) {
+        double horizontalSpawnDistance = livingEntity.getData(ModAttachments.HORIZONTAL_SPAWN_DISTANCE);
+        double verticalSpawnDistance = livingEntity.getData(ModAttachments.VERTICAL_SPAWN_DISTANCE);
         return -(FAST_FALL_PUNISHMENT * Math.max(0, fastFallDistance - 2) +
                 DISTANCE_PUNISHMENT * livingEntity.distanceTo(target) +
-                TIME_PUNISHMENT * timeElapsed);
+                6 * TIME_PUNISHMENT * timeElapsed / normalizeTime(horizontalSpawnDistance, verticalSpawnDistance));
+    }
+
+    private static final double X0 = 0;
+    private static final double X1 = 100;
+    private static final double Y0 = 50;
+    private static final double Y1 = 150;
+    private static final double T00 = 3.55;  // time at (0, 50)
+    private static final double T01 = 6.5;  // time at (0, 150)
+    private static final double T10 = 8.5;  // time at (100, 50)
+    private static final double T11 = 8.75;  // time at (100, 150)
+
+    private static double normalizeTime(double x, double y) {
+        double wx = (x - X0) / (X1 - X0);
+        double wy = (y - Y0) / (Y1 - Y0);
+
+        // Bilinear interpolation
+        return (1 - wx) * (1 - wy) * T00 +
+                (1 - wx) * wy * T01 +
+                wx * (1 - wy) * T10 +
+                wx * wy * T11;
     }
 
     private static int generationNumber() {
@@ -155,6 +194,15 @@ public class NEATUtil {
 
     private static double degreeOfRandomness() {
         return 1.0 * Math.min(GENERATIONAL_RANDOMNESS_BOUND, generationNumber()) / GENERATIONAL_RANDOMNESS_BOUND;
+    }
+
+    private static BlockPos spawnPositionFromPhase() {
+        return switch (PHASE) {
+            case 0 -> ModEvents.AGENT_SPAWN_POS_PHASE_1;
+            case 1 -> ModEvents.AGENT_SPAWN_POS_PHASE_2;
+            case 2 -> ModEvents.AGENT_SPAWN_POS_PHASE_3;
+            default -> ModEvents.AGENT_SPAWN_POS_PHASE_4;
+        };
     }
 
     // saving the agent itself has become redundant because the NEATController object is already being saved
