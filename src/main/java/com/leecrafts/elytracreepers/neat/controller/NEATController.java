@@ -20,22 +20,22 @@ public class NEATController implements Serializable {
     public static final int MAX_NODES = (int) Math.pow(2, 20);
 
     // TODO adjust hyperparameters
-    private final double C1 = 1;
-    private final double C2 = 1;
-    private final double C3 = 1;
+    private final double C1 = 1.0;
+    private final double C2 = 1.0;
+    private final double C3 = 2.0;
 
-    private final double CP = 4;
+    private final double CP = 3.5;
 
     private final double WEIGHT_SHIFT_STRENGTH = 0.3;
-    private final double WEIGHT_RANDOM_STRENGTH = 1;
+    private final double WEIGHT_RANDOM_STRENGTH = 1.0;
 
     private static final double SURVIVAL_RATE = 0.8;
 
-    private final double PROBABILITY_MUTATE_LINK = 0.05;
-    private final double PROBABILITY_MUTATE_NODE = 0.05;
-    private final double PROBABILITY_MUTATE_WEIGHT_SHIFT = 0.1;
+    private final double PROBABILITY_MUTATE_LINK = 0.15;
+    private final double PROBABILITY_MUTATE_NODE = 0.03;
+    private final double PROBABILITY_MUTATE_WEIGHT_SHIFT = 0.7;
     private final double PROBABILITY_MUTATE_WEIGHT_RANDOM = 0.1;
-    private final double PROBABILITY_MUTATE_TOGGLE_LINK = 0.01;
+    private final double PROBABILITY_MUTATE_TOGGLE_LINK = 0.0;
 
     // We COULD use an ArrayList<ConnectionGene>, but we want O(1) access time
     // Using a HashMap works because we overrode hashCode for ConnectionGene so that hash codes are unique for all connection genes
@@ -168,6 +168,8 @@ public class NEATController implements Serializable {
                 continue;
             }
             boolean found = false;
+//            List<Integer> indexes = IntStream.range(0, this.species.size()).boxed().collect(Collectors.toList());
+//            Collections.shuffle(indexes);
             for (Species s : this.species.getData()) {
                 if (s.put(agent)) {
                     found = true;
