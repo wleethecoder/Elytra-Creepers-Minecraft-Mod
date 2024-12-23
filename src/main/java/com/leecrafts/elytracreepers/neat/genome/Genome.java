@@ -76,7 +76,7 @@ public class Genome implements Serializable {
         excess = thisGenome.getConnections().size() - i;
 
         double N = Math.max(thisGenome.getConnections().size(), otherGenome.getConnections().size());
-        if (N < 20) {
+        if (N < 40) {
             N = 1;
         }
         return this.neatController.getC1() * excess / N +
