@@ -69,7 +69,7 @@ public class NEATUtil {
     public static final double MAX_TARGET_SPEED = 10.0 / TICKS_PER_SECOND;
 
     private static int PHASE = 0;
-    private static final int NUM_PHASES = 4;
+    private static final int NUM_PHASES = 2;
 
     public static void initializeEntityPopulation(ServerLevel serverLevel, NEATController neatController, ServerPlayer trackingPlayer, int episodePhase) {
         // initialize population
@@ -87,7 +87,7 @@ public class NEATUtil {
             if (RANDOM_MODE) {
                 armorStand.moveTo(Vec3.atBottomCenterOf(ModEvents.TARGET_INIT_POS));
                 double angle = Math.random() * 2 * Math.PI;
-                double magnitude = degreeOfRandomness() * Math.random() * MAX_TARGET_SPEED * (PHASE < 2 ? 1 : 0.3);
+                double magnitude = degreeOfRandomness() * Math.random() * MAX_TARGET_SPEED;
                 double xSpeed = magnitude * Math.cos(angle);
                 double zSpeed = magnitude * Math.sin(angle);
                 armorStand.setData(ModAttachments.TARGET_MOVEMENT, new Vec3(xSpeed, 0, zSpeed));
@@ -95,16 +95,6 @@ public class NEATUtil {
             for (int i = 0; i < neatController.getPopulationSize(); i++) {
                 Entity entity = Config.spawnedElytraEntityType.spawn(serverLevel, spawnPositionFromPhase(), MobSpawnType.MOB_SUMMONED);
                 if (entity instanceof LivingEntity livingEntity) {
-                    if (RANDOM_MODE) {
-                        double horizontalSpawnOffset = PHASE < 2 ? degreeOfRandomness() * Math.random() * 100 : 0;
-                        double verticalSpawnOffset = degreeOfRandomness() * Math.random() * 50;
-                        livingEntity.setPos(livingEntity.getX() + horizontalSpawnOffset,
-                                livingEntity.getY() - verticalSpawnOffset,
-                                livingEntity.getZ());
-
-                        livingEntity.setData(ModAttachments.HORIZONTAL_SPAWN_DISTANCE, Math.abs(livingEntity.getX() - armorStand.getX()));
-                        livingEntity.setData(ModAttachments.VERTICAL_SPAWN_DISTANCE, Math.abs(livingEntity.getY() - armorStand.getY()));
-                    }
                     livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
 
                     // setting agent data attachment
@@ -161,31 +151,9 @@ public class NEATUtil {
     }
 
     private static double calculateFitness(LivingEntity livingEntity, Entity target, float fastFallDistance, int timeElapsed) {
-        double horizontalSpawnDistance = livingEntity.getData(ModAttachments.HORIZONTAL_SPAWN_DISTANCE);
-        double verticalSpawnDistance = livingEntity.getData(ModAttachments.VERTICAL_SPAWN_DISTANCE);
         return -(FAST_FALL_PUNISHMENT * Math.max(0, fastFallDistance - 2) +
                 DISTANCE_PUNISHMENT * livingEntity.distanceTo(target) +
-                6 * TIME_PUNISHMENT * timeElapsed / normalizeTime(horizontalSpawnDistance, verticalSpawnDistance));
-    }
-
-    private static final double X0 = 0;
-    private static final double X1 = 100;
-    private static final double Y0 = 50;
-    private static final double Y1 = 150;
-    private static final double T00 = 3.55;  // time at (0, 50)
-    private static final double T01 = 6.5;  // time at (0, 150)
-    private static final double T10 = 8.5;  // time at (100, 50)
-    private static final double T11 = 8.75;  // time at (100, 150)
-
-    private static double normalizeTime(double x, double y) {
-        double wx = (x - X0) / (X1 - X0);
-        double wy = (y - Y0) / (Y1 - Y0);
-
-        // Bilinear interpolation
-        return (1 - wx) * (1 - wy) * T00 +
-                (1 - wx) * wy * T01 +
-                wx * (1 - wy) * T10 +
-                wx * wy * T11;
+                TIME_PUNISHMENT * timeElapsed);
     }
 
     private static int generationNumber() {
@@ -200,8 +168,7 @@ public class NEATUtil {
         return switch (PHASE) {
             case 0 -> ModEvents.AGENT_SPAWN_POS_PHASE_1;
             case 1 -> ModEvents.AGENT_SPAWN_POS_PHASE_2;
-            case 2 -> ModEvents.AGENT_SPAWN_POS_PHASE_3;
-            default -> ModEvents.AGENT_SPAWN_POS_PHASE_4;
+            default -> ModEvents.AGENT_SPAWN_POS_PHASE_1;
         };
     }
 

@@ -42,11 +42,9 @@ public class ModEvents {
 
     private static final double SIGHT_DISTANCE = 200;
     public static final BlockPos TARGET_INIT_POS = new BlockPos(-189, -63, -2);
-    public static final BlockPos AGENT_SPAWN_POS = TARGET_INIT_POS.offset(0, (int) NEATUtil.AGENT_SPAWN_DISTANCE, 0);
-    public static final BlockPos AGENT_SPAWN_POS_PHASE_1 = TARGET_INIT_POS.offset(-100, 150, 0);
-    public static final BlockPos AGENT_SPAWN_POS_PHASE_2 = TARGET_INIT_POS.offset(-100, 100, 0);
-    public static final BlockPos AGENT_SPAWN_POS_PHASE_3 = TARGET_INIT_POS.offset(0, 150, 0);
-    public static final BlockPos AGENT_SPAWN_POS_PHASE_4 = TARGET_INIT_POS.offset(0, 100, 0);
+//    public static final BlockPos AGENT_SPAWN_POS = TARGET_INIT_POS.offset(0, (int) NEATUtil.AGENT_SPAWN_DISTANCE, 0);
+    public static final BlockPos AGENT_SPAWN_POS_PHASE_1 = TARGET_INIT_POS.offset(-100, 100, 0);
+    public static final BlockPos AGENT_SPAWN_POS_PHASE_2 = TARGET_INIT_POS.offset(0, 100, 0);
 
     @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.GAME)
     public static class GameBusEvents {

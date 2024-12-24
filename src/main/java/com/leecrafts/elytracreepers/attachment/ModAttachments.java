@@ -21,14 +21,6 @@ public class ModAttachments {
             "agent", () -> AttachmentType.builder(() -> (Agent) null).build()
     );
 
-    public static final Supplier<AttachmentType<Double>> HORIZONTAL_SPAWN_DISTANCE = ATTACHMENT_TYPES.register(
-            "horizontal_spawn_distance", () -> AttachmentType.builder(() -> 0.0).build()
-    );
-
-    public static final Supplier<AttachmentType<Double>> VERTICAL_SPAWN_DISTANCE = ATTACHMENT_TYPES.register(
-            "vertical_spawn_distance", () -> AttachmentType.builder(() -> 0.0).build()
-    );
-
     public static final Supplier<AttachmentType<Entity>> TARGET_ENTITY = ATTACHMENT_TYPES.register(
             "target_entity", () -> AttachmentType.builder(() -> (Entity) null).build()
     );
