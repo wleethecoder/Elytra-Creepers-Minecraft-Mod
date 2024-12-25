@@ -26,8 +26,8 @@ import static net.minecraft.SharedConstants.TICKS_PER_SECOND;
 
 public class NEATUtil {
 
-    public static final boolean TRAINING = true;
-    public static final boolean PRODUCTION = false;
+    public static final boolean TRAINING = false;
+    public static final boolean PRODUCTION = true;
     public static final boolean RANDOM_MODE = true;
 
     private static final String BASE_DIRECTORY_PATH = new File(System.getProperty("user.dir")).getParent();

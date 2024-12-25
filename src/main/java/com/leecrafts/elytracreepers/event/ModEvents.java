@@ -9,6 +9,8 @@ import com.leecrafts.elytracreepers.item.custom.NeuralElytra;
 import com.leecrafts.elytracreepers.neat.calculations.Calculator;
 import com.leecrafts.elytracreepers.neat.controller.NEATController;
 import com.leecrafts.elytracreepers.neat.util.NEATUtil;
+import com.leecrafts.elytracreepers.payload.EntityVelocityPayload;
+import com.leecrafts.elytracreepers.payload.ServerPayloadHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,6 +23,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
@@ -28,6 +31,11 @@ import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import org.joml.Vector3f;
 
 import java.util.List;
 
@@ -73,10 +81,9 @@ public class ModEvents {
                     serverPlayer.getMainHandItem().is(Items.OAK_BUTTON)) {
                 // TODO loop spawn attempts in production mode
                 double angle = Math.random() * 2 * Math.PI;
-                double distance = Math.random() * NEATUtil.AGENT_SPAWN_DISTANCE;
+                double distance = (serverPlayer.getRandom().nextBoolean() ? 1 : 0) * NEATUtil.AGENT_SPAWN_DISTANCE;
                 int xOffset = (int) (distance * Math.cos(angle));
-                int yOffset = (int) (NEATUtil.AGENT_SPAWN_DISTANCE +
-                        Math.random() * NEATUtil.AGENT_SPAWN_Y_OFFSET * (serverPlayer.getRandom().nextBoolean() ? 1 : -1));
+                int yOffset = (int) NEATUtil.AGENT_SPAWN_DISTANCE;
                 int zOffset = (int) (distance * Math.sin(angle));
                 BlockPos blockPos = serverPlayer.blockPosition().offset(xOffset, yOffset, zOffset);
                 Entity entity = Config.spawnedElytraEntityType.spawn(serverPlayer.serverLevel(), blockPos, MobSpawnType.MOB_SUMMONED);
@@ -177,7 +184,7 @@ public class ModEvents {
             }
         }
 
-        // After sliding for 1 second on the ground, the agent's run ends and score is recorded
+        // After sliding for 0.5 seconds on the ground, the agent's run ends and score is recorded
         @SubscribeEvent
         public static void agentRunEndAfterLanding(EntityTickEvent.Pre event) {
             if (NEATUtil.TRAINING &&
@@ -187,7 +194,8 @@ public class ModEvents {
                     livingEntity.onGround()/* &&
                     NeuralElytra.isWearing(livingEntity)*/) {
                 int landTimestamp = livingEntity.getData(ModAttachments.LAND_TIMESTAMP);
-                if (landTimestamp != -1 && livingEntity.tickCount - landTimestamp > TICKS_PER_SECOND) {
+                if (landTimestamp != -1 &&
+                        (livingEntity.tickCount - landTimestamp) > (0.5 * TICKS_PER_SECOND)) {
                     NEATUtil.recordFitness(livingEntity, livingEntity.getData(ModAttachments.FALL_DISTANCE), livingEntity.tickCount, serverLevel, neatController, trackingPlayer);
                 }
             }
@@ -221,10 +229,36 @@ public class ModEvents {
             }
         }
 
+        // Servers do not normally handle deltamovement
+        @SubscribeEvent
+        public static void entityMovement(EntityTickEvent.Pre event) {
+            Entity entity = event.getEntity();
+            if (entity.level().isClientSide) {
+                Vec3 deltaMovement = entity.getDeltaMovement();
+                PacketDistributor.sendToServer(new EntityVelocityPayload.EntityVelocity(
+                        entity.getId(),
+                        new Vector3f((float) deltaMovement.x, (float) deltaMovement.y, (float) deltaMovement.z)));
+            }
+        }
+
     }
 
     @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.MOD)
     public static class ModBusEvents {
+
+        @SubscribeEvent
+        public static void register(final RegisterPayloadHandlersEvent event) {
+            // Sets the current network version
+            final PayloadRegistrar registrar = event.registrar("1");
+            registrar.playToServer(
+                    EntityVelocityPayload.EntityVelocity.TYPE,
+                    EntityVelocityPayload.EntityVelocity.STREAM_CODEC,
+                    new DirectionalPayloadHandler<>(
+                            ServerPayloadHandler::handleDataOnMain,
+                            ServerPayloadHandler::handleDataOnMain
+                    )
+            );
+        }
 
         @SubscribeEvent
         public static void createDefaultAttributes(EntityAttributeCreationEvent event) {

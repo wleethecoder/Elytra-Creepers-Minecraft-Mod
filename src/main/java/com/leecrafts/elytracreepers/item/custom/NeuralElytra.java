@@ -16,6 +16,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
+import static net.minecraft.SharedConstants.TICKS_PER_SECOND;
+
 public class NeuralElytra extends ElytraItem {
 
     private static final int LOWEST_TARGET_POINT = -128;
@@ -33,15 +35,18 @@ public class NeuralElytra extends ElytraItem {
         super.elytraFlightTick(stack, entity, flightTicks);
         if (isNonPlayerLivingEntity(entity) && !entity.level().isClientSide) {
             Entity target = entity.getData(ModAttachments.TARGET_ENTITY);
-            Vec3 targetVec;
             Vec3 targetVelocity;
+            Vec3 targetVec;
             if (target != null) {
-                targetVec = new Vec3(target.getX(), target.getY(), target.getZ());
-                targetVelocity = target.getDeltaMovement();
+//                targetVelocity = target.getDeltaMovement();
+                targetVelocity = target.getData(ModAttachments.ENTITY_VELOCITY);
+                double factor = 0.5 * TICKS_PER_SECOND;
+                targetVec = new Vec3(target.getX(), target.getY(), target.getZ())
+                        .add(targetVelocity.multiply(factor, 0, factor));
             }
             else {
-                targetVec = getGroundTargetVec(entity);
                 targetVelocity = Vec3.ZERO;
+                targetVec = getGroundTargetVec(entity);
             }
             Vec3 distance = targetVec.subtract(entity.position());
             Vec3 distanceNormalized = distance.normalize();

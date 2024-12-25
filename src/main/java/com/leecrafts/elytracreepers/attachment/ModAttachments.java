@@ -41,6 +41,10 @@ public class ModAttachments {
             "calculator", () -> AttachmentType.builder(() -> (Calculator) null).build()
     );
 
+    public static final Supplier<AttachmentType<Vec3>> ENTITY_VELOCITY = ATTACHMENT_TYPES.register(
+            "entity_velocity", () -> AttachmentType.builder(() -> Vec3.ZERO).build()
+    );
+
     public static void register(IEventBus eventBus) {
         ATTACHMENT_TYPES.register(eventBus);
     }
