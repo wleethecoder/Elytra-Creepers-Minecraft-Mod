@@ -195,7 +195,7 @@ public class ModEvents {
                     NeuralElytra.isWearing(livingEntity)*/) {
                 int landTimestamp = livingEntity.getData(ModAttachments.LAND_TIMESTAMP);
                 if (landTimestamp != -1 &&
-                        (livingEntity.tickCount - landTimestamp) > (0.5 * TICKS_PER_SECOND)) {
+                        (livingEntity.tickCount - landTimestamp) > (NeuralElytra.INTERPOLATION_FACTOR * TICKS_PER_SECOND)) {
                     NEATUtil.recordFitness(livingEntity, livingEntity.getData(ModAttachments.FALL_DISTANCE), livingEntity.tickCount, serverLevel, neatController, trackingPlayer);
                 }
             }
@@ -234,11 +234,20 @@ public class ModEvents {
         public static void entityMovement(EntityTickEvent.Pre event) {
             Entity entity = event.getEntity();
             if (entity.level().isClientSide) {
-                Vec3 deltaMovement = entity.getDeltaMovement();
+//                Vec3 deltaMovement = entity.getDeltaMovement();
+                Vec3 previousPos = entity.getData(ModAttachments.ENTITY_PREVIOUS_POS);
+//                entity.setData(ModAttachments.ENTITY_VELOCITY, previousPos != null ? entity.position().subtract(previousPos) : Vec3.ZERO);
+                Vec3 newVelocity = previousPos != null ? entity.position().subtract(previousPos) : Vec3.ZERO;
                 PacketDistributor.sendToServer(new EntityVelocityPayload.EntityVelocity(
                         entity.getId(),
-                        new Vector3f((float) deltaMovement.x, (float) deltaMovement.y, (float) deltaMovement.z)));
+                        new Vector3f((float) newVelocity.x, (float) newVelocity.y, (float) newVelocity.z)));
+                entity.setData(ModAttachments.ENTITY_PREVIOUS_POS, entity.position());
             }
+//            if (!entity.level().isClientSide) {
+//                Vec3 previousPos = entity.getData(ModAttachments.ENTITY_PREVIOUS_POS);
+//                entity.setData(ModAttachments.ENTITY_VELOCITY, previousPos != null ? entity.position().subtract(previousPos) : Vec3.ZERO);
+//                entity.setData(ModAttachments.ENTITY_PREVIOUS_POS, entity.position());
+//            }
         }
 
     }

@@ -26,8 +26,8 @@ import static net.minecraft.SharedConstants.TICKS_PER_SECOND;
 
 public class NEATUtil {
 
-    public static final boolean TRAINING = false;
-    public static final boolean PRODUCTION = true;
+    public static final boolean TRAINING = true;
+    public static final boolean PRODUCTION = false;
     public static final boolean RANDOM_MODE = true;
 
     private static final String BASE_DIRECTORY_PATH = new File(System.getProperty("user.dir")).getParent();
@@ -87,7 +87,11 @@ public class NEATUtil {
             if (RANDOM_MODE) {
                 armorStand.moveTo(Vec3.atBottomCenterOf(ModEvents.TARGET_INIT_POS));
                 double angle = Math.random() * 2 * Math.PI;
-                double magnitude = degreeOfRandomness() * Math.random() * MAX_TARGET_SPEED;
+//                double magnitude = degreeOfRandomness() * Math.random() * MAX_TARGET_SPEED;
+                // TODO uncomment above line.
+                double magnitude = Math.random() * MAX_TARGET_SPEED;
+                System.out.println("it's supposed to go " + (magnitude * TICKS_PER_SECOND) + " m/s");
+
                 double xSpeed = magnitude * Math.cos(angle);
                 double zSpeed = magnitude * Math.sin(angle);
                 armorStand.setData(ModAttachments.TARGET_MOVEMENT, new Vec3(xSpeed, 0, zSpeed));

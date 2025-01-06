@@ -21,6 +21,7 @@ import static net.minecraft.SharedConstants.TICKS_PER_SECOND;
 public class NeuralElytra extends ElytraItem {
 
     private static final int LOWEST_TARGET_POINT = -128;
+    public static final double INTERPOLATION_FACTOR = 0.75;
 
     public NeuralElytra(Properties properties) {
         super(properties);
@@ -38,11 +39,29 @@ public class NeuralElytra extends ElytraItem {
             Vec3 targetVelocity;
             Vec3 targetVec;
             if (target != null) {
-//                targetVelocity = target.getDeltaMovement();
-                targetVelocity = target.getData(ModAttachments.ENTITY_VELOCITY);
-                double factor = 0.5 * TICKS_PER_SECOND;
+                double factor;
+                if (NEATUtil.TRAINING) {
+                    // TODO consider no longer using deltamovement (it's sorta inaccurate :( )
+                    targetVelocity = target.getData(ModAttachments.ENTITY_VELOCITY);
+//                    targetVelocity = target.getDeltaMovement();
+                    factor = INTERPOLATION_FACTOR * TICKS_PER_SECOND;
+                }
+                else {
+                    targetVelocity = target.getData(ModAttachments.ENTITY_VELOCITY);
+                    // TODO we dont need to multiply by 1.6 anymore (i think)
+                    factor = 1/*.6*/ * INTERPOLATION_FACTOR * TICKS_PER_SECOND;
+                }
+                targetVelocity = targetVelocity.multiply(1, 0, 1);
+                if (target.tickCount % (.5*TICKS_PER_SECOND) == 0) {
+                    System.out.println("***");
+//                    System.out.println(targetVelocity);
+                    System.out.println(target.getDeltaMovement().multiply(TICKS_PER_SECOND, 0, TICKS_PER_SECOND).length());
+                    System.out.println(targetVelocity.scale(TICKS_PER_SECOND).length());
+//                    System.out.println(targetVelocity.scale(factor).length());
+//                    System.out.println(target.getDeltaMovement().multiply(1,0,1).length());
+                }
                 targetVec = new Vec3(target.getX(), target.getY(), target.getZ())
-                        .add(targetVelocity.multiply(factor, 0, factor));
+                        .add(targetVelocity.scale(factor));
             }
             else {
                 targetVelocity = Vec3.ZERO;

@@ -45,6 +45,10 @@ public class ModAttachments {
             "entity_velocity", () -> AttachmentType.builder(() -> Vec3.ZERO).build()
     );
 
+    public static final Supplier<AttachmentType<Vec3>> ENTITY_PREVIOUS_POS = ATTACHMENT_TYPES.register(
+            "entity_previous_pos", () -> AttachmentType.builder(() -> (Vec3) null).build()
+    );
+
     public static void register(IEventBus eventBus) {
         ATTACHMENT_TYPES.register(eventBus);
     }
