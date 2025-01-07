@@ -143,7 +143,7 @@ public class NEATTest {
 //        agents(true);
 //        saveAndLoad();
 //        displayGenomeOfLoadedEntityAgent(4);
-        displayGenomeOfLoadedNeatController(1, 761, -1);
+        displayGenomeOfLoadedNeatController(1, 601, 2);
 //        NEATController nc = new NEATController(NEATUtil.INPUT_SIZE-2, NEATUtil.OUTPUT_SIZE, NEATUtil.POPULATION_SIZE);
 //        Agent a = nc.getAgent(0);
 //        new Frame(a.getGenome());

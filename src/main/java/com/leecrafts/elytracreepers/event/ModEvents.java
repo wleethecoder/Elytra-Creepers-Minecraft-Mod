@@ -30,6 +30,7 @@ import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -126,7 +127,7 @@ public class ModEvents {
                     !livingEntity.level().isClientSide &&
                     event.getTo().is(ModItems.NEURAL_ELYTRA.asItem()) &&
                     NeuralElytra.isNonPlayerLivingEntity(livingEntity)) {
-                Calculator agent = NEATUtil.loadAgent(1);
+                Calculator agent = NEATUtil.loadAgent(2);
                 livingEntity.setData(ModAttachments.CALCULATOR, agent);
 //                System.out.println("loaded agent score: " + livingEntity.getData(ModAttachments.AGENT).getScore());
 
@@ -216,38 +217,30 @@ public class ModEvents {
             }
         }
 
-        @SubscribeEvent
-        public static void armorStandTargetRandomMovement(EntityTickEvent.Pre event) {
-            if (NEATUtil.TRAINING &&
-                    NEATUtil.RANDOM_MODE &&
-                    event.getEntity() instanceof ArmorStand armorStand &&
-                    armorStand.level() instanceof ServerLevel serverLevel) {
-                // armor stand stops moving after it goes 20 * 8 = 160 blocks so that it will not go too far
-                if (armorStand.distanceToSqr(TARGET_INIT_POS.getX(), TARGET_INIT_POS.getY(), TARGET_INIT_POS.getZ()) < 160 * 160) {
-                    armorStand.setDeltaMovement(armorStand.getData(ModAttachments.TARGET_MOVEMENT));
-                }
-            }
-        }
-
         // Servers do not normally handle deltamovement
         @SubscribeEvent
         public static void entityMovement(EntityTickEvent.Pre event) {
             Entity entity = event.getEntity();
             if (entity.level().isClientSide) {
-//                Vec3 deltaMovement = entity.getDeltaMovement();
                 Vec3 previousPos = entity.getData(ModAttachments.ENTITY_PREVIOUS_POS);
-//                entity.setData(ModAttachments.ENTITY_VELOCITY, previousPos != null ? entity.position().subtract(previousPos) : Vec3.ZERO);
                 Vec3 newVelocity = previousPos != null ? entity.position().subtract(previousPos) : Vec3.ZERO;
                 PacketDistributor.sendToServer(new EntityVelocityPayload.EntityVelocity(
                         entity.getId(),
                         new Vector3f((float) newVelocity.x, (float) newVelocity.y, (float) newVelocity.z)));
                 entity.setData(ModAttachments.ENTITY_PREVIOUS_POS, entity.position());
             }
-//            if (!entity.level().isClientSide) {
-//                Vec3 previousPos = entity.getData(ModAttachments.ENTITY_PREVIOUS_POS);
-//                entity.setData(ModAttachments.ENTITY_VELOCITY, previousPos != null ? entity.position().subtract(previousPos) : Vec3.ZERO);
-//                entity.setData(ModAttachments.ENTITY_PREVIOUS_POS, entity.position());
-//            }
+
+            // armor stand movement during training mode
+            if (NEATUtil.TRAINING &&
+                    NEATUtil.RANDOM_MODE &&
+                    entity instanceof ArmorStand armorStand &&
+                    armorStand.level() instanceof ServerLevel serverLevel) {
+                // armor stand stops moving after it goes 20 * 8 = 160 blocks so that it will not go too far
+                if (armorStand.distanceToSqr(TARGET_INIT_POS.getX(), TARGET_INIT_POS.getY(), TARGET_INIT_POS.getZ()) < 160 * 160) {
+//                    armorStand.setDeltaMovement(armorStand.getData(ModAttachments.TARGET_MOVEMENT));
+                    armorStand.setPos(armorStand.position().add(armorStand.getData(ModAttachments.TARGET_MOVEMENT)));
+                }
+            }
         }
 
     }
