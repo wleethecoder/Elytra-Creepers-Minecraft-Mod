@@ -40,7 +40,11 @@ public class Config
 
     private static final ModConfigSpec.ConfigValue<String> SPAWNED_ELYTRA_ENTITY_TYPE = BUILDER
             .comment("The type of entities that will spawn with a neural elytra.")
-            .define("elytra_entity_type", "minecraft:creeper");
+            .define("entity_type", "minecraft:creeper");
+
+    private static final ModConfigSpec.ConfigValue<Boolean> ELYTRA_ENTITY_GRIEFING = BUILDER
+            .comment("Whether or not entities flying with a neural elytra are able to destroy blocks (e.g. via explosions)")
+            .define("griefing", false);
 
 
     static final ModConfigSpec SPEC = BUILDER.build();
@@ -49,7 +53,8 @@ public class Config
     public static int magicNumber;
     public static String magicNumberIntroduction;
     public static Set<Item> items;
-    public static EntityType<?> spawnedElytraEntityType;
+    public static EntityType<?> entityType;
+    public static boolean griefing;
 
     private static boolean validateItemName(final Object obj)
     {
@@ -70,12 +75,14 @@ public class Config
 
         Optional<EntityType<?>> entityTypeOptional = EntityType.byString(SPAWNED_ELYTRA_ENTITY_TYPE.get());
         if (entityTypeOptional.isPresent()) {
-            spawnedElytraEntityType = entityTypeOptional.get();
+            entityType = entityTypeOptional.get();
         }
         else {
-            System.out.println("the value entered for 'elytra_entity_type' in elytracreepers-common.toml not recognized, " +
+            System.out.println("the value entered for 'entity_type' in elytracreepers-common.toml not recognized, " +
                     "defaulting to minecraft:creeper");
-            spawnedElytraEntityType = EntityType.CREEPER;
+            entityType = EntityType.CREEPER;
         }
+
+        griefing = ELYTRA_ENTITY_GRIEFING.get();
     }
 }

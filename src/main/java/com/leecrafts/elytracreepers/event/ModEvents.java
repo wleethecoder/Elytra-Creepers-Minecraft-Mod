@@ -87,7 +87,7 @@ public class ModEvents {
                 int yOffset = (int) NEATUtil.AGENT_SPAWN_DISTANCE;
                 int zOffset = (int) (distance * Math.sin(angle));
                 BlockPos blockPos = serverPlayer.blockPosition().offset(xOffset, yOffset, zOffset);
-                Entity entity = Config.spawnedElytraEntityType.spawn(serverPlayer.serverLevel(), blockPos, MobSpawnType.MOB_SUMMONED);
+                Entity entity = Config.entityType.spawn(serverPlayer.serverLevel(), blockPos, MobSpawnType.MOB_SUMMONED);
                 if (entity instanceof LivingEntity livingEntity) {
                     livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
 
@@ -173,7 +173,7 @@ public class ModEvents {
             LivingEntity livingEntity = event.getEntity();
             if (NEATUtil.TRAINING &&
                     livingEntity.level() instanceof ServerLevel serverLevel &&
-                    livingEntity.getType() == Config.spawnedElytraEntityType &&
+                    livingEntity.getType() == Config.entityType &&
                     NeuralElytra.isWearing(livingEntity)) {
 //                NEATUtil.recordFitness(livingEntity, event.getDistance(), serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
                 livingEntity.setData(ModAttachments.FALL_DISTANCE, event.getDistance());
@@ -191,7 +191,7 @@ public class ModEvents {
             if (NEATUtil.TRAINING &&
                     event.getEntity() instanceof LivingEntity livingEntity &&
                     livingEntity.level() instanceof ServerLevel serverLevel &&
-                    livingEntity.getType() == Config.spawnedElytraEntityType &&
+                    livingEntity.getType() == Config.entityType &&
                     livingEntity.onGround()/* &&
                     NeuralElytra.isWearing(livingEntity)*/) {
                 int landTimestamp = livingEntity.getData(ModAttachments.LAND_TIMESTAMP);
@@ -208,7 +208,7 @@ public class ModEvents {
             if (NEATUtil.TRAINING &&
                     event.getEntity() instanceof LivingEntity livingEntity &&
                     livingEntity.level() instanceof ServerLevel serverLevel &&
-                    livingEntity.getType() == Config.spawnedElytraEntityType &&
+                    livingEntity.getType() == Config.entityType &&
                     NeuralElytra.isWearing(livingEntity)) {
                 Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
                 if (target != null && livingEntity.distanceTo(target) > SIGHT_DISTANCE) {
@@ -240,6 +240,20 @@ public class ModEvents {
 //                    armorStand.setDeltaMovement(armorStand.getData(ModAttachments.TARGET_MOVEMENT));
                     armorStand.setPos(armorStand.position().add(armorStand.getData(ModAttachments.TARGET_MOVEMENT)));
                 }
+            }
+        }
+
+        // If the "griefing" config value is set to false (default), then entities flying on a neural elytra cannot
+        // destroy blocks
+        // For example, creepers that fly on a neural elytra cannot destroy blocks via exploding
+        @SubscribeEvent
+        public static void explosionGriefing(ExplosionEvent.Detonate event) {
+            Entity entity = event.getExplosion().getDirectSourceEntity();
+            if (!entity.level().isClientSide &&
+                    entity.getType() == Config.entityType &&
+                    !Config.griefing &&
+                    entity.getData(ModAttachments.TARGET_ENTITY) != null) {
+                event.getAffectedBlocks().clear();
             }
         }
 
