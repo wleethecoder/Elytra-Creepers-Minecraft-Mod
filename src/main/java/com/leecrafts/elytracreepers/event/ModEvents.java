@@ -141,12 +141,8 @@ public class ModEvents {
                     !livingEntity.level().isClientSide &&
                     event.getTo().is(ModItems.NEURAL_ELYTRA.asItem()) &&
                     NeuralElytra.isNonPlayerLivingEntity(livingEntity)) {
-                Calculator agent = NEATUtil.loadAgent(2);
+                Calculator agent = NEATUtil.loadAgent(4);
                 livingEntity.setData(ModAttachments.CALCULATOR, agent);
-//                System.out.println("loaded agent score: " + livingEntity.getData(ModAttachments.AGENT).getScore());
-
-//                NEATController neatController1 = NEATUtil.loadNEATController(1, 301);
-//                System.out.println("loaded neatController best agent score: " + neatController1.getBestAgent().getScore());
             }
         }
 
