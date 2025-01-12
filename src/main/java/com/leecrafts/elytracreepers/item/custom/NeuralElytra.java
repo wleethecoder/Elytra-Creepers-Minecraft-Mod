@@ -5,6 +5,7 @@ import com.leecrafts.elytracreepers.item.ModItems;
 import com.leecrafts.elytracreepers.neat.calculations.Calculator;
 import com.leecrafts.elytracreepers.neat.controller.Agent;
 import com.leecrafts.elytracreepers.neat.util.NEATUtil;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -42,12 +43,12 @@ public class NeuralElytra extends ElytraItem {
                 targetVelocity = target.getData(NEATUtil.TRAINING ?
                         ModAttachments.TARGET_MOVEMENT : ModAttachments.ENTITY_VELOCITY)
                         .multiply(1, 0, 1);
-                targetVec = getGroundTargetVec(target)
+                targetVec = getGroundTargetVec(target, entity.getY())
                         .add(targetVelocity.scale(INTERPOLATION_FACTOR * TICKS_PER_SECOND));
             }
             else {
                 targetVelocity = Vec3.ZERO;
-                targetVec = getGroundTargetVec(entity);
+                targetVec = getGroundTargetVec(entity, entity.getY());
             }
             Vec3 distance = targetVec.subtract(entity.position());
             Vec3 distanceNormalized = distance.normalize();
@@ -134,12 +135,18 @@ public class NeuralElytra extends ElytraItem {
         return entity instanceof LivingEntity livingEntity && !(livingEntity instanceof Player);
     }
 
-    private static Vec3 getGroundTargetVec(Entity entity) {
-        int i = (int) entity.getY();
+    private static Vec3 getGroundTargetVec(Entity entity, double startingY) {
+        int i = (int) startingY;
+        findHighest:
         while (i >= LOWEST_TARGET_POINT) {
-            BlockState blockState = entity.level().getBlockState(entity.blockPosition().atY(i));
-            if (!blockState.isAir() && blockState.getFluidState().isEmpty()) {
-                break;
+            for (int x = 0; x < 3; x++) {
+                for (int z = 0; z < 3; z++) {
+                    BlockPos blockPos = entity.blockPosition().offset(-1 + x, 0, -1 + z).atY(i);
+                    BlockState blockState = entity.level().getBlockState(blockPos);
+                    if (!blockState.isAir() && blockState.getFluidState().isEmpty()) {
+                        break findHighest;
+                    }
+                }
             }
             i--;
         }
