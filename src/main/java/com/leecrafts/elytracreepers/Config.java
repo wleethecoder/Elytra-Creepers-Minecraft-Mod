@@ -39,7 +39,7 @@ public class Config
             .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), Config::validateItemName);
 
     private static final ModConfigSpec.ConfigValue<String> SPAWNED_ENTITY_TYPE = BUILDER
-            .comment("The type of entities that will spawn with a neural elytra.")
+            .comment("The type of entities that will spawn with a neural elytra")
             .define("spawned_entity_type", "minecraft:creeper");
 
     private static final ModConfigSpec.ConfigValue<Boolean> GRIEFING = BUILDER
@@ -55,6 +55,10 @@ public class Config
             .comment("Whether or not creepers flying with a neural elytra hurt only the target when exploding")
             .define("explode_hurt_only_target", true);
 
+    private static final ModConfigSpec.IntValue NUM_ENTITIES_PER_SPAWN = BUILDER
+            .comment("How many entities with a neural elytra spawn at a time")
+            .defineInRange("num_entities_per_spawn", 1, 0, 10);
+
 
     static final ModConfigSpec SPEC = BUILDER.build();
 
@@ -66,6 +70,7 @@ public class Config
     public static boolean griefing;
     public static boolean autoIgnite;
     public static boolean explodeHurtOnlyTarget;
+    public static int numEntitiesPerSpawn;
 
     private static boolean validateItemName(final Object obj)
     {
@@ -97,5 +102,6 @@ public class Config
         griefing = GRIEFING.get();
         autoIgnite = AUTO_IGNITE.get();
         explodeHurtOnlyTarget = EXPLODE_HURT_ONLY_TARGET.get();
+        numEntitiesPerSpawn = NUM_ENTITIES_PER_SPAWN.get();
     }
 }

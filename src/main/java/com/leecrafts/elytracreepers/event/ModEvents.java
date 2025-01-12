@@ -81,7 +81,13 @@ public class ModEvents {
                     event.getEntity() instanceof ServerPlayer serverPlayer &&
                     serverPlayer.tickCount % (1 * TICKS_PER_SECOND) == 0 &&
                     serverPlayer.getMainHandItem().is(Items.OAK_BUTTON)) {
-                if (attemptSpawns(serverPlayer)) {
+                boolean success = false;
+                for (int i = 0; i < Config.numEntitiesPerSpawn; i++) {
+                    if (attemptSpawns(serverPlayer)) {
+                        success = true;
+                    }
+                }
+                if (success) {
                     serverPlayer.serverLevel().playSound(
                             null, serverPlayer.blockPosition(), SoundEvents.PHANTOM_SWOOP, SoundSource.HOSTILE);
                 }
@@ -118,7 +124,7 @@ public class ModEvents {
                         return true;
                     }
 
-                    System.out.println("trying spawn again");
+//                    System.out.println("trying spawn again");
                     livingEntity.discard();
                 }
             }
