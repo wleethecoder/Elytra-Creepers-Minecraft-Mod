@@ -81,14 +81,24 @@ public class ModEvents {
                     event.getEntity() instanceof ServerPlayer serverPlayer &&
                     serverPlayer.tickCount % (1 * TICKS_PER_SECOND) == 0 &&
                     serverPlayer.getMainHandItem().is(Items.OAK_BUTTON)) {
-                // TODO loop spawn attempts in production mode
+                if (attemptSpawns(serverPlayer)) {
+                    serverPlayer.serverLevel().playSound(
+                            null, serverPlayer.blockPosition(), SoundEvents.PHANTOM_SWOOP, SoundSource.HOSTILE);
+                }
+            }
+        }
+
+        private static boolean attemptSpawns(ServerPlayer serverPlayer) {
+            for (int i = 0; i < 10; i++) {
                 double angle = Math.random() * 2 * Math.PI;
                 double distance = (serverPlayer.getRandom().nextBoolean() ? 1 : 0) * NEATUtil.AGENT_SPAWN_DISTANCE;
                 int xOffset = (int) (distance * Math.cos(angle));
                 int yOffset = (int) NEATUtil.AGENT_SPAWN_DISTANCE;
                 int zOffset = (int) (distance * Math.sin(angle));
                 BlockPos blockPos = serverPlayer.blockPosition().offset(xOffset, yOffset, zOffset);
-                Entity entity = Config.spawnedEntityType.spawn(serverPlayer.serverLevel(), blockPos, MobSpawnType.MOB_SUMMONED);
+                ServerLevel serverLevel = serverPlayer.serverLevel();
+//                Entity entity = Config.spawnedEntityType.spawn(serverPlayer.serverLevel(), blockPos, MobSpawnType.MOB_SUMMONED);
+                Entity entity = Config.spawnedEntityType.create(serverLevel, null, blockPos, MobSpawnType.MOB_SUMMONED, false, false);
                 if (entity instanceof LivingEntity livingEntity) {
                     livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
 
@@ -102,11 +112,18 @@ public class ModEvents {
                     if (livingEntity instanceof Mob mob) {
                         mob.setPersistenceRequired();
                     }
-                }
 
-                serverPlayer.serverLevel().playSound(
-                        null, serverPlayer.blockPosition(), SoundEvents.PHANTOM_SWOOP, SoundSource.HOSTILE);
+                    if (!serverLevel.containsAnyLiquid(livingEntity.getBoundingBox()) && serverLevel.isUnobstructed(livingEntity)) {
+                        serverLevel.addFreshEntityWithPassengers(livingEntity);
+                        return true;
+                    }
+
+                    System.out.println("trying spawn again");
+                    livingEntity.discard();
+                }
             }
+
+            return false;
         }
 
         // loading not the agent object itself (too much unnecessary data), but the agent's calculator object.
