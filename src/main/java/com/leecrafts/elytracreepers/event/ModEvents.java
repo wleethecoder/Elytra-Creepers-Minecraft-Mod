@@ -147,7 +147,7 @@ public class ModEvents {
 //                        livingEntity.setSharedFlag(7, false);
 
                         if (livingEntity instanceof Mob mob) {
-                            mob.setPersistenceRequired();
+                            mob.persistenceRequired = false;
                         }
                     }
                 }
