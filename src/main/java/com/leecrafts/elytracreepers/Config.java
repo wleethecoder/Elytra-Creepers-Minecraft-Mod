@@ -51,6 +51,10 @@ public class Config
                     "(it also has to be within 7 blocks of its target)")
             .define("auto_ignite", true);
 
+    private static final ModConfigSpec.ConfigValue<Boolean> EXPLODE_HURT_ONLY_TARGET = BUILDER
+            .comment("Whether or not creepers flying with a neural elytra hurt only the target when exploding")
+            .define("explode_hurt_only_target", true);
+
 
     static final ModConfigSpec SPEC = BUILDER.build();
 
@@ -61,6 +65,7 @@ public class Config
     public static EntityType<?> spawnedEntityType;
     public static boolean griefing;
     public static boolean autoIgnite;
+    public static boolean explodeHurtOnlyTarget;
 
     private static boolean validateItemName(final Object obj)
     {
@@ -91,5 +96,6 @@ public class Config
 
         griefing = GRIEFING.get();
         autoIgnite = AUTO_IGNITE.get();
+        explodeHurtOnlyTarget = EXPLODE_HURT_ONLY_TARGET.get();
     }
 }

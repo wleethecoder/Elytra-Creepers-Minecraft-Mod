@@ -240,11 +240,17 @@ public class ModEvents {
         @SubscribeEvent
         public static void explosionGriefing(ExplosionEvent.Detonate event) {
             Entity entity = event.getExplosion().getDirectSourceEntity();
+            Entity target = entity.getData(ModAttachments.TARGET_ENTITY);
             if (!entity.level().isClientSide &&
                     entity.getType() == Config.spawnedEntityType &&
-                    !Config.griefing &&
-                    entity.getData(ModAttachments.TARGET_ENTITY) != null) {
-                event.getAffectedBlocks().clear();
+                    target != null) {
+                if (!Config.griefing) {
+                    event.getAffectedBlocks().clear();
+                }
+                if (Config.explodeHurtOnlyTarget) {
+                    event.getAffectedEntities().clear();
+                    event.getAffectedEntities().add(target);
+                }
             }
         }
 
