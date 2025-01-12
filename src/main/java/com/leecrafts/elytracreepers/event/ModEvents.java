@@ -108,16 +108,6 @@ public class ModEvents {
             }
         }
 
-        @SubscribeEvent
-        public static void putOnNeuralElytra(PlayerInteractEvent.EntityInteract event) {
-            if (event.getTarget() instanceof LivingEntity livingEntity &&
-                    !livingEntity.level().isClientSide &&
-                    event.getItemStack().is(ModItems.NEURAL_ELYTRA)) {
-                livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
-                System.out.println(livingEntity.getItemBySlot(EquipmentSlot.CHEST).getItem());
-            }
-        }
-
         // loading not the agent object itself (too much unnecessary data), but the agent's calculator object.
         @SubscribeEvent
         public static void loadAgent(LivingEquipmentChangeEvent event) {
@@ -151,11 +141,11 @@ public class ModEvents {
                         livingEntity.setSharedFlag(7, true);
                     }
                     else if (livingEntity.onGround()) {
-                        // TODO change this part
 //                        compoundTag.putBoolean("FallFlying", false);
 //                        livingEntity.load(compoundTag);
                         livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.AIR));
 //                        livingEntity.setSharedFlag(7, false);
+
                         if (livingEntity instanceof Mob mob) {
                             mob.setPersistenceRequired();
                         }
