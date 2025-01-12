@@ -42,7 +42,7 @@ public class NeuralElytra extends ElytraItem {
                 targetVelocity = target.getData(NEATUtil.TRAINING ?
                         ModAttachments.TARGET_MOVEMENT : ModAttachments.ENTITY_VELOCITY)
                         .multiply(1, 0, 1);
-                targetVec = new Vec3(target.getX(), target.getY(), target.getZ())
+                targetVec = getGroundTargetVec(target)
                         .add(targetVelocity.scale(INTERPOLATION_FACTOR * TICKS_PER_SECOND));
             }
             else {
