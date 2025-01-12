@@ -21,7 +21,7 @@ import static net.minecraft.SharedConstants.TICKS_PER_SECOND;
 public class NeuralElytra extends ElytraItem {
 
     private static final int LOWEST_TARGET_POINT = -128;
-    public static final double INTERPOLATION_FACTOR = 0.5;
+    public static final double INTERPOLATION_FACTOR = 0.75;
 
     public NeuralElytra(Properties properties) {
         super(properties);

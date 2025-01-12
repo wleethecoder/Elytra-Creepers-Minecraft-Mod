@@ -19,6 +19,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -87,7 +88,7 @@ public class ModEvents {
                 int yOffset = (int) NEATUtil.AGENT_SPAWN_DISTANCE;
                 int zOffset = (int) (distance * Math.sin(angle));
                 BlockPos blockPos = serverPlayer.blockPosition().offset(xOffset, yOffset, zOffset);
-                Entity entity = Config.entityType.spawn(serverPlayer.serverLevel(), blockPos, MobSpawnType.MOB_SUMMONED);
+                Entity entity = Config.spawnedEntityType.spawn(serverPlayer.serverLevel(), blockPos, MobSpawnType.MOB_SUMMONED);
                 if (entity instanceof LivingEntity livingEntity) {
                     livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
 
@@ -146,7 +147,7 @@ public class ModEvents {
                         livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.AIR));
 //                        livingEntity.setSharedFlag(7, false);
 
-                        if (livingEntity instanceof Mob mob) {
+                        if (NEATUtil.PRODUCTION && livingEntity instanceof Mob mob) {
                             mob.persistenceRequired = false;
                         }
                     }
@@ -163,7 +164,7 @@ public class ModEvents {
             LivingEntity livingEntity = event.getEntity();
             if (NEATUtil.TRAINING &&
                     livingEntity.level() instanceof ServerLevel serverLevel &&
-                    livingEntity.getType() == Config.entityType &&
+                    livingEntity.getType() == Config.spawnedEntityType &&
                     NeuralElytra.isWearing(livingEntity)) {
 //                NEATUtil.recordFitness(livingEntity, event.getDistance(), serverLevel, SIGHT_DISTANCE, neatController, trackingPlayer);
                 livingEntity.setData(ModAttachments.FALL_DISTANCE, event.getDistance());
@@ -181,7 +182,7 @@ public class ModEvents {
             if (NEATUtil.TRAINING &&
                     event.getEntity() instanceof LivingEntity livingEntity &&
                     livingEntity.level() instanceof ServerLevel serverLevel &&
-                    livingEntity.getType() == Config.entityType &&
+                    livingEntity.getType() == Config.spawnedEntityType &&
                     livingEntity.onGround()/* &&
                     NeuralElytra.isWearing(livingEntity)*/) {
                 int landTimestamp = livingEntity.getData(ModAttachments.LAND_TIMESTAMP);
@@ -198,7 +199,7 @@ public class ModEvents {
             if (NEATUtil.TRAINING &&
                     event.getEntity() instanceof LivingEntity livingEntity &&
                     livingEntity.level() instanceof ServerLevel serverLevel &&
-                    livingEntity.getType() == Config.entityType &&
+                    livingEntity.getType() == Config.spawnedEntityType &&
                     NeuralElytra.isWearing(livingEntity)) {
                 Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
                 if (target != null && livingEntity.distanceTo(target) > SIGHT_DISTANCE) {
@@ -240,10 +241,28 @@ public class ModEvents {
         public static void explosionGriefing(ExplosionEvent.Detonate event) {
             Entity entity = event.getExplosion().getDirectSourceEntity();
             if (!entity.level().isClientSide &&
-                    entity.getType() == Config.entityType &&
+                    entity.getType() == Config.spawnedEntityType &&
                     !Config.griefing &&
                     entity.getData(ModAttachments.TARGET_ENTITY) != null) {
                 event.getAffectedBlocks().clear();
+            }
+        }
+
+        // automatically ignite creeper when it lands on the ground
+        @SubscribeEvent
+        public static void autoIgnite(LivingFallEvent event) {
+            LivingEntity livingEntity = event.getEntity();
+            Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
+            if (NEATUtil.PRODUCTION &&
+                    !livingEntity.level().isClientSide &&
+                    livingEntity.getType() == Config.spawnedEntityType &&
+                    Config.autoIgnite &&
+                    target != null) {
+                if (livingEntity instanceof Creeper creeper &&
+                        creeper.distanceTo(target) < 7 &&
+                        (!(target instanceof Player) || !((Player) target).isCreative())) {
+                    creeper.ignite();
+                }
             }
         }
 

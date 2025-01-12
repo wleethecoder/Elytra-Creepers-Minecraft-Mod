@@ -38,13 +38,18 @@ public class Config
             .comment("A list of items to log on common setup.")
             .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), Config::validateItemName);
 
-    private static final ModConfigSpec.ConfigValue<String> SPAWNED_ELYTRA_ENTITY_TYPE = BUILDER
+    private static final ModConfigSpec.ConfigValue<String> SPAWNED_ENTITY_TYPE = BUILDER
             .comment("The type of entities that will spawn with a neural elytra.")
-            .define("entity_type", "minecraft:creeper");
+            .define("spawned_entity_type", "minecraft:creeper");
 
-    private static final ModConfigSpec.ConfigValue<Boolean> ELYTRA_ENTITY_GRIEFING = BUILDER
+    private static final ModConfigSpec.ConfigValue<Boolean> GRIEFING = BUILDER
             .comment("Whether or not entities flying with a neural elytra are able to destroy blocks (e.g. via explosions)")
             .define("griefing", false);
+
+    private static final ModConfigSpec.ConfigValue<Boolean> AUTO_IGNITE = BUILDER
+            .comment("Whether or not creepers flying with a neural elytra ignite automatically when landing on the ground " +
+                    "(it also has to be within 7 blocks of its target)")
+            .define("auto_ignite", true);
 
 
     static final ModConfigSpec SPEC = BUILDER.build();
@@ -53,8 +58,9 @@ public class Config
     public static int magicNumber;
     public static String magicNumberIntroduction;
     public static Set<Item> items;
-    public static EntityType<?> entityType;
+    public static EntityType<?> spawnedEntityType;
     public static boolean griefing;
+    public static boolean autoIgnite;
 
     private static boolean validateItemName(final Object obj)
     {
@@ -73,16 +79,17 @@ public class Config
                 .map(itemName -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemName)))
                 .collect(Collectors.toSet());
 
-        Optional<EntityType<?>> entityTypeOptional = EntityType.byString(SPAWNED_ELYTRA_ENTITY_TYPE.get());
+        Optional<EntityType<?>> entityTypeOptional = EntityType.byString(SPAWNED_ENTITY_TYPE.get());
         if (entityTypeOptional.isPresent()) {
-            entityType = entityTypeOptional.get();
+            spawnedEntityType = entityTypeOptional.get();
         }
         else {
-            System.out.println("the value entered for 'entity_type' in elytracreepers-common.toml not recognized, " +
+            System.out.println("the value entered for 'spawned_entity_type' in elytracreepers-common.toml not recognized, " +
                     "defaulting to minecraft:creeper");
-            entityType = EntityType.CREEPER;
+            spawnedEntityType = EntityType.CREEPER;
         }
 
-        griefing = ELYTRA_ENTITY_GRIEFING.get();
+        griefing = GRIEFING.get();
+        autoIgnite = AUTO_IGNITE.get();
     }
 }
