@@ -79,8 +79,7 @@ public class ModEvents {
         public static void spawnAgentsProduction(EntityTickEvent.Pre event) {
             if (NEATUtil.PRODUCTION &&
                     event.getEntity() instanceof ServerPlayer serverPlayer &&
-                    serverPlayer.tickCount % (1 * TICKS_PER_SECOND) == 0 &&
-                    serverPlayer.getMainHandItem().is(Items.OAK_BUTTON)) {
+                    serverPlayer.tickCount % (Config.spawnInterval * TICKS_PER_SECOND) == 0) {
                 boolean success = false;
                 for (int i = 0; i < Config.numEntitiesPerSpawn; i++) {
                     if (attemptSpawns(serverPlayer)) {

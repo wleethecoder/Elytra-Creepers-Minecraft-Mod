@@ -59,6 +59,10 @@ public class Config
             .comment("How many entities with a neural elytra spawn at a time")
             .defineInRange("num_entities_per_spawn", 1, 0, 10);
 
+    private static final ModConfigSpec.IntValue SPAWN_INTERVAL = BUILDER
+            .comment("Length of time interval (in seconds) between spawns")
+            .defineInRange("spawn_interval", 60, 5, 180);
+
 
     static final ModConfigSpec SPEC = BUILDER.build();
 
@@ -71,6 +75,7 @@ public class Config
     public static boolean autoIgnite;
     public static boolean explodeHurtOnlyTarget;
     public static int numEntitiesPerSpawn;
+    public static int spawnInterval;
 
     private static boolean validateItemName(final Object obj)
     {
@@ -103,5 +108,6 @@ public class Config
         autoIgnite = AUTO_IGNITE.get();
         explodeHurtOnlyTarget = EXPLODE_HURT_ONLY_TARGET.get();
         numEntitiesPerSpawn = NUM_ENTITIES_PER_SPAWN.get();
+        spawnInterval = SPAWN_INTERVAL.get();
     }
 }
