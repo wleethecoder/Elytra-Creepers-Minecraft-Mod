@@ -16,6 +16,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.ServerStatsCounter;
+import net.minecraft.stats.Stats;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -85,9 +88,12 @@ public class ModEvents {
                 // spawning mechanics of elytra entities are similar to those of phantoms (see vanilla PhantomSpawner class)
                 ServerLevel serverLevel = serverPlayer.serverLevel();
                 BlockPos blockPos = serverPlayer.blockPosition();
+                ServerStatsCounter serverStatsCounter = serverPlayer.getStats();
+                int timeSinceRest = Mth.clamp(serverStatsCounter.getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_REST)), 1, Integer.MAX_VALUE);
                 if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING) &&
                         serverLevel.dimensionType().hasSkyLight() &&
-                        serverLevel.getSkyDarken() >= 5 &&
+                        (!Config.nightOnlySpawn || serverLevel.getSkyDarken() >= 5) &&
+                        (!Config.insomniaOnlySpawn || timeSinceRest >= 72000) &&
                         blockPos.getY() >= serverLevel.getSeaLevel() &&
                         serverLevel.canSeeSky(blockPos)) {
                     boolean success = false;

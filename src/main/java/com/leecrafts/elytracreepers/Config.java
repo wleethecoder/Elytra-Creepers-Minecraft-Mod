@@ -63,6 +63,14 @@ public class Config
             .comment("Length of time interval (in seconds) between spawns")
             .defineInRange("spawn_interval", 60, 5, 180);
 
+    private static final ModConfigSpec.ConfigValue<Boolean> NIGHT_ONLY_SPAWN = BUILDER
+            .comment("Whether or not entities with a neural elytra spawn only in the night")
+            .define("night_only_spawn", true);
+
+    private static final ModConfigSpec.ConfigValue<Boolean> INSOMNIA_ONLY_SPAWN = BUILDER
+            .comment("Whether or not entities with a neural elytra spawn only when the player has insomnia")
+            .define("insomnia_only_spawn", false);
+
 
     static final ModConfigSpec SPEC = BUILDER.build();
 
@@ -76,6 +84,8 @@ public class Config
     public static boolean explodeHurtOnlyTarget;
     public static int numEntitiesPerSpawn;
     public static int spawnInterval;
+    public static boolean nightOnlySpawn;
+    public static boolean insomniaOnlySpawn;
 
     private static boolean validateItemName(final Object obj)
     {
@@ -109,5 +119,7 @@ public class Config
         explodeHurtOnlyTarget = EXPLODE_HURT_ONLY_TARGET.get();
         numEntitiesPerSpawn = NUM_ENTITIES_PER_SPAWN.get();
         spawnInterval = SPAWN_INTERVAL.get();
+        nightOnlySpawn = NIGHT_ONLY_SPAWN.get();
+        insomniaOnlySpawn = INSOMNIA_ONLY_SPAWN.get();
     }
 }
