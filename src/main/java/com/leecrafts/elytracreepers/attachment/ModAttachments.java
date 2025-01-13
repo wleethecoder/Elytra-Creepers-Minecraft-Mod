@@ -3,6 +3,7 @@ package com.leecrafts.elytracreepers.attachment;
 import com.leecrafts.elytracreepers.ElytraCreepers;
 import com.leecrafts.elytracreepers.neat.calculations.Calculator;
 import com.leecrafts.elytracreepers.neat.controller.Agent;
+import com.mojang.serialization.Codec;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
@@ -23,6 +24,10 @@ public class ModAttachments {
 
     public static final Supplier<AttachmentType<Entity>> TARGET_ENTITY = ATTACHMENT_TYPES.register(
             "target_entity", () -> AttachmentType.builder(() -> (Entity) null).build()
+    );
+
+    public static final Supplier<AttachmentType<Boolean>> HAD_TARGET = ATTACHMENT_TYPES.register(
+            "had_target", () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL).build()
     );
 
     public static final Supplier<AttachmentType<Vec3>> TARGET_MOVEMENT = ATTACHMENT_TYPES.register(

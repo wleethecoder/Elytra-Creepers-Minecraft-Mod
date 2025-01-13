@@ -45,8 +45,6 @@ import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.joml.Vector3f;
 
-import java.util.List;
-
 import static net.minecraft.SharedConstants.TICKS_PER_SECOND;
 
 public class ModEvents {
@@ -125,12 +123,8 @@ public class ModEvents {
                 if (entity instanceof LivingEntity livingEntity) {
                     livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
 
-                    List<Player> candidates = livingEntity.level().getEntitiesOfClass(
-                            Player.class, livingEntity.getBoundingBox().inflate(SIGHT_DISTANCE));
-                    if (!candidates.isEmpty()) {
-                        int index = entity.getRandom().nextInt(candidates.size());
-                        livingEntity.setData(ModAttachments.TARGET_ENTITY, candidates.get(index));
-                    }
+                    livingEntity.setData(ModAttachments.TARGET_ENTITY, serverPlayer);
+                    livingEntity.setData(ModAttachments.HAD_TARGET, true);
 
                     if (livingEntity instanceof Mob mob) {
                         mob.setPersistenceRequired();
@@ -277,16 +271,21 @@ public class ModEvents {
         @SubscribeEvent
         public static void explosionGriefing(ExplosionEvent.Detonate event) {
             Entity entity = event.getExplosion().getDirectSourceEntity();
-            Entity target = entity.getData(ModAttachments.TARGET_ENTITY);
+            // the reason why HAD_TARGET data attachment is needed:
+            // There was a bug where, if multiple creepers explode on the player and player dies, the remaining explosions
+            // are treated like normal explosions, which can destroy blocks and/or other entities
             if (!entity.level().isClientSide &&
                     entity.getType() == Config.spawnedEntityType &&
-                    target != null) {
+                    entity.getData(ModAttachments.HAD_TARGET)) {
                 if (!Config.griefing) {
                     event.getAffectedBlocks().clear();
                 }
                 if (Config.explodeHurtOnlyTarget) {
                     event.getAffectedEntities().clear();
-                    event.getAffectedEntities().add(target);
+                    Entity target = entity.getData(ModAttachments.TARGET_ENTITY);
+                    if (target != null) {
+                        event.getAffectedEntities().add(target);
+                    }
                 }
             }
         }
