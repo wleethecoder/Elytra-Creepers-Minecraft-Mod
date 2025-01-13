@@ -12,6 +12,7 @@ import com.leecrafts.elytracreepers.neat.util.NEATUtil;
 import com.leecrafts.elytracreepers.payload.EntityVelocityPayload;
 import com.leecrafts.elytracreepers.payload.ServerPayloadHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -25,6 +26,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -97,20 +99,33 @@ public class ModEvents {
                         blockPos.getY() >= serverLevel.getSeaLevel() &&
                         serverLevel.canSeeSky(blockPos)) {
                     boolean success = false;
+                    boolean isEnemy = false;
                     for (int i = 0; i < Config.numEntitiesPerSpawn; i++) {
-                        if (attemptSpawns(serverPlayer, serverLevel, blockPos)) {
+                        LivingEntity livingEntity = attemptSpawns(serverPlayer, serverLevel, blockPos);
+                        if (livingEntity != null) {
                             success = true;
+                            isEnemy = livingEntity instanceof Enemy;
                         }
                     }
                     if (success) {
-                        serverLevel.playSound(
-                                null, serverPlayer.blockPosition(), SoundEvents.PHANTOM_SWOOP, SoundSource.HOSTILE);
+                        if (Config.soundWarn) {
+                            serverLevel.playSound(
+                                    null,
+                                    serverPlayer.blockPosition(),
+                                    isEnemy ? SoundEvents.AMBIENT_CAVE.value() : SoundEvents.ARROW_HIT_PLAYER,
+                                    SoundSource.HOSTILE,
+                                    2.0f,
+                                    1.0f);
+                        }
+                        if (Config.subtitleWarn) {
+                            serverPlayer.displayClientMessage(Component.literal("Above you."), true);
+                        }
                     }
                 }
             }
         }
 
-        private static boolean attemptSpawns(ServerPlayer serverPlayer, ServerLevel serverLevel, BlockPos blockPos) {
+        private static LivingEntity attemptSpawns(ServerPlayer serverPlayer, ServerLevel serverLevel, BlockPos blockPos) {
             for (int i = 0; i < 10; i++) {
                 double angle = Math.random() * 2 * Math.PI;
                 double distance = (serverPlayer.getRandom().nextBoolean() ? 1 : 0) * NEATUtil.AGENT_SPAWN_DISTANCE;
@@ -133,7 +148,7 @@ public class ModEvents {
                     if (!serverLevel.containsAnyLiquid(livingEntity.getBoundingBox()) && serverLevel.isUnobstructed(livingEntity)) {
                         serverLevel.addFreshEntityWithPassengers(livingEntity);
                         livingEntity.addEffect(new MobEffectInstance(MobEffects.GLOWING, -1));
-                        return true;
+                        return livingEntity;
                     }
 
 //                    System.out.println("trying spawn again");
@@ -141,7 +156,7 @@ public class ModEvents {
                 }
             }
 
-            return false;
+            return null;
         }
 
         // loading not the agent object itself (too much unnecessary data), but the agent's calculator object.

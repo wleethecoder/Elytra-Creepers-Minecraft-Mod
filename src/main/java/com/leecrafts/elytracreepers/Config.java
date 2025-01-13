@@ -71,6 +71,14 @@ public class Config
             .comment("Whether or not entities with a neural elytra spawn only when the player has insomnia")
             .define("insomnia_only_spawn", false);
 
+    private static final ModConfigSpec.ConfigValue<Boolean> SUBTITLE_WARN = BUILDER
+            .comment("Displays a subtitle whenever entities with a neural elytra spawn")
+            .define("subtitle_warn", true);
+
+    private static final ModConfigSpec.ConfigValue<Boolean> SOUND_WARN = BUILDER
+            .comment("Plays a sound whenever entities with a neural elytra spawn")
+            .define("sound_warn", true);
+
 
     static final ModConfigSpec SPEC = BUILDER.build();
 
@@ -86,6 +94,8 @@ public class Config
     public static int spawnInterval;
     public static boolean nightOnlySpawn;
     public static boolean insomniaOnlySpawn;
+    public static boolean subtitleWarn;
+    public static boolean soundWarn;
 
     private static boolean validateItemName(final Object obj)
     {
@@ -121,5 +131,7 @@ public class Config
         spawnInterval = SPAWN_INTERVAL.get();
         nightOnlySpawn = NIGHT_ONLY_SPAWN.get();
         insomniaOnlySpawn = INSOMNIA_ONLY_SPAWN.get();
+        subtitleWarn = SUBTITLE_WARN.get();
+        soundWarn = SOUND_WARN.get();
     }
 }
