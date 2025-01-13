@@ -23,6 +23,7 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -79,31 +80,40 @@ public class ModEvents {
         public static void spawnAgentsProduction(EntityTickEvent.Pre event) {
             if (NEATUtil.PRODUCTION &&
                     event.getEntity() instanceof ServerPlayer serverPlayer &&
-                    serverPlayer.tickCount % (Config.spawnInterval * TICKS_PER_SECOND) == 0) {
-                boolean success = false;
-                for (int i = 0; i < Config.numEntitiesPerSpawn; i++) {
-                    if (attemptSpawns(serverPlayer)) {
-                        success = true;
+                    serverPlayer.tickCount % (Config.spawnInterval * TICKS_PER_SECOND) == 0 &&
+                    !serverPlayer.isSpectator()) {
+                // spawning mechanics of elytra entities are similar to those of phantoms (see vanilla PhantomSpawner class)
+                ServerLevel serverLevel = serverPlayer.serverLevel();
+                BlockPos blockPos = serverPlayer.blockPosition();
+                if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING) &&
+                        serverLevel.dimensionType().hasSkyLight() &&
+                        serverLevel.getSkyDarken() >= 5 &&
+                        blockPos.getY() >= serverLevel.getSeaLevel() &&
+                        serverLevel.canSeeSky(blockPos)) {
+                    boolean success = false;
+                    for (int i = 0; i < Config.numEntitiesPerSpawn; i++) {
+                        if (attemptSpawns(serverPlayer, serverLevel, blockPos)) {
+                            success = true;
+                        }
                     }
-                }
-                if (success) {
-                    serverPlayer.serverLevel().playSound(
-                            null, serverPlayer.blockPosition(), SoundEvents.PHANTOM_SWOOP, SoundSource.HOSTILE);
+                    if (success) {
+                        serverLevel.playSound(
+                                null, serverPlayer.blockPosition(), SoundEvents.PHANTOM_SWOOP, SoundSource.HOSTILE);
+                    }
                 }
             }
         }
 
-        private static boolean attemptSpawns(ServerPlayer serverPlayer) {
+        private static boolean attemptSpawns(ServerPlayer serverPlayer, ServerLevel serverLevel, BlockPos blockPos) {
             for (int i = 0; i < 10; i++) {
                 double angle = Math.random() * 2 * Math.PI;
                 double distance = (serverPlayer.getRandom().nextBoolean() ? 1 : 0) * NEATUtil.AGENT_SPAWN_DISTANCE;
                 int xOffset = (int) (distance * Math.cos(angle));
                 int yOffset = (int) NEATUtil.AGENT_SPAWN_DISTANCE;
                 int zOffset = (int) (distance * Math.sin(angle));
-                BlockPos blockPos = serverPlayer.blockPosition().offset(xOffset, yOffset, zOffset);
-                ServerLevel serverLevel = serverPlayer.serverLevel();
+                BlockPos blockPos1 = blockPos.offset(xOffset, yOffset, zOffset);
 //                Entity entity = Config.spawnedEntityType.spawn(serverPlayer.serverLevel(), blockPos, MobSpawnType.MOB_SUMMONED);
-                Entity entity = Config.spawnedEntityType.create(serverLevel, null, blockPos, MobSpawnType.MOB_SUMMONED, false, false);
+                Entity entity = Config.spawnedEntityType.create(serverLevel, null, blockPos1, MobSpawnType.MOB_SUMMONED, false, false);
                 if (entity instanceof LivingEntity livingEntity) {
                     livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
 
