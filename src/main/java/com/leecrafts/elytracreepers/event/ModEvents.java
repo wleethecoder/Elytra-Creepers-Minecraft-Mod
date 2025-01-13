@@ -19,6 +19,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -136,6 +138,7 @@ public class ModEvents {
 
                     if (!serverLevel.containsAnyLiquid(livingEntity.getBoundingBox()) && serverLevel.isUnobstructed(livingEntity)) {
                         serverLevel.addFreshEntityWithPassengers(livingEntity);
+                        livingEntity.addEffect(new MobEffectInstance(MobEffects.GLOWING, -1));
                         return true;
                     }
 
