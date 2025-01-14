@@ -4,6 +4,7 @@ import com.leecrafts.elytracreepers.Config;
 import com.leecrafts.elytracreepers.ElytraCreepers;
 import com.leecrafts.elytracreepers.attachment.ModAttachments;
 import com.leecrafts.elytracreepers.entity.ModEntities;
+import com.leecrafts.elytracreepers.entity.custom.TraineeEntity;
 import com.leecrafts.elytracreepers.item.ModItems;
 import com.leecrafts.elytracreepers.item.custom.NeuralElytra;
 import com.leecrafts.elytracreepers.neat.calculations.Calculator;
@@ -11,6 +12,9 @@ import com.leecrafts.elytracreepers.neat.controller.NEATController;
 import com.leecrafts.elytracreepers.neat.util.NEATUtil;
 import com.leecrafts.elytracreepers.payload.EntityVelocityPayload;
 import com.leecrafts.elytracreepers.payload.ServerPayloadHandler;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -33,8 +37,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
@@ -157,6 +163,17 @@ public class ModEvents {
             }
 
             return null;
+        }
+
+        // only for testing purposes
+        @SubscribeEvent
+        public static void putOnNeuralElytra(PlayerInteractEvent.EntityInteract event) {
+            if (event.getTarget() instanceof LivingEntity livingEntity &&
+                    !livingEntity.level().isClientSide &&
+                    event.getItemStack().is(ModItems.NEURAL_ELYTRA)) {
+                livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
+                System.out.println(livingEntity.getItemBySlot(EquipmentSlot.CHEST).getItem());
+            }
         }
 
         // loading not the agent object itself (too much unnecessary data), but the agent's calculator object.
@@ -320,6 +337,26 @@ public class ModEvents {
                         (!(target instanceof Player) || !((Player) target).isCreative())) {
                     creeper.ignite();
                 }
+            }
+        }
+
+    }
+
+    @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
+    public static class GameBusClientEvents {
+
+        @SubscribeEvent
+        public static void entityRender(RenderLivingEvent.Pre<LivingEntity, EntityModel<LivingEntity>> event) {
+            LivingEntity entity = event.getEntity();
+            float partialTick = event.getPartialTick();
+            PoseStack poseStack = event.getPoseStack();
+            if (!(entity instanceof TraineeEntity) && !(entity instanceof Player) && entity.isFallFlying()) {
+                // Strangely enough, I had to copy and paste these 2 lines of code to TraineeRenderer#actuallyRender.
+                // Otherwise, if I got rid of the "!(entity instanceof TraineeEntity)" condition and didn't modify
+                // TraineeRenderer#actuallyRender, the rotations would be inaccurate for the Trainee entity.
+                // This behavior may be due to the way GeckoLib entities handle rotations.
+                poseStack.mulPose(Axis.YP.rotationDegrees(-entity.getViewYRot(partialTick)));
+                poseStack.mulPose(Axis.XP.rotationDegrees(entity.getViewXRot(partialTick) + 90));
             }
         }
 
