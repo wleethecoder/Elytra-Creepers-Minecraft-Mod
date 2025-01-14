@@ -225,7 +225,7 @@ public class NEATUtil {
             try (InputStream inputStream = NEATUtil.class.getResourceAsStream(
                     String.format("%s/%s/%s-%s.dat", ASSETS_DIRECTORY_PATH, type, type, numberString));
                  ObjectInputStream objectInputStream = new ObjectInputStream(inputStream)) {
-                System.out.println("existing " + type + " in resources folder found");
+//                System.out.println("existing " + type + " in resources folder found");
                 object = objectInputStream.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 System.out.println("Error loading object: " + e.getMessage());
