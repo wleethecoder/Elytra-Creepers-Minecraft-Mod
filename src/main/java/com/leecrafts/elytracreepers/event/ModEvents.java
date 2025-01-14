@@ -338,6 +338,21 @@ public class ModEvents {
             }
         }
 
+        // There were several bugs regarding creeper behaviors and griefing
+        // Solving the one described in the explosionGriefing event listener caused another bug: the respawned player
+        // would not be damaged from those same group of creepers that included the creeper that had killed the player
+        // So my solution is to simply discard those creepers
+        // I hope I don't have to explain this to anybody
+        @SubscribeEvent
+        public static void removeCreepersWithLostTargets(EntityTickEvent.Pre event) {
+            if (event.getEntity() instanceof Creeper creeper && !creeper.level().isClientSide) {
+                Entity target = creeper.getData(ModAttachments.TARGET_ENTITY);
+                if (creeper.getData(ModAttachments.HAD_TARGET) && (target == null || target.isRemoved())) {
+                    creeper.discard();
+                }
+            }
+        }
+
     }
 
     @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
