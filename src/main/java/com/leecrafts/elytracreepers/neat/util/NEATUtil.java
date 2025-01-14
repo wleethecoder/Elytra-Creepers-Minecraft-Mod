@@ -49,17 +49,14 @@ public class NEATUtil {
     public static final int INPUT_SIZE = 7;
     public static final int OUTPUT_SIZE = 4;
 
-    // TODO adjust hyperparameters
     public static final double FAST_FALL_PUNISHMENT = 5;
     public static final double DISTANCE_PUNISHMENT = 2;
     public static final double TIME_PUNISHMENT = 0.05;
 
-    // TODO change this comment
     // I am trying out a naive method of adding randomness into the training process.
-    // First of all, without the randomization of agent spawn points and target movement, convergence was reached after 330 generations.
-    // Therefore, I want the randomness to be the smallest at generation 0 and the largest at generation 330.
-    // For example, at generation 0 the range of horizontal distances between the target and agent spawn points is [100, 100].
-    // But eventually, that range would increase, becoming [50, 100] at generation 165 and [0, 100] at generation 330.
+    // I want the randomness to be the smallest at generation 0 and the largest at generation 175.
+    // For example, at generation 0 the range of speeds of the target is [0, 0] m/s.
+    // But eventually, that range would increase, becoming [0, ~5.0] m/s at generation 87 and [0, 10.0] m/s at generation 175.
     public static final int GENERATIONAL_RANDOMNESS_BOUND = 175;
 
     public static final double AGENT_SPAWN_DISTANCE = 100;

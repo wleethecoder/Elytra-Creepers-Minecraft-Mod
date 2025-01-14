@@ -19,7 +19,6 @@ public class NEATController implements Serializable {
 
     public static final int MAX_NODES = (int) Math.pow(2, 20);
 
-    // TODO adjust hyperparameters
     private final double C1 = 1.0;
     private final double C2 = 1.0;
     private final double C3 = 2.0;

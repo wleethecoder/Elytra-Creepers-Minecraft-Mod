@@ -23,7 +23,6 @@ public class Node implements Comparable<Node>, Serializable {
         this.output = this.activationFunction(s);
     }
 
-    // TODO tweak activation function
     private double activationFunction(double x) {
         // if this is an output node (output activation is linear)
         if (this.getX() >= 0.9) {

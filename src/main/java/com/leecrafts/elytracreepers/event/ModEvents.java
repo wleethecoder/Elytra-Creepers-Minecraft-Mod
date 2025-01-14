@@ -197,16 +197,10 @@ public class ModEvents {
             if (NeuralElytra.isNonPlayerLivingEntity(event.getEntity())) {
                 LivingEntity livingEntity = (LivingEntity) event.getEntity();
                 if (!livingEntity.level().isClientSide && NeuralElytra.isWearing(livingEntity)) {
-                    // I have to use NBTs because Entity#setSharedFlag is a protected method
-//                    CompoundTag compoundTag = livingEntity.saveWithoutId(new CompoundTag());
                     if (!livingEntity.onGround() && !livingEntity.isFallFlying()) {
-//                        compoundTag.putBoolean("FallFlying", true);
-//                        livingEntity.load(compoundTag);
                         livingEntity.setSharedFlag(7, true);
                     }
                     else if (livingEntity.onGround()) {
-//                        compoundTag.putBoolean("FallFlying", false);
-//                        livingEntity.load(compoundTag);
                         livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.AIR));
 //                        livingEntity.setSharedFlag(7, false);
 
