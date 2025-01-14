@@ -42,6 +42,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -288,6 +289,17 @@ public class ModEvents {
 //                    armorStand.setDeltaMovement(armorStand.getData(ModAttachments.TARGET_MOVEMENT));
                     armorStand.setPos(armorStand.position().add(armorStand.getData(ModAttachments.TARGET_MOVEMENT)));
                 }
+            }
+        }
+
+        // elytra entities take twice the damage when flying
+        @SubscribeEvent
+        public static void doubleAirDamage(LivingDamageEvent.Pre event) {
+            LivingEntity livingEntity = event.getEntity();
+            if (!livingEntity.level().isClientSide &&
+                    livingEntity.getData(ModAttachments.HAD_TARGET) &&
+                    livingEntity.isFallFlying()) {
+                event.setNewDamage(2 * event.getOriginalDamage());
             }
         }
 
