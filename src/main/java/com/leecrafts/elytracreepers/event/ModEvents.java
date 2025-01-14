@@ -319,6 +319,10 @@ public class ModEvents {
                         event.getAffectedEntities().add(target);
                     }
                 }
+
+                if (entity instanceof LivingEntity livingEntity) {
+                    livingEntity.removeEffect(MobEffects.GLOWING);
+                }
             }
         }
 
