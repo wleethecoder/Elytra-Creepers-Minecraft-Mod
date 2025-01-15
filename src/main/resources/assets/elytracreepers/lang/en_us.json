@@ -1,3 +1,6 @@
 {
-  "item.elytracreepers.neural_elytra": "Neural Elytra"
+  "item.elytracreepers.neural_elytra": "Neural Elytra",
+
+  "advancements.adventure.kill_elytra_entity_midair.title": "No Flying Allowed",
+  "advancements.adventure.kill_elytra_entity_midair.description": "Kill an entity while it is flying on an elytra"
 }
