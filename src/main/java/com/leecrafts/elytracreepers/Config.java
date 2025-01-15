@@ -22,24 +22,24 @@ public class Config
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
     private static final ModConfigSpec.ConfigValue<String> SPAWNED_ENTITY_TYPE = BUILDER
-            .comment("The type of entities that will spawn with a neural elytra")
+            .comment("The type of entities that spawn with an elytra")
             .define("spawned_entity_type", "minecraft:creeper");
 
     private static final ModConfigSpec.BooleanValue GRIEFING = BUILDER
-            .comment("Whether or not entities flying with a neural elytra are able to destroy blocks (e.g. via explosions)")
+            .comment("Whether or not elytra-wearing entities are able to destroy blocks (e.g. via explosions)")
             .define("griefing", false);
 
     private static final ModConfigSpec.BooleanValue AUTO_IGNITE = BUILDER
-            .comment("Whether or not creepers flying with a neural elytra ignite automatically when landing on the ground " +
-                    "(it also has to be within 7 blocks of its target)")
+            .comment("Whether or not elytra-wearing creepers ignite automatically when landing on the ground " +
+                    "(they also has to be within 7 blocks of the player target)")
             .define("auto_ignite", true);
 
     private static final ModConfigSpec.BooleanValue EXPLODE_HURT_ONLY_TARGET = BUILDER
-            .comment("Whether or not creepers flying with a neural elytra hurt only the target when exploding")
+            .comment("Whether or not elytra-wearing creepers hurt only the player target when exploding")
             .define("explode_hurt_only_target", true);
 
     private static final ModConfigSpec.IntValue NUM_ENTITIES_PER_SPAWN = BUILDER
-            .comment("How many entities with a neural elytra spawn at a time")
+            .comment("How many elytra-wearing entities spawn at a time")
             .defineInRange("num_entities_per_spawn", 1, 0, 10);
 
     private static final ModConfigSpec.IntValue SPAWN_INTERVAL = BUILDER
@@ -47,19 +47,19 @@ public class Config
             .defineInRange("spawn_interval", 60, 5, 180);
 
     private static final ModConfigSpec.BooleanValue NIGHT_ONLY_SPAWN = BUILDER
-            .comment("Whether or not entities with a neural elytra spawn only in the night")
+            .comment("Whether or not elytra-wearing entities spawn only in the night")
             .define("night_only_spawn", true);
 
     private static final ModConfigSpec.BooleanValue INSOMNIA_ONLY_SPAWN = BUILDER
-            .comment("Whether or not entities with a neural elytra spawn only when the player has insomnia")
+            .comment("Whether or not elytra-wearing entities spawn only when the player has insomnia")
             .define("insomnia_only_spawn", false);
 
     private static final ModConfigSpec.BooleanValue SUBTITLE_WARN = BUILDER
-            .comment("Displays a subtitle whenever entities with a neural elytra spawn")
+            .comment("Displays a subtitle whenever elytra-wearing entities spawn")
             .define("subtitle_warn", true);
 
     private static final ModConfigSpec.BooleanValue SOUND_WARN = BUILDER
-            .comment("Plays a sound whenever entities with a neural elytra spawn")
+            .comment("Plays a sound whenever elytra-wearing entities spawn")
             .define("sound_warn", true);
 
 
