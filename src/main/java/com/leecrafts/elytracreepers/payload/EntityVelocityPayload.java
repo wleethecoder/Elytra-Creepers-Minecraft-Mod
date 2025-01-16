@@ -5,6 +5,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
 public class EntityVelocityPayload {
@@ -26,7 +27,7 @@ public class EntityVelocityPayload {
         );
 
         @Override
-        public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+        public CustomPacketPayload.@NotNull Type<? extends CustomPacketPayload> type() {
             return TYPE;
         }
     }
