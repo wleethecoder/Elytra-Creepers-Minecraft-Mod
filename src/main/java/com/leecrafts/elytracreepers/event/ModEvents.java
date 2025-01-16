@@ -43,6 +43,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -362,6 +363,16 @@ public class ModEvents {
                 if (creeper.getData(ModAttachments.HAD_TARGET) && (target == null || target.isRemoved())) {
                     creeper.discard();
                 }
+            }
+        }
+
+        // preventing elytra entities from dropping neural elytras upon death
+        // because i don't want neural elytras to be obtainable by players (for the time being)
+        @SubscribeEvent
+        public static void elytraEntityDeath(LivingDeathEvent event) {
+            LivingEntity livingEntity = event.getEntity();
+            if (!livingEntity.level().isClientSide && NeuralElytra.isWearing(livingEntity)) {
+                livingEntity.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
             }
         }
 
