@@ -24,8 +24,7 @@ public class Config
             .define("griefing", false);
 
     private static final ModConfigSpec.BooleanValue AUTO_IGNITE = BUILDER
-            .comment("Whether or not elytra-wearing creepers ignite automatically when landing on the ground " +
-                    "(they also has to be within 7 blocks of the player target)")
+            .comment("Whether or not elytra-wearing creepers ignite automatically when landing on the ground near the player target")
             .define("auto_ignite", true);
 
     private static final ModConfigSpec.BooleanValue EXPLODE_HURT_ONLY_TARGET = BUILDER

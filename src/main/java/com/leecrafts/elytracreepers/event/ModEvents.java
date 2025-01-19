@@ -301,20 +301,17 @@ public class ModEvents {
         @SubscribeEvent
         public static void doubleAirDamage(LivingDamageEvent.Pre event) {
             LivingEntity livingEntity = event.getEntity();
-            boolean flying = NeuralElytra.isWearing(livingEntity) && livingEntity.isFallFlying();
             if (!livingEntity.level().isClientSide) {
+                boolean flying = NeuralElytra.isWearing(livingEntity) && livingEntity.isFallFlying();
                 if (flying) {
                     event.setNewDamage(2 * event.getOriginalDamage());
-                    livingEntity.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
-                    if (NEATUtil.PRODUCTION && livingEntity instanceof Mob mob) {
-                        mob.persistenceRequired = false;
-                    }
+                    stopFlying(livingEntity);
                     livingEntity.setData(ModAttachments.RECENTLY_DAMAGED_MIDAIR, true);
                     livingEntity.level().playSound(
                             null,
                             livingEntity.blockPosition(),
                             SoundEvents.ITEM_BREAK,
-                            SoundSource.HOSTILE,
+                            SoundSource.NEUTRAL,
                             1.0f,
                             1.0f);
                 }
@@ -364,9 +361,26 @@ public class ModEvents {
                     Config.autoIgnite &&
                     target != null) {
                 if (livingEntity instanceof Creeper creeper &&
-                        creeper.distanceTo(target) < 7 &&
                         (!(target instanceof Player) || !((Player) target).isCreative())) {
-                    creeper.ignite();
+                    double igniteDistance = target
+                            .getData(ModAttachments.ENTITY_VELOCITY)
+                            .scale(0.9 * TICKS_PER_SECOND)
+                            .horizontalDistance();
+                    float f = (float)(creeper.getX() - target.getX());
+                    float f2 = (float)(creeper.getZ() - target.getZ());
+                    double distance = Mth.sqrt(f * f + f2 * f2);
+                    if (distance < igniteDistance) {
+                        creeper.ignite();
+
+                        // this code is added because sometimes the ignite sound doesn't play
+                        creeper.level().playSound(
+                                null,
+                                creeper.blockPosition(),
+                                SoundEvents.CREEPER_PRIMED,
+                                SoundSource.HOSTILE,
+                                1.0f,
+                                0.5f);
+                    }
                 }
             }
         }
