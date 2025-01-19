@@ -5,11 +5,7 @@
       "trigger": "minecraft:player_killed_entity",
       "conditions": {
         "entity": {
-          "equipment": {
-            "chest": {
-              "items": "elytracreepers:neural_elytra"
-            }
-          }
+          "nbt": "{\"neoforge:attachments\":{\"elytracreepers:recently_damaged_midair\":1b}}"
         }
       }
     }

@@ -24,6 +24,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -203,14 +204,17 @@ public class ModEvents {
                         livingEntity.setSharedFlag(7, true);
                     }
                     else if (livingEntity.onGround()) {
-                        livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.AIR));
-//                        livingEntity.setSharedFlag(7, false);
-
-                        if (NEATUtil.PRODUCTION && livingEntity instanceof Mob mob) {
-                            mob.persistenceRequired = false;
-                        }
+                        stopFlying(livingEntity);
                     }
                 }
+            }
+        }
+
+        public static void stopFlying(LivingEntity livingEntity) {
+//            livingEntity.setSharedFlag(7, false);
+            livingEntity.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
+            if (NEATUtil.PRODUCTION && livingEntity instanceof Mob mob) {
+                mob.persistenceRequired = false;
             }
         }
 
@@ -297,10 +301,26 @@ public class ModEvents {
         @SubscribeEvent
         public static void doubleAirDamage(LivingDamageEvent.Pre event) {
             LivingEntity livingEntity = event.getEntity();
-            if (!livingEntity.level().isClientSide &&
-                    livingEntity.getData(ModAttachments.HAD_TARGET) &&
-                    livingEntity.isFallFlying()) {
-                event.setNewDamage(2 * event.getOriginalDamage());
+            boolean flying = NeuralElytra.isWearing(livingEntity) && livingEntity.isFallFlying();
+            if (!livingEntity.level().isClientSide) {
+                if (flying) {
+                    event.setNewDamage(2 * event.getOriginalDamage());
+                    livingEntity.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
+                    if (NEATUtil.PRODUCTION && livingEntity instanceof Mob mob) {
+                        mob.persistenceRequired = false;
+                    }
+                    livingEntity.setData(ModAttachments.RECENTLY_DAMAGED_MIDAIR, true);
+                    livingEntity.level().playSound(
+                            null,
+                            livingEntity.blockPosition(),
+                            SoundEvents.ITEM_BREAK,
+                            SoundSource.HOSTILE,
+                            1.0f,
+                            1.0f);
+                }
+                else if (!event.getSource().is(DamageTypes.FALL)) {
+                    livingEntity.setData(ModAttachments.RECENTLY_DAMAGED_MIDAIR, false);
+                }
             }
         }
 

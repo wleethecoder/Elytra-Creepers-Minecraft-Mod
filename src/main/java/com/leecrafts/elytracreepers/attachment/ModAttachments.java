@@ -54,6 +54,10 @@ public class ModAttachments {
             "entity_previous_pos", () -> AttachmentType.builder(() -> (Vec3) null).build()
     );
 
+    public static final Supplier<AttachmentType<Boolean>> RECENTLY_DAMAGED_MIDAIR = ATTACHMENT_TYPES.register(
+            "recently_damaged_midair", () -> AttachmentType.builder(() -> false).serialize(Codec.BOOL).build()
+    );
+
     public static void register(IEventBus eventBus) {
         ATTACHMENT_TYPES.register(eventBus);
     }
