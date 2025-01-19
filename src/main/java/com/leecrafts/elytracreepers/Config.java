@@ -23,9 +23,9 @@ public class Config
             .comment("Whether or not elytra-wearing entities are able to destroy blocks (e.g. via explosions)")
             .define("griefing", false);
 
-    private static final ModConfigSpec.BooleanValue AUTO_IGNITE = BUILDER
-            .comment("Whether or not elytra-wearing creepers ignite automatically when landing on the ground near the player target")
-            .define("auto_ignite", true);
+    private static final ModConfigSpec.BooleanValue SMART_IGNITE = BUILDER
+            .comment("Whether or not elytra-wearing creepers ignite at a \"smarter\" time so that their explosions are more accurate")
+            .define("smart_ignite", true);
 
     private static final ModConfigSpec.BooleanValue EXPLODE_HURT_ONLY_TARGET = BUILDER
             .comment("Whether or not elytra-wearing creepers hurt only the player target when exploding")
@@ -60,7 +60,7 @@ public class Config
 
     public static EntityType<?> spawnedEntityType;
     public static boolean griefing;
-    public static boolean autoIgnite;
+    public static boolean smartIgnite;
     public static boolean explodeHurtOnlyTarget;
     public static int numEntitiesPerSpawn;
     public static int spawnInterval;
@@ -83,7 +83,7 @@ public class Config
         }
 
         griefing = GRIEFING.get();
-        autoIgnite = AUTO_IGNITE.get();
+        smartIgnite = SMART_IGNITE.get();
         explodeHurtOnlyTarget = EXPLODE_HURT_ONLY_TARGET.get();
         numEntitiesPerSpawn = NUM_ENTITIES_PER_SPAWN.get();
         spawnInterval = SPAWN_INTERVAL.get();

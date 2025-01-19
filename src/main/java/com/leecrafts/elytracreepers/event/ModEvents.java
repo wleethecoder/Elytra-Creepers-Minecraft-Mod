@@ -351,27 +351,39 @@ public class ModEvents {
             }
         }
 
-        // automatically ignite creeper when it lands on the ground
+        // ignite creeper at a "smarter" time so that its explosions are more accurate
         @SubscribeEvent
-        public static void autoIgnite(LivingFallEvent event) {
-            LivingEntity livingEntity = event.getEntity();
-            Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
-            if (NEATUtil.PRODUCTION &&
+        public static void smartIgnite(EntityTickEvent.Pre event) {
+            if (event.getEntity() instanceof LivingEntity livingEntity &&
+                    NEATUtil.PRODUCTION &&
                     !livingEntity.level().isClientSide &&
                     livingEntity.getType() == Config.spawnedEntityType &&
-                    Config.autoIgnite &&
-                    target != null) {
-                if (livingEntity instanceof Creeper creeper &&
+                    Config.smartIgnite) {
+                Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
+                if (target != null &&
+                        livingEntity instanceof Creeper creeper &&
                         (!(target instanceof Player) || !((Player) target).isCreative())) {
-                    double igniteDistance = target
+                    double igniteHorizontalDistance = target
                             .getData(ModAttachments.ENTITY_VELOCITY)
-                            .scale(0.9 * TICKS_PER_SECOND)
+                            .scale(1.0 * TICKS_PER_SECOND)
                             .horizontalDistance();
                     float f = (float)(creeper.getX() - target.getX());
                     float f2 = (float)(creeper.getZ() - target.getZ());
-                    double distance = Mth.sqrt(f * f + f2 * f2);
-                    if (distance < igniteDistance) {
+                    double horizontalDistance = Mth.sqrt(f * f + f2 * f2);
+                    boolean ignited = creeper.getSwellDir() > 0 || creeper.isIgnited();
+                    if (horizontalDistance < igniteHorizontalDistance &&
+                            Math.abs(creeper.getY() - target.getY()) < 1.0 &&
+                            !ignited) {
                         creeper.ignite();
+
+                        // this code is added because sometimes the ignite sound doesn't play
+                        creeper.level().playSound(
+                                null,
+                                creeper.blockPosition(),
+                                SoundEvents.CREEPER_PRIMED,
+                                SoundSource.HOSTILE,
+                                1.0f,
+                                0.5f);
                     }
                 }
             }
