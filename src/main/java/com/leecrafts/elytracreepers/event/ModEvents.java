@@ -156,7 +156,7 @@ public class ModEvents {
 
                     if (!serverLevel.containsAnyLiquid(livingEntity.getBoundingBox()) && serverLevel.isUnobstructed(livingEntity)) {
                         serverLevel.addFreshEntityWithPassengers(livingEntity);
-                        livingEntity.addEffect(new MobEffectInstance(MobEffects.GLOWING, -1));
+                        livingEntity.addEffect(new MobEffectInstance(MobEffects.GLOWING, -1, 0, false, false));
                         return livingEntity;
                     }
 
