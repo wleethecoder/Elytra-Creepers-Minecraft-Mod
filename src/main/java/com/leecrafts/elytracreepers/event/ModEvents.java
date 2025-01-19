@@ -371,15 +371,6 @@ public class ModEvents {
                     double distance = Mth.sqrt(f * f + f2 * f2);
                     if (distance < igniteDistance) {
                         creeper.ignite();
-
-                        // this code is added because sometimes the ignite sound doesn't play
-                        creeper.level().playSound(
-                                null,
-                                creeper.blockPosition(),
-                                SoundEvents.CREEPER_PRIMED,
-                                SoundSource.HOSTILE,
-                                1.0f,
-                                0.5f);
                     }
                 }
             }
