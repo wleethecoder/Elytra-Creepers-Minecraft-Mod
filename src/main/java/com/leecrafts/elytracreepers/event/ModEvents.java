@@ -200,10 +200,11 @@ public class ModEvents {
             if (NeuralElytra.isNonPlayerLivingEntity(event.getEntity())) {
                 LivingEntity livingEntity = (LivingEntity) event.getEntity();
                 if (!livingEntity.level().isClientSide && NeuralElytra.isWearing(livingEntity)) {
-                    if (!livingEntity.onGround() && !livingEntity.isFallFlying()) {
+                    boolean landed = livingEntity.onGround() || livingEntity.isInFluidType();
+                    if (!landed && !livingEntity.isFallFlying()) {
                         livingEntity.setSharedFlag(7, true);
                     }
-                    else if (livingEntity.onGround()) {
+                    else if (landed) {
                         stopFlying(livingEntity);
                     }
                 }
