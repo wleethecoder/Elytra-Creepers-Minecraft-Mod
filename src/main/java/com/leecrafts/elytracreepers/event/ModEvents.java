@@ -367,6 +367,8 @@ public class ModEvents {
                     NEATUtil.PRODUCTION &&
                     !livingEntity.level().isClientSide &&
                     livingEntity.getType() == Config.spawnedEntityType &&
+                    NeuralElytra.isWearing(livingEntity) &&
+                    livingEntity.isFallFlying() &&
                     Config.smartIgnite) {
                 Entity target = livingEntity.getData(ModAttachments.TARGET_ENTITY);
                 if (target != null &&
