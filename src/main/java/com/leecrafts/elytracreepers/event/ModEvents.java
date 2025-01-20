@@ -114,7 +114,7 @@ public class ModEvents {
                     // max. spawn cap logic
                     int numCurrentEntities = serverLevel.getEntitiesOfClass(
                             LivingEntity.class,
-                            new AABB(serverPlayer.blockPosition()).inflate(200),
+                            new AABB(serverPlayer.blockPosition()).inflate(128),
                             livingEntity -> livingEntity.getData(ModAttachments.HAD_TARGET)).size();
                     int numCanSpawn = Math.min(Config.maximumSpawnCap - numCurrentEntities, Config.numEntitiesPerSpawn);
 
