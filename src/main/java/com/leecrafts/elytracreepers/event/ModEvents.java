@@ -37,6 +37,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -109,7 +110,15 @@ public class ModEvents {
                         serverLevel.canSeeSky(blockPos)) {
                     boolean success = false;
                     boolean isEnemy = false;
-                    for (int i = 0; i < Config.numEntitiesPerSpawn; i++) {
+
+                    // max. spawn cap logic
+                    int numCurrentEntities = serverLevel.getEntitiesOfClass(
+                            LivingEntity.class,
+                            new AABB(serverPlayer.blockPosition()).inflate(200),
+                            livingEntity -> livingEntity.getData(ModAttachments.HAD_TARGET)).size();
+                    int numCanSpawn = Math.min(Config.maximumSpawnCap - numCurrentEntities, Config.numEntitiesPerSpawn);
+
+                    for (int i = 0; i < numCanSpawn; i++) {
                         LivingEntity livingEntity = attemptSpawns(serverPlayer, serverLevel, blockPos);
                         if (livingEntity != null) {
                             success = true;

@@ -39,6 +39,10 @@ public class Config
             .comment("Length of time interval (in seconds) between spawns")
             .defineInRange("spawn_interval", 60, 5, 180);
 
+    private static final ModConfigSpec.IntValue MAXIMUM_SPAWN_CAP = BUILDER
+            .comment("The maximum amount of elytra-wearing entities that can spawn per player")
+            .defineInRange("maximum_spawn_cap", 10, 1, 75);
+
     private static final ModConfigSpec.BooleanValue NIGHT_ONLY_SPAWN = BUILDER
             .comment("Whether or not elytra-wearing entities spawn only in the night")
             .define("night_only_spawn", true);
@@ -64,6 +68,7 @@ public class Config
     public static boolean explodeHurtOnlyTarget;
     public static int numEntitiesPerSpawn;
     public static int spawnInterval;
+    public static int maximumSpawnCap;
     public static boolean nightOnlySpawn;
     public static boolean insomniaOnlySpawn;
     public static boolean subtitleWarn;
@@ -87,6 +92,7 @@ public class Config
         explodeHurtOnlyTarget = EXPLODE_HURT_ONLY_TARGET.get();
         numEntitiesPerSpawn = NUM_ENTITIES_PER_SPAWN.get();
         spawnInterval = SPAWN_INTERVAL.get();
+        maximumSpawnCap = MAXIMUM_SPAWN_CAP.get();
         nightOnlySpawn = NIGHT_ONLY_SPAWN.get();
         insomniaOnlySpawn = INSOMNIA_ONLY_SPAWN.get();
         subtitleWarn = SUBTITLE_WARN.get();
