@@ -341,7 +341,6 @@ public class ModEvents {
             // There was a bug where, if multiple creepers explode on the player and player dies, the remaining explosions
             // are treated like normal explosions, which can destroy blocks and/or other entities
             if (!entity.level().isClientSide &&
-                    entity.getType() == Config.spawnedEntityType &&
                     entity.getData(ModAttachments.HAD_TARGET)) {
                 if (!Config.griefing) {
                     event.getAffectedBlocks().clear();
@@ -366,7 +365,6 @@ public class ModEvents {
             if (event.getEntity() instanceof LivingEntity livingEntity &&
                     NEATUtil.PRODUCTION &&
                     !livingEntity.level().isClientSide &&
-                    livingEntity.getType() == Config.spawnedEntityType &&
                     NeuralElytra.isWearing(livingEntity) &&
                     livingEntity.isFallFlying() &&
                     Config.smartIgnite) {
