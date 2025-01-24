@@ -33,7 +33,7 @@ public class Config
 
     private static final ModConfigSpec.IntValue NUM_ENTITIES_PER_SPAWN = BUILDER
             .comment("How many elytra-wearing entities spawn at a time")
-            .defineInRange("num_entities_per_spawn", 1, 0, 10);
+            .defineInRange("num_entities_per_spawn", 1, 0, 75);
 
     private static final ModConfigSpec.IntValue SPAWN_INTERVAL = BUILDER
             .comment("Length of time interval (in seconds) between spawns")
