@@ -75,7 +75,7 @@ public class ElytraCreepers {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-            EntityRenderers.<TraineeEntity>register(ModEntities.TRAINEE_ENTITY.get(), TraineeRenderer::new);
+            EntityRenderers.register(ModEntities.TRAINEE_ENTITY.get(), TraineeRenderer::new);
         }
     }
 }

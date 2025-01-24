@@ -348,9 +348,9 @@ public class ModEvents {
             // are treated like normal explosions, which can destroy blocks and/or other entities
             if (!entity.level().isClientSide &&
                     entity.getData(ModAttachments.HAD_TARGET)) {
-//                if (!Config.griefing) {
-//                    event.getAffectedBlocks().clear();
-//                }
+                if (!Config.griefing) {
+                    event.getAffectedBlocks().clear();
+                }
                 if (Config.explodeHurtOnlyTarget) {
                     event.getAffectedEntities().clear();
                     Entity target = entity.getData(ModAttachments.TARGET_ENTITY);
@@ -431,10 +431,10 @@ public class ModEvents {
 
     }
 
-    @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
-    public static class GameBusClientEvents {
-
-        // there is no longer a getEntity() method from the 1.21.1 -> 1.21.2 update
+//    @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
+//    public static class GameBusClientEvents {
+//
+//        // there is no longer a getEntity() method from the 1.21.1 -> 1.21.2 update
 //        @SubscribeEvent
 //        public static void entityRender(RenderLivingEvent.Pre<LivingEntity, EntityModel<LivingEntity>> event) {
 //            LivingEntity entity = event.getEntity();
@@ -449,8 +449,8 @@ public class ModEvents {
 //                poseStack.mulPose(Axis.XP.rotationDegrees(entity.getViewXRot(partialTick) + 90));
 //            }
 //        }
-
-    }
+//
+//    }
 
     @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.MOD)
     public static class ModBusEvents {

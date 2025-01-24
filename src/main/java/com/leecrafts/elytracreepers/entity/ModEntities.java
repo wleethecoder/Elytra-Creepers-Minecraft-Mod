@@ -22,7 +22,7 @@ public class ModEntities {
                     .noSave()
                     .canSpawnFarFromPlayer()
                     .clientTrackingRange(8)
-                    .build(null)
+                    .build("trainee")
     );
 
     public static void register(IEventBus eventBus) {
