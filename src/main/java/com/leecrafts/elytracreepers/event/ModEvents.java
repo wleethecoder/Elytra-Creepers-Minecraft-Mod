@@ -313,20 +313,22 @@ public class ModEvents {
             LivingEntity livingEntity = event.getEntity();
             if (!livingEntity.level().isClientSide) {
                 boolean flying = NeuralElytra.isWearing(livingEntity) && livingEntity.isFallFlying();
-                if (flying) {
-                    event.setNewDamage(2 * event.getOriginalDamage());
-                    stopFlying(livingEntity);
-                    livingEntity.setData(ModAttachments.RECENTLY_DAMAGED_MIDAIR, true);
-                    livingEntity.level().playSound(
-                            null,
-                            livingEntity.blockPosition(),
-                            SoundEvents.ITEM_BREAK,
-                            SoundSource.NEUTRAL,
-                            1.0f,
-                            1.0f);
-                }
-                else if (!event.getSource().is(DamageTypes.FALL)) {
-                    livingEntity.setData(ModAttachments.RECENTLY_DAMAGED_MIDAIR, false);
+                if (!event.getSource().is(DamageTypes.ON_FIRE)) {
+                    if (flying) {
+                        event.setNewDamage(2 * event.getOriginalDamage());
+                        stopFlying(livingEntity);
+                        livingEntity.setData(ModAttachments.RECENTLY_DAMAGED_MIDAIR, true);
+                        livingEntity.level().playSound(
+                                null,
+                                livingEntity.blockPosition(),
+                                SoundEvents.ITEM_BREAK,
+                                SoundSource.NEUTRAL,
+                                1.0f,
+                                1.0f);
+                    }
+                    else if (!event.getSource().is(DamageTypes.FALL)) {
+                        livingEntity.setData(ModAttachments.RECENTLY_DAMAGED_MIDAIR, false);
+                    }
                 }
             }
         }
