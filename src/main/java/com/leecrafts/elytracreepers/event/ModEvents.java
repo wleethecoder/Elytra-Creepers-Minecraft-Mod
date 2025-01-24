@@ -204,7 +204,7 @@ public class ModEvents {
         // this cannot be implemented in the NeuralElytra class because Item#inventoryTick is only called when an item is in a
         // player's inventory
         @SubscribeEvent
-        public static void fallFlying(EntityTickEvent.Pre event) {
+        public static void setFallFlying(EntityTickEvent.Pre event) {
             if (NeuralElytra.isNonPlayerLivingEntity(event.getEntity())) {
                 LivingEntity livingEntity = (LivingEntity) event.getEntity();
                 if (!livingEntity.level().isClientSide && NeuralElytra.isWearing(livingEntity)) {
@@ -219,6 +219,18 @@ public class ModEvents {
                     }
                     else if (landed) {
                         stopFlying(livingEntity);
+                    }
+                }
+            }
+        }
+
+        @SubscribeEvent
+        public static void fallFlyingTick(EntityTickEvent.Post event) {
+            if (NeuralElytra.isNonPlayerLivingEntity(event.getEntity())) {
+                LivingEntity livingEntity = (LivingEntity) event.getEntity();
+                if (!livingEntity.level().isClientSide && NeuralElytra.isWearing(livingEntity)) {
+                    if (livingEntity.isFallFlying()) {
+                        NeuralElytra.elytraFlightTick(livingEntity);
                     }
                 }
             }
