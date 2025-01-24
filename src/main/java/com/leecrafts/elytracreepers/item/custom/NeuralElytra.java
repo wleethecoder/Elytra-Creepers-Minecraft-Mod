@@ -11,7 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ElytraItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -19,12 +19,12 @@ import org.jetbrains.annotations.NotNull;
 
 import static net.minecraft.SharedConstants.TICKS_PER_SECOND;
 
-public class NeuralElytra extends ElytraItem {
+public class NeuralElytra extends Item {
 
     private static final int LOWEST_TARGET_POINT = -128;
     public static final double INTERPOLATION_FACTOR = 0.75;
 
-    public NeuralElytra(Properties properties) {
+    public NeuralElytra(Item.Properties properties) {
         super(properties);
     }
 
@@ -32,46 +32,41 @@ public class NeuralElytra extends ElytraItem {
         return livingEntity.getItemBySlot(EquipmentSlot.CHEST).is(ModItems.NEURAL_ELYTRA.asItem());
     }
 
-    @Override
-    public boolean elytraFlightTick(@NotNull ItemStack stack, @NotNull LivingEntity entity, int flightTicks) {
-        super.elytraFlightTick(stack, entity, flightTicks);
-        if (isNonPlayerLivingEntity(entity) && !entity.level().isClientSide) {
-            Entity target = entity.getData(ModAttachments.TARGET_ENTITY);
-            Vec3 targetVelocity;
-            Vec3 targetVec;
-            if (target != null) {
-                targetVelocity = target.getData(NEATUtil.TRAINING ?
-                        ModAttachments.TARGET_MOVEMENT : ModAttachments.ENTITY_VELOCITY)
-                        .multiply(1, 0, 1);
-                targetVec = getGroundTargetVec(target, entity.getY())
-                        .add(targetVelocity.scale(INTERPOLATION_FACTOR * TICKS_PER_SECOND));
-            }
-            else {
-                targetVelocity = Vec3.ZERO;
-                targetVec = getGroundTargetVec(entity, entity.getY());
-            }
-            Vec3 distance = targetVec.subtract(entity.position());
-            Vec3 distanceNormalized = distance.normalize();
-            double pitchFacingTarget = Math.asin(-distanceNormalized.y); // in radians
-            double yawFacingTarget = Math.atan2(-distanceNormalized.x, distanceNormalized.z); // in radians
-
-            double[] observations = getObservations(entity, distance, pitchFacingTarget, yawFacingTarget, targetVelocity, false);
-            double[] outputs = new double[NEATUtil.OUTPUT_SIZE];
-            if (NEATUtil.TRAINING) {
-                Agent agent = entity.getData(ModAttachments.AGENT);
-                if (agent != null) {
-                    outputs = agent.calculate(observations);
-                }
-            }
-            else {
-                Calculator calculator = entity.getData(ModAttachments.CALCULATOR);
-                if (calculator != null) {
-                    outputs = calculator.calculate(observations);
-                }
-            }
-            handleOutputs(entity, outputs, pitchFacingTarget, yawFacingTarget);
+    public static void elytraFlightTick(@NotNull LivingEntity entity) {
+        Entity target = entity.getData(ModAttachments.TARGET_ENTITY);
+        Vec3 targetVelocity;
+        Vec3 targetVec;
+        if (target != null) {
+            targetVelocity = target.getData(NEATUtil.TRAINING ?
+                    ModAttachments.TARGET_MOVEMENT : ModAttachments.ENTITY_VELOCITY)
+                    .multiply(1, 0, 1);
+            targetVec = getGroundTargetVec(target, entity.getY())
+                    .add(targetVelocity.scale(INTERPOLATION_FACTOR * TICKS_PER_SECOND));
         }
-        return true;
+        else {
+            targetVelocity = Vec3.ZERO;
+            targetVec = getGroundTargetVec(entity, entity.getY());
+        }
+        Vec3 distance = targetVec.subtract(entity.position());
+        Vec3 distanceNormalized = distance.normalize();
+        double pitchFacingTarget = Math.asin(-distanceNormalized.y); // in radians
+        double yawFacingTarget = Math.atan2(-distanceNormalized.x, distanceNormalized.z); // in radians
+
+        double[] observations = getObservations(entity, distance, pitchFacingTarget, yawFacingTarget, targetVelocity, false);
+        double[] outputs = new double[NEATUtil.OUTPUT_SIZE];
+        if (NEATUtil.TRAINING) {
+            Agent agent = entity.getData(ModAttachments.AGENT);
+            if (agent != null) {
+                outputs = agent.calculate(observations);
+            }
+        }
+        else {
+            Calculator calculator = entity.getData(ModAttachments.CALCULATOR);
+            if (calculator != null) {
+                outputs = calculator.calculate(observations);
+            }
+        }
+        handleOutputs(entity, outputs, pitchFacingTarget, yawFacingTarget);
     }
 
     private static double[] getObservations(LivingEntity entity, Vec3 distance, double pitchFacingTarget, double yawFacingTarget, Vec3 targetVelocity, boolean print) {

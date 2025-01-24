@@ -151,8 +151,7 @@ public class ModEvents {
                 int yOffset = (int) NEATUtil.AGENT_SPAWN_DISTANCE;
                 int zOffset = (int) (distance * Math.sin(angle));
                 BlockPos blockPos1 = blockPos.offset(xOffset, yOffset, zOffset);
-//                Entity entity = Config.spawnedEntityType.spawn(serverPlayer.serverLevel(), blockPos, MobSpawnType.MOB_SUMMONED);
-                Entity entity = Config.spawnedEntityType.create(serverLevel, null, blockPos1, MobSpawnType.MOB_SUMMONED, false, false);
+                Entity entity = Config.spawnedEntityType.create(serverLevel, null, blockPos1, EntitySpawnReason.MOB_SUMMONED, false, false);
                 if (entity instanceof LivingEntity livingEntity) {
                     livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
 
@@ -210,8 +209,13 @@ public class ModEvents {
                 LivingEntity livingEntity = (LivingEntity) event.getEntity();
                 if (!livingEntity.level().isClientSide && NeuralElytra.isWearing(livingEntity)) {
                     boolean landed = livingEntity.onGround() || livingEntity.isInFluidType();
-                    if (!landed && !livingEntity.isFallFlying()) {
-                        livingEntity.setSharedFlag(7, true);
+                    if (!landed) {
+                        if (!livingEntity.isFallFlying()) {
+                            livingEntity.setSharedFlag(7, true);
+                        }
+                        else {
+                            NeuralElytra.elytraFlightTick(livingEntity);
+                        }
                     }
                     else if (landed) {
                         stopFlying(livingEntity);
@@ -344,9 +348,9 @@ public class ModEvents {
             // are treated like normal explosions, which can destroy blocks and/or other entities
             if (!entity.level().isClientSide &&
                     entity.getData(ModAttachments.HAD_TARGET)) {
-                if (!Config.griefing) {
-                    event.getAffectedBlocks().clear();
-                }
+//                if (!Config.griefing) {
+//                    event.getAffectedBlocks().clear();
+//                }
                 if (Config.explodeHurtOnlyTarget) {
                     event.getAffectedEntities().clear();
                     Entity target = entity.getData(ModAttachments.TARGET_ENTITY);
@@ -430,20 +434,21 @@ public class ModEvents {
     @EventBusSubscriber(modid = ElytraCreepers.MODID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
     public static class GameBusClientEvents {
 
-        @SubscribeEvent
-        public static void entityRender(RenderLivingEvent.Pre<LivingEntity, EntityModel<LivingEntity>> event) {
-            LivingEntity entity = event.getEntity();
-            float partialTick = event.getPartialTick();
-            PoseStack poseStack = event.getPoseStack();
-            if (!(entity instanceof TraineeEntity) && !(entity instanceof Player) && entity.isFallFlying()) {
-                // Strangely enough, I had to copy and paste these 2 lines of code to TraineeRenderer#actuallyRender.
-                // Otherwise, if I got rid of the "!(entity instanceof TraineeEntity)" condition and didn't modify
-                // TraineeRenderer#actuallyRender, the rotations would be inaccurate for the Trainee entity.
-                // This behavior may be due to the way GeckoLib entities handle rotations.
-                poseStack.mulPose(Axis.YP.rotationDegrees(-entity.getViewYRot(partialTick)));
-                poseStack.mulPose(Axis.XP.rotationDegrees(entity.getViewXRot(partialTick) + 90));
-            }
-        }
+        // there is no longer a getEntity() method from the 1.21.1 -> 1.21.2 update
+//        @SubscribeEvent
+//        public static void entityRender(RenderLivingEvent.Pre<LivingEntity, EntityModel<LivingEntity>> event) {
+//            LivingEntity entity = event.getEntity();
+//            float partialTick = event.getPartialTick();
+//            PoseStack poseStack = event.getPoseStack();
+//            if (!(entity instanceof TraineeEntity) && !(entity instanceof Player) && entity.isFallFlying()) {
+//                // Strangely enough, I had to copy and paste these 2 lines of code to TraineeRenderer#actuallyRender.
+//                // Otherwise, if I got rid of the "!(entity instanceof TraineeEntity)" condition and didn't modify
+//                // TraineeRenderer#actuallyRender, the rotations would be inaccurate for the Trainee entity.
+//                // This behavior may be due to the way GeckoLib entities handle rotations.
+//                poseStack.mulPose(Axis.YP.rotationDegrees(-entity.getViewYRot(partialTick)));
+//                poseStack.mulPose(Axis.XP.rotationDegrees(entity.getViewXRot(partialTick) + 90));
+//            }
+//        }
 
     }
 

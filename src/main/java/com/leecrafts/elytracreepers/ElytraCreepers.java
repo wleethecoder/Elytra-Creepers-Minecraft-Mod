@@ -3,6 +3,7 @@ package com.leecrafts.elytracreepers;
 import com.leecrafts.elytracreepers.attachment.ModAttachments;
 import com.leecrafts.elytracreepers.client.trainee.TraineeRenderer;
 import com.leecrafts.elytracreepers.entity.ModEntities;
+import com.leecrafts.elytracreepers.entity.custom.TraineeEntity;
 import com.leecrafts.elytracreepers.item.ModItems;
 import com.leecrafts.elytracreepers.neat.util.NEATUtil;
 import com.mojang.logging.LogUtils;
@@ -74,7 +75,7 @@ public class ElytraCreepers {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-            EntityRenderers.register(ModEntities.TRAINEE_ENTITY.get(), TraineeRenderer::new);
+            EntityRenderers.<TraineeEntity>register(ModEntities.TRAINEE_ENTITY.get(), TraineeRenderer::new);
         }
     }
 }

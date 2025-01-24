@@ -1,5 +1,6 @@
 package com.leecrafts.elytracreepers.entity.custom;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
@@ -36,11 +37,11 @@ public class TraineeEntity extends Mob implements GeoEntity {
     }
 
     @Override
-    public boolean hurt(@NotNull DamageSource source, float amount) {
+    public boolean hurtServer(@NotNull ServerLevel serverLevel, DamageSource source, float amount) {
         // Immune to any damage except from the /kill command.
         // This prevents the agent from prematurely dying before reaching the end of its run.
         if (!source.is(DamageTypes.GENERIC_KILL)) return false;
-        return super.hurt(source, amount);
+        return super.hurtServer(serverLevel, source, amount);
     }
 
     @Override

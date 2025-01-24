@@ -90,7 +90,7 @@ public class NEATUtil {
                 armorStand.setData(ModAttachments.TARGET_MOVEMENT, new Vec3(xSpeed, 0, zSpeed));
             }
             for (int i = 0; i < neatController.getPopulationSize(); i++) {
-                Entity entity = Config.spawnedEntityType.spawn(serverLevel, spawnPositionFromPhase(), MobSpawnType.MOB_SUMMONED);
+                Entity entity = Config.spawnedEntityType.spawn(serverLevel, spawnPositionFromPhase(), EntitySpawnReason.MOB_SUMMONED);
                 if (entity instanceof LivingEntity livingEntity) {
                     livingEntity.setItemSlot(EquipmentSlot.CHEST, new ItemStack((ItemLike) ModItems.NEURAL_ELYTRA));
 
