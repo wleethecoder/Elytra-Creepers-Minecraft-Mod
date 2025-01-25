@@ -8,6 +8,7 @@ The creepers are trained using [Neuroevolution of Augmenting Topologies (NEAT)](
 **1/25/25 update**: I have just finished developing the mod. I will update this section accordingly. [This link to my YouTube video](https://youtu.be/3O8KIYB8WFI) (which I will make public in the upcoming Monday) is a showcase and guide on the mod itself. That being said, I will probably make another video regarding the training process of the AI models.
 
 **Will update this paragraph soon**
+
 I am currently training the neural networks, but I've already made some promising progress. See clip below. After iterating over 700 generations, the agents are consistently able to land on the grounded destination smoothly and efficiently. Starting from a randomized spawn point, the vast majority of the agents precisely intercept the moving target in under 6 seconds! As seen in the video below, the agents dive towards the target, and move in a spiral pattern when close to the ground for a smooth, precise landing. 
 
 https://github.com/user-attachments/assets/99f5820e-af48-4b4e-9082-d4d64be6dd6f
