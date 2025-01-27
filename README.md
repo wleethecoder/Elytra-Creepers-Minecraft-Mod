@@ -4,6 +4,10 @@ The Elytra Creepers mod features AI-controlled creepers capable of advanced flig
 
 The creepers are trained using [Neuroevolution of Augmenting Topologies (NEAT)](https://en.wikipedia.org/wiki/Neuroevolution_of_augmenting_topologies), a well-known neuroevolution method. Neuroevolution is a “survival of the fittest” genetic algorithm that combines evolutionary biology with neural networks: a population of agents run a task, a fitness score is used to evaluate performance, those deemed the fittest produce the next generation of agents, and so on.
 
+[CurseForge](https://www.curseforge.com/minecraft/mc-mods/elytra-creepers)
+
+[Modrinth](https://modrinth.com/mod/elytra-creepers)
+
 ## Progress
 **1/25/25 update**: I have just finished developing the mod. I will update this section accordingly. [This link to my YouTube video](https://youtu.be/3O8KIYB8WFI) (which I will make public in the upcoming Monday) is a showcase and guide on the mod itself. That being said, I will probably make another video regarding the training process of the AI models.
 
