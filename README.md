@@ -1,6 +1,6 @@
 # Elytra Creepers
 
-The Elytra Creepers mod features AI-controlled creepers capable of advanced aerial navigation using elytras. The creepers should be able to fly to a grounded target--while **maximizing flight time efficiency** and **minimizing fall damage**.
+The Elytra Creepers mod features AI-controlled creepers capable of advanced flight using elytras. The creepers are trained to fly to a grounded target as quickly as possible while minimizing fall damage. They can even outpace moving targets and still hit them with potentially point-blank explosions!
 
 The creepers are trained using [Neuroevolution of Augmenting Topologies (NEAT)](https://en.wikipedia.org/wiki/Neuroevolution_of_augmenting_topologies), a well-known neuroevolution method. Neuroevolution is a “survival of the fittest” genetic algorithm that combines evolutionary biology with neural networks: a population of agents run a task, a fitness score is used to evaluate performance, those deemed the fittest produce the next generation of agents, and so on.
 
